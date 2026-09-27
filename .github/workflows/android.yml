@@ -5,6 +5,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,3 +28,17 @@ jobs:
         with:
           name: privacy-screen-debug-apk
           path: app/build/outputs/apk/debug/*.apk
+
+      # Publish the APK as a GitHub Release so it has a direct download link.
+      - name: Publish APK release
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk PrivacyScreen.apk
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest PrivacyScreen.apk \
+            --target "${GITHUB_SHA}" \
+            --title "Privacy Screen (latest build)" \
+            --notes "Debug build of commit ${GITHUB_SHA::7}. Download PrivacyScreen.apk below and open it on your phone to install." \
+            --prerelease
