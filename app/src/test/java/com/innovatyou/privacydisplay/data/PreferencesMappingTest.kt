@@ -29,6 +29,9 @@ class PreferencesMappingTest {
             batterySaver = false,
             themeMode = ThemeMode.DARK,
             excludedApps = setOf("com.example.bank", "com.example.maps"),
+            blurOnExtraViewer = false,
+            blurWhenAway = true,
+            blurStrength = 0.25f,
         )
         val prefs = mutablePreferencesOf()
         prefs.writePrivacySettings(settings)

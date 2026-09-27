@@ -57,6 +57,9 @@ internal object PreferenceKeys {
     val BATTERY_SAVER = booleanPreferencesKey("battery_saver")
     val THEME_MODE = stringPreferencesKey("theme_mode")
     val EXCLUDED_APPS = stringSetPreferencesKey("excluded_apps")
+    val BLUR_ON_EXTRA_VIEWER = booleanPreferencesKey("blur_on_extra_viewer")
+    val BLUR_WHEN_AWAY = booleanPreferencesKey("blur_when_away")
+    val BLUR_STRENGTH = floatPreferencesKey("blur_strength")
 }
 
 internal fun Preferences.toPrivacySettings(): PrivacySettings {
@@ -76,6 +79,9 @@ internal fun Preferences.toPrivacySettings(): PrivacySettings {
         batterySaver = this[PreferenceKeys.BATTERY_SAVER] ?: d.batterySaver,
         themeMode = enumOrDefault(this[PreferenceKeys.THEME_MODE], d.themeMode),
         excludedApps = this[PreferenceKeys.EXCLUDED_APPS] ?: d.excludedApps,
+        blurOnExtraViewer = this[PreferenceKeys.BLUR_ON_EXTRA_VIEWER] ?: d.blurOnExtraViewer,
+        blurWhenAway = this[PreferenceKeys.BLUR_WHEN_AWAY] ?: d.blurWhenAway,
+        blurStrength = this[PreferenceKeys.BLUR_STRENGTH] ?: d.blurStrength,
     ).sanitized()
 }
 
@@ -94,6 +100,9 @@ internal fun MutablePreferences.writePrivacySettings(s: PrivacySettings) {
     this[PreferenceKeys.BATTERY_SAVER] = s.batterySaver
     this[PreferenceKeys.THEME_MODE] = s.themeMode.name
     this[PreferenceKeys.EXCLUDED_APPS] = s.excludedApps
+    this[PreferenceKeys.BLUR_ON_EXTRA_VIEWER] = s.blurOnExtraViewer
+    this[PreferenceKeys.BLUR_WHEN_AWAY] = s.blurWhenAway
+    this[PreferenceKeys.BLUR_STRENGTH] = s.blurStrength
 }
 
 private inline fun <reified T : Enum<T>> enumOrDefault(name: String?, default: T): T =

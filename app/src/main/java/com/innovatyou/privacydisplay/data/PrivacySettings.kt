@@ -14,6 +14,9 @@ enum class MaskMode {
     /** An oval clear area with a radial gradient to the edges. */
     GRADIENT,
 
+    /** Grainy, frosted-glass fog toward the edges instead of plain darkening. */
+    FROSTED,
+
     /** Edge opacity is used as-is and privacy strength also dims the clear area. */
     CUSTOM,
 }
@@ -45,6 +48,12 @@ data class PrivacySettings(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     /** Package names of apps in which the mask is paused. */
     val excludedApps: Set<String> = emptySet(),
+    /** Blur the whole screen while face detection sees an additional viewer. */
+    val blurOnExtraViewer: Boolean = true,
+    /** Blur the whole screen while nobody is looking at it (no face, or looking away). */
+    val blurWhenAway: Boolean = false,
+    /** Strength of the viewer-shield blur. */
+    val blurStrength: Float = 0.6f,
 ) {
     /** Returns a copy with every numeric value clamped to its valid range. */
     fun sanitized(): PrivacySettings = copy(
@@ -53,6 +62,7 @@ data class PrivacySettings(
         clearAreaHeight = clearAreaHeight.coerceIn(MIN_CLEAR_AREA, 1f),
         edgeOpacity = edgeOpacity.coerceIn(0f, 1f),
         gradientWidth = gradientWidth.coerceIn(0f, MAX_GRADIENT_WIDTH),
+        blurStrength = blurStrength.coerceIn(0f, 1f),
     )
 
     /** Whether the overlay service needs to keep running (active or waiting for an unlock). */

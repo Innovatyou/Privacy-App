@@ -111,6 +111,10 @@ private fun PrivacyApp(viewModel: PrivacyViewModel) {
             onAutoEnableOnUnlockChange = viewModel::setAutoEnableOnUnlock,
             onBatterySaverChange = viewModel::setBatterySaver,
             onThemeModeChange = viewModel::setThemeMode,
+            onBlurOnExtraViewerChange = viewModel::setBlurOnExtraViewer,
+            onBlurWhenAwayChange = viewModel::setBlurWhenAway,
+            onBlurStrengthChange = viewModel::setBlurStrength,
+            onTestShield = viewModel::testShield,
             onGrantOverlay = { context.startActivity(PermissionIntents.overlaySettings(context)) },
             onGrantCamera = { cameraPermission.launch(Manifest.permission.CAMERA) },
             onGrantNotifications = {

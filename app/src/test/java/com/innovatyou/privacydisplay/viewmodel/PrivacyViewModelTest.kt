@@ -125,6 +125,24 @@ class PrivacyViewModelTest {
     }
 
     @Test
+    fun `viewer shield settings are saved`() = runTest(dispatcher) {
+        viewModel.setBlurOnExtraViewer(false)
+        viewModel.setBlurWhenAway(true)
+        viewModel.setBlurStrength(0.9f)
+        advanceUntilIdle()
+        val s = repository.state.value
+        assertFalse(s.blurOnExtraViewer)
+        assertTrue(s.blurWhenAway)
+        assertEquals(0.9f, s.blurStrength, 0f)
+    }
+
+    @Test
+    fun `testing the shield goes through the controller`() = runTest(dispatcher) {
+        viewModel.testShield()
+        assertEquals(1, controller.shieldTests)
+    }
+
+    @Test
     fun `installed apps are loaded once`() = runTest(dispatcher) {
         viewModel.loadApps()
         advanceUntilIdle()
@@ -153,6 +171,10 @@ private class FakeController(private val repository: FakeRepository) : PrivacyCo
         return true
     }
     override fun onAppForeground() = Unit
+    var shieldTests = 0
+    override fun testShield() {
+        shieldTests++
+    }
 }
 
 private class FakePermissions : PermissionManager {
@@ -163,6 +185,7 @@ private class FakePermissions : PermissionManager {
     override fun hasNotificationPermission() = true
     override fun hasUsageAccess() = false
     override fun hasFrontCamera() = true
+    override fun supportsWindowBlur() = true
     override fun maxOverlayOpacity() = 0.8f
 }
 

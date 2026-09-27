@@ -22,6 +22,8 @@ data class PermissionState(
     val notifications: Boolean = false,
     val usageAccess: Boolean = false,
     val frontCamera: Boolean = true,
+    /** System blur (Android 12+ cross-window blur) is available for the viewer shield. */
+    val windowBlur: Boolean = false,
 )
 
 interface PermissionManager {
@@ -30,6 +32,7 @@ interface PermissionManager {
     fun hasNotificationPermission(): Boolean
     fun hasUsageAccess(): Boolean
     fun hasFrontCamera(): Boolean
+    fun supportsWindowBlur(): Boolean
 
     /**
      * The most opaque an overlay may be while still letting touches through to the apps below.
@@ -43,12 +46,14 @@ interface PermissionManager {
         notifications = hasNotificationPermission(),
         usageAccess = hasUsageAccess(),
         frontCamera = hasFrontCamera(),
+        windowBlur = supportsWindowBlur(),
     )
 }
 
 @Singleton
 class AndroidPermissionManager @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val blurSupport: BlurSupport,
 ) : PermissionManager {
 
     override fun canDrawOverlays(): Boolean = Settings.canDrawOverlays(context)
@@ -80,6 +85,8 @@ class AndroidPermissionManager @Inject constructor(
 
     override fun hasFrontCamera(): Boolean =
         context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT)
+
+    override fun supportsWindowBlur(): Boolean = blurSupport.isAvailable()
 
     override fun maxOverlayOpacity(): Float = maxOverlayOpacity(context)
 

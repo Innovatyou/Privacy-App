@@ -81,6 +81,23 @@ class MaskSpecTest {
     }
 
     @Test
+    fun `full cover hides the whole screen`() {
+        val spec = MaskSpec.compute(params(MaskMode.GRADIENT, strength = 0.2f).copy(fullCover = true), 1000f, 2000f)
+        assertEquals(1f, spec.alphaAt(500f, 1000f), 0f)
+        assertEquals(1f, spec.alphaAt(0f, 0f), 0f)
+        assertTrue(spec.hardEdge)
+    }
+
+    @Test
+    fun `frosted mode is a soft frosted mask`() {
+        val spec = MaskSpec.compute(params(MaskMode.FROSTED, strength = 1f, edge = 0.8f), 1000f, 2000f)
+        assertTrue(spec.frosted)
+        assertTrue(!spec.hardEdge)
+        assertEquals(0f, spec.alphaAt(500f, 1000f), 0.001f)
+        assertEquals(0.8f, spec.alphaAt(0f, 0f), 0.001f)
+    }
+
+    @Test
     fun `zero strength black mask draws nothing`() {
         assertTrue(MaskSpec.compute(params(MaskMode.BLACK, strength = 0f), 1000f, 2000f).isEmpty)
     }

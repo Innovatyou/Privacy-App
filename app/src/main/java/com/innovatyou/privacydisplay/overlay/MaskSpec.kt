@@ -27,6 +27,8 @@ data class MaskSpec(
     val featherPx: Float,
     val shape: MaskShape,
     val hardEdge: Boolean,
+    /** Draw as grainy frosted glass instead of plain black. */
+    val frosted: Boolean = false,
 ) {
     val isEmpty: Boolean get() = outsideAlpha <= 0f && centerAlpha <= 0f
 
@@ -62,6 +64,13 @@ data class MaskSpec(
         const val CUSTOM_CENTER_FACTOR = 0.5f
 
         fun compute(params: MaskParams, width: Float, height: Float): MaskSpec {
+            if (params.fullCover) {
+                return MaskSpec(
+                    width, height, width / 2f, height / 2f, width / 2f, height / 2f,
+                    outsideAlpha = 1f, centerAlpha = 1f, featherPx = 0f,
+                    shape = MaskShape.RECTANGLE, hardEdge = true,
+                )
+            }
             // Orientation awareness: keep the clear area the same physical shape when the phone
             // rotates, so the settings (made in portrait) still fit in landscape.
             val landscape = width > height
@@ -78,11 +87,17 @@ data class MaskSpec(
             val edge = params.edgeOpacity.coerceIn(0f, 1f)
             val feather = params.gradientWidth.coerceIn(0f, PrivacySettings.MAX_GRADIENT_WIDTH) * min(width, height)
 
-            fun spec(outside: Float, center: Float, featherPx: Float, shape: MaskShape, hard: Boolean) =
-                MaskSpec(
-                    width, height, left, top, left + clearWidth, top + clearHeight,
-                    outside, center, featherPx, shape, hard,
-                )
+            fun spec(
+                outside: Float,
+                center: Float,
+                featherPx: Float,
+                shape: MaskShape,
+                hard: Boolean,
+                frosted: Boolean = false,
+            ) = MaskSpec(
+                width, height, left, top, left + clearWidth, top + clearHeight,
+                outside, center, featherPx, shape, hard, frosted,
+            )
 
             return when (params.mode) {
                 MaskMode.BLACK, MaskMode.NARROW_WINDOW ->
@@ -91,6 +106,8 @@ data class MaskSpec(
                     spec(strength * edge, 0f, feather, MaskShape.RECTANGLE, hard = false)
                 MaskMode.GRADIENT ->
                     spec(strength * edge, 0f, feather, MaskShape.ELLIPSE, hard = false)
+                MaskMode.FROSTED ->
+                    spec(strength * edge, 0f, feather, MaskShape.RECTANGLE, hard = false, frosted = true)
                 MaskMode.CUSTOM -> {
                     val center = strength * CUSTOM_CENTER_FACTOR
                     spec(max(edge, center), center, feather, MaskShape.RECTANGLE, hard = false)

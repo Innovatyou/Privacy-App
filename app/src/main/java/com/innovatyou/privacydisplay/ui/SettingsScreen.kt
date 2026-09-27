@@ -20,6 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -51,6 +52,9 @@ import com.innovatyou.privacydisplay.ui.components.SwitchRow
 import com.innovatyou.privacydisplay.viewmodel.PrivacyUiState
 
 fun maskModeTag(mode: MaskMode) = "mask_mode_${mode.name}"
+
+const val BLUR_EXTRA_VIEWER_TAG = "blur_extra_viewer"
+const val TEST_SHIELD_TAG = "test_shield"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -163,6 +167,15 @@ fun SettingsScreen(
                 )
             }
 
+            SectionHeader(stringResource(R.string.section_shield))
+            ViewerShieldCard(state, actions)
+            Spacer(Modifier.height(12.dp))
+            InfoCard(
+                title = stringResource(R.string.shield_explainer_title),
+                text = stringResource(R.string.shield_explainer),
+                icon = Icons.Filled.Face,
+            )
+
             SectionHeader(stringResource(R.string.section_automation))
             SettingsCard {
                 SwitchRow(
@@ -265,6 +278,60 @@ fun SettingsScreen(
 }
 
 @Composable
+private fun ViewerShieldCard(state: PrivacyUiState, actions: PrivacyActions) {
+    val settings = state.settings
+    val detectionReady = settings.faceDetectionEnabled && settings.multipleViewerProtection
+    SettingsCard {
+        SwitchRow(
+            title = stringResource(R.string.blur_on_extra_viewer),
+            subtitle = stringResource(R.string.blur_on_extra_viewer_hint),
+            checked = settings.blurOnExtraViewer,
+            onCheckedChange = actions.onBlurOnExtraViewerChange,
+            enabled = detectionReady,
+            testTag = BLUR_EXTRA_VIEWER_TAG,
+        )
+        SwitchRow(
+            title = stringResource(R.string.blur_when_away),
+            subtitle = stringResource(R.string.blur_when_away_hint),
+            checked = settings.blurWhenAway,
+            onCheckedChange = actions.onBlurWhenAwayChange,
+            enabled = settings.faceDetectionEnabled,
+        )
+        PercentSlider(
+            label = stringResource(R.string.blur_strength),
+            value = settings.blurStrength,
+            onValueChange = actions.onBlurStrengthChange,
+            enabled = state.permissions.windowBlur,
+        )
+        if (!state.permissions.windowBlur) {
+            Text(
+                stringResource(R.string.blur_unsupported),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
+            )
+        }
+        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
+            FilledTonalButton(
+                onClick = actions.onTestShield,
+                enabled = settings.enabled,
+                modifier = Modifier
+                    .heightIn(min = 48.dp)
+                    .testTag(TEST_SHIELD_TAG),
+            ) {
+                Text(stringResource(R.string.test_shield))
+            }
+            Text(
+                stringResource(R.string.test_shield_hint),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
+    }
+}
+
+@Composable
 private fun MaskModeRow(mode: MaskMode, selected: Boolean, onSelect: () -> Unit) {
     Row(
         modifier = Modifier
@@ -311,6 +378,7 @@ fun maskTitle(mode: MaskMode): Int = when (mode) {
     MaskMode.DARK_EDGES -> R.string.mask_dark_edges
     MaskMode.NARROW_WINDOW -> R.string.mask_narrow
     MaskMode.GRADIENT -> R.string.mask_gradient
+    MaskMode.FROSTED -> R.string.mask_frosted
     MaskMode.CUSTOM -> R.string.mask_custom
 }
 
@@ -320,6 +388,7 @@ private fun maskDescription(mode: MaskMode): Int = when (mode) {
     MaskMode.DARK_EDGES -> R.string.mask_dark_edges_desc
     MaskMode.NARROW_WINDOW -> R.string.mask_narrow_desc
     MaskMode.GRADIENT -> R.string.mask_gradient_desc
+    MaskMode.FROSTED -> R.string.mask_frosted_desc
     MaskMode.CUSTOM -> R.string.mask_custom_desc
 }
 

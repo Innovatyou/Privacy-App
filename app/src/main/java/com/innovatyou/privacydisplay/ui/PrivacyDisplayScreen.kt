@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.innovatyou.privacydisplay.R
 import com.innovatyou.privacydisplay.camera.ViewerState
 import com.innovatyou.privacydisplay.overlay.PrivacyPolicy
+import com.innovatyou.privacydisplay.overlay.ShieldReason
 import com.innovatyou.privacydisplay.ui.components.InfoCard
 import com.innovatyou.privacydisplay.ui.components.PercentSlider
 import com.innovatyou.privacydisplay.ui.components.PrivacyMaskPreview
@@ -150,6 +151,15 @@ fun PrivacyDisplayScreen(
                     enabled = state.permissions.frontCamera,
                 )
                 SwitchRow(
+                    title = stringResource(R.string.blur_on_extra_viewer),
+                    subtitle = stringResource(
+                        if (state.permissions.windowBlur) R.string.blur_on_extra_viewer_hint else R.string.blur_unsupported
+                    ),
+                    checked = settings.blurOnExtraViewer,
+                    onCheckedChange = actions.onBlurOnExtraViewerChange,
+                    enabled = settings.faceDetectionEnabled && settings.multipleViewerProtection,
+                )
+                SwitchRow(
                     title = stringResource(R.string.auto_enable_unlock),
                     subtitle = stringResource(R.string.auto_enable_unlock_hint),
                     checked = settings.autoEnableOnUnlock,
@@ -193,6 +203,10 @@ internal fun statusText(state: PrivacyUiState): Int {
     return when {
         !state.permissions.overlay -> R.string.status_permission_needed
         !state.settings.enabled -> R.string.status_off
+        runtime.shield == ShieldReason.TEST -> R.string.status_shield_test
+        runtime.shield == ShieldReason.EXTRA_VIEWER ->
+            if (runtime.shieldBlurs) R.string.status_shield_blurred else R.string.status_shield_darkened
+        runtime.shield == ShieldReason.NOBODY_LOOKING -> R.string.status_shield_away
         runtime.viewerState == ViewerState.MULTIPLE_VIEWERS && state.settings.multipleViewerProtection ->
             R.string.status_additional_viewer
         runtime.boosted -> R.string.status_no_viewer

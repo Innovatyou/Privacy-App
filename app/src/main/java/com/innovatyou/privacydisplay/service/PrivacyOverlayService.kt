@@ -12,10 +12,13 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.innovatyou.privacydisplay.R
 import com.innovatyou.privacydisplay.camera.FaceDetectionManager
+import com.innovatyou.privacydisplay.camera.ViewerReport
+import com.innovatyou.privacydisplay.camera.ViewerSide
 import com.innovatyou.privacydisplay.camera.ViewerState
 import com.innovatyou.privacydisplay.data.PreferencesRepository
 import com.innovatyou.privacydisplay.data.PrivacySettings
 import com.innovatyou.privacydisplay.overlay.PrivacyPolicy
+import com.innovatyou.privacydisplay.util.BlurSupport
 import com.innovatyou.privacydisplay.util.DeviceState
 import com.innovatyou.privacydisplay.util.DeviceStateMonitor
 import com.innovatyou.privacydisplay.util.ForegroundAppMonitor
@@ -56,8 +59,10 @@ class PrivacyOverlayService : LifecycleService() {
     @Inject lateinit var deviceMonitor: DeviceStateMonitor
     @Inject lateinit var orientation: OrientationManager
     @Inject lateinit var permissions: PermissionManager
+    @Inject lateinit var blurSupport: BlurSupport
 
     private var overlay: PrivacyOverlayWindow? = null
+    private var shieldWindow: BlurShieldWindow? = null
     private var status: StatusContent? = null
     private var cameraTypeGranted = false
     private var alertShowing = false
@@ -82,6 +87,7 @@ class PrivacyOverlayService : LifecycleService() {
     }
 
     override fun onDestroy() {
+        hideShield()
         overlay?.hide()
         overlay = null
         notifications.cancelViewerAlert()
@@ -112,7 +118,10 @@ class PrivacyOverlayService : LifecycleService() {
 
         // Resize the mask when the display rotates or changes size.
         scope.launch {
-            orientation.displayChanges().collect { overlay?.onDisplayChanged() }
+            orientation.displayChanges().collect {
+                overlay?.onDisplayChanged()
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) shieldWindow?.onDisplayChanged()
+            }
         }
 
         val pausedForPackage: Flow<String?> = combine(settingsFlow, device, runtime.appForegroundCount) { s, d, _ ->
@@ -144,31 +153,40 @@ class PrivacyOverlayService : LifecycleService() {
                 }
             }.distinctUntilChanged()
 
-        val viewerState: Flow<ViewerState> = cameraDecision.flatMapLatest { decision ->
+        val viewerReports: Flow<ViewerReport> = cameraDecision.flatMapLatest { decision ->
             when (decision) {
-                CameraDecision.Off -> flowOf(ViewerState.OFF)
-                CameraDecision.PausedForBattery -> flowOf(ViewerState.PAUSED_BATTERY)
-                CameraDecision.Unavailable -> flowOf(ViewerState.UNAVAILABLE)
+                CameraDecision.Off -> flowOf(ViewerReport(ViewerState.OFF))
+                CameraDecision.PausedForBattery -> flowOf(ViewerReport(ViewerState.PAUSED_BATTERY))
+                CameraDecision.Unavailable -> flowOf(ViewerReport(ViewerState.UNAVAILABLE))
                 is CameraDecision.Run ->
                     if (ensureCameraForegroundType()) {
-                        faceDetection.viewerStates(decision.intervalMs)
+                        faceDetection.viewerReports(decision.intervalMs)
                     } else {
-                        flowOf(ViewerState.BLOCKED_IN_BACKGROUND)
+                        flowOf(ViewerReport(ViewerState.BLOCKED_IN_BACKGROUND))
                     }
             }
         }
 
         scope.launch {
-            combine(settingsFlow, pausedForPackage, viewerState) { s, paused, viewer ->
-                Triple(s, paused, viewer)
-            }.collect { (s, paused, viewer) -> render(s, paused, viewer) }
+            combine(
+                settingsFlow, pausedForPackage, viewerReports, blurSupport.availability(), runtime.shieldTest,
+            ) { s, paused, report, blurAvailable, testing ->
+                RenderInput(s, paused, report, blurAvailable, testing)
+            }.collect { render(it) }
         }
     }
 
-    private fun render(settings: PrivacySettings, pausedForPackage: String?, viewer: ViewerState) {
+    private fun render(input: RenderInput) {
+        val settings = input.settings
+        val pausedForPackage = input.pausedForPackage
+        val viewer = input.report.state
         val canDraw = permissions.canDrawOverlays()
         val show = settings.enabled && pausedForPackage == null && canDraw
-        val mask = PrivacyPolicy.maskParams(settings, viewer)
+        val shield = if (show) PrivacyPolicy.shieldReason(settings, viewer, input.shieldTest) else null
+        val shieldBlurs = shield != null && input.blurAvailable
+        val mask = PrivacyPolicy.shieldedMask(
+            PrivacyPolicy.maskParams(settings, viewer), shield, input.blurAvailable,
+        )
 
         if (show) {
             try {
@@ -181,6 +199,7 @@ class PrivacyOverlayService : LifecycleService() {
         } else {
             overlay?.hide()
         }
+        if (shieldBlurs) showShield(PrivacyPolicy.blurRadiusDp(settings.blurStrength)) else hideShield()
         val visible = overlay?.isShowing == true
         val pausedLabel = pausedForPackage?.let(::appLabel)
 
@@ -191,19 +210,39 @@ class PrivacyOverlayService : LifecycleService() {
                 pausedForApp = pausedLabel,
                 viewerState = viewer,
                 boosted = visible && mask.boosted,
+                extraViewerSide = input.report.extraViewerSide,
+                shield = shield.takeIf { visible },
+                shieldBlurs = visible && shieldBlurs,
             )
         }
-        updateViewerAlert(visible && settings.multipleViewerProtection && viewer == ViewerState.MULTIPLE_VIEWERS)
-        updateStatus(statusContent(settings, pausedLabel, viewer, canDraw))
+        updateViewerAlert(
+            visible && settings.multipleViewerProtection && viewer == ViewerState.MULTIPLE_VIEWERS,
+            input.report.extraViewerSide,
+        )
+        updateStatus(statusContent(settings, pausedLabel, input.report, canDraw))
     }
 
-    private fun updateViewerAlert(multipleViewers: Boolean) {
+    private fun showShield(radiusDp: Float) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+        try {
+            (shieldWindow ?: BlurShieldWindow(this).also { shieldWindow = it }).show(radiusDp)
+        } catch (e: RuntimeException) {
+            Log.w(TAG, "Could not show the viewer shield", e)
+            shieldWindow = null
+        }
+    }
+
+    private fun hideShield() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) shieldWindow?.hide()
+    }
+
+    private fun updateViewerAlert(multipleViewers: Boolean, side: ViewerSide?) {
         if (multipleViewers && !alertShowing) {
             alertShowing = true
             val now = SystemClock.elapsedRealtime()
             if (now - lastAlertAt > ALERT_MIN_INTERVAL_MS) {
                 lastAlertAt = now
-                notifications.showViewerAlert()
+                notifications.showViewerAlert(side)
             }
         } else if (!multipleViewers && alertShowing) {
             alertShowing = false
@@ -214,7 +253,7 @@ class PrivacyOverlayService : LifecycleService() {
     private fun statusContent(
         settings: PrivacySettings,
         pausedLabel: String?,
-        viewer: ViewerState,
+        report: ViewerReport,
         canDraw: Boolean,
     ): StatusContent = when {
         !settings.enabled -> StatusContent(
@@ -228,12 +267,18 @@ class PrivacyOverlayService : LifecycleService() {
             getString(R.string.status_paused_for_app, pausedLabel),
             true,
         )
-        else -> StatusContent(getString(R.string.notif_active_title), viewerText(viewer), true)
+        else -> StatusContent(getString(R.string.notif_active_title), viewerText(report), true)
     }
 
-    private fun viewerText(viewer: ViewerState): String = getString(
-        when (viewer) {
-            ViewerState.MULTIPLE_VIEWERS -> R.string.status_additional_viewer
+    private fun viewerText(report: ViewerReport): String = getString(
+        when (report.state) {
+            ViewerState.MULTIPLE_VIEWERS -> when (report.extraViewerSide) {
+                ViewerSide.LEFT -> R.string.alert_text_left
+                ViewerSide.RIGHT -> R.string.alert_text_right
+                ViewerSide.ABOVE -> R.string.alert_text_above
+                ViewerSide.BELOW -> R.string.alert_text_below
+                null -> R.string.status_additional_viewer
+            }
             ViewerState.NO_FACE, ViewerState.LOOKING_AWAY -> R.string.status_no_viewer
             ViewerState.BLOCKED_IN_BACKGROUND -> R.string.face_paused_background
             ViewerState.PAUSED_BATTERY -> R.string.face_paused_battery
@@ -297,6 +342,14 @@ class PrivacyOverlayService : LifecycleService() {
     }
 
     private data class ExclusionRequest(val packages: Set<String>, val intervalMs: Long)
+
+    private data class RenderInput(
+        val settings: PrivacySettings,
+        val pausedForPackage: String?,
+        val report: ViewerReport,
+        val blurAvailable: Boolean,
+        val shieldTest: Boolean,
+    )
 
     private sealed interface CameraDecision {
         data object Off : CameraDecision

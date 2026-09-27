@@ -14,7 +14,12 @@ data class MaskParams(
     val gradientWidth: Float,
     /** True when face detection raised the protection above the user's settings. */
     val boosted: Boolean = false,
+    /** Cover the whole screen (used by the viewer shield when system blur is unavailable). */
+    val fullCover: Boolean = false,
 )
+
+/** Why the viewer shield (full-screen blur) is active. */
+enum class ShieldReason { EXTRA_VIEWER, NOBODY_LOOKING, TEST }
 
 /** Decides how face detection changes the mask. */
 object PrivacyPolicy {
@@ -53,4 +58,34 @@ object PrivacyPolicy {
             else -> base
         }
     }
+
+    /**
+     * Whether the whole screen should be shielded (blurred) right now.
+     * @param testing true while the user is previewing the shield from settings.
+     */
+    fun shieldReason(settings: PrivacySettings, viewer: ViewerState, testing: Boolean): ShieldReason? {
+        if (!settings.enabled) return null
+        if (testing) return ShieldReason.TEST
+        if (!settings.faceDetectionEnabled) return null
+        return when {
+            viewer == ViewerState.MULTIPLE_VIEWERS &&
+                settings.multipleViewerProtection && settings.blurOnExtraViewer -> ShieldReason.EXTRA_VIEWER
+            (viewer == ViewerState.NO_FACE || viewer == ViewerState.LOOKING_AWAY) &&
+                settings.blurWhenAway -> ShieldReason.NOBODY_LOOKING
+            else -> null
+        }
+    }
+
+    /**
+     * The mask to draw together with the shield. With system blur the normal mask stays; without
+     * it (Android 11 and older, or blur turned off by the system) the screen is fully darkened.
+     */
+    fun shieldedMask(mask: MaskParams, shield: ShieldReason?, blurAvailable: Boolean): MaskParams =
+        if (shield != null && !blurAvailable) mask.copy(fullCover = true, boosted = true) else mask
+
+    /** Blur radius in dp for a 0–1 strength. */
+    fun blurRadiusDp(strength: Float): Float = MIN_BLUR_DP + (MAX_BLUR_DP - MIN_BLUR_DP) * strength.coerceIn(0f, 1f)
+
+    private const val MIN_BLUR_DP = 8f
+    private const val MAX_BLUR_DP = 60f
 }

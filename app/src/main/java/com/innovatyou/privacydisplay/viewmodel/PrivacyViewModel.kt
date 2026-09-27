@@ -99,6 +99,12 @@ class PrivacyViewModel @Inject constructor(
         update { it.copy(strongestMaskOnMultipleViewers = enabled) }
     fun setBatterySaver(enabled: Boolean) = update { it.copy(batterySaver = enabled) }
     fun setThemeMode(mode: ThemeMode) = update { it.copy(themeMode = mode) }
+    fun setBlurOnExtraViewer(enabled: Boolean) = update { it.copy(blurOnExtraViewer = enabled) }
+    fun setBlurWhenAway(enabled: Boolean) = update { it.copy(blurWhenAway = enabled) }
+    fun setBlurStrength(value: Float) = update { it.copy(blurStrength = value) }
+
+    /** Shows the viewer shield for a few seconds. Only visible while Privacy Mode is on. */
+    fun testShield() = controller.testShield()
 
     fun setFaceDetection(enabled: Boolean) {
         if (enabled && !permissionManager.hasCameraPermission()) {

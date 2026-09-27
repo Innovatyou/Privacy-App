@@ -72,6 +72,8 @@
     <string name="mask_narrow_desc">A smaller clear window with solid black around it.</string>
     <string name="mask_gradient">Gradient mask</string>
     <string name="mask_gradient_desc">An oval clear area that fades to dark at the edges.</string>
+    <string name="mask_frosted">Frosted edges</string>
+    <string name="mask_frosted_desc">Grainy frosted-glass fog toward the edges, with a clear centre.</string>
     <string name="mask_custom">Custom opacity</string>
     <string name="mask_custom_desc">Edges use Edge opacity. Privacy strength also dims the clear area.</string>
     <string name="strongest_mask">Use the strongest mask for extra viewers</string>
@@ -128,4 +130,25 @@
     <string name="notif_action_turn_on">Turn on</string>
     <string name="alert_title">Privacy Mode</string>
     <string name="alert_text">Additional viewer detected.</string>
+    <string name="alert_text_left">Additional viewer detected on your left.</string>
+    <string name="alert_text_right">Additional viewer detected on your right.</string>
+    <string name="alert_text_above">Additional viewer detected above you.</string>
+    <string name="alert_text_below">Additional viewer detected below you.</string>
+
+    <!-- Viewer shield -->
+    <string name="section_shield">Viewer shield</string>
+    <string name="shield_explainer_title">How the viewer shield works</string>
+    <string name="shield_explainer">A phone screen shows the same picture in every direction, so an app cannot make it look blurry only to people at an angle. Instead, the front camera watches for other faces to your left, right, above or below, and blurs the whole screen while they are looking. Nothing is recorded.</string>
+    <string name="blur_on_extra_viewer">Blur the screen when someone else looks</string>
+    <string name="blur_on_extra_viewer_hint">Needs face detection and multiple-viewer protection.</string>
+    <string name="blur_when_away">Blur when you look away</string>
+    <string name="blur_when_away_hint">Also blurs the screen when no one is looking at it.</string>
+    <string name="blur_strength">Blur strength</string>
+    <string name="blur_unsupported">This phone does not support system blur right now (it needs Android 12 or newer and may be off in Battery Saver). The screen is darkened instead.</string>
+    <string name="test_shield">Test viewer shield</string>
+    <string name="test_shield_hint">Shows the shield for 5 seconds. Turn on Privacy Mode first.</string>
+    <string name="status_shield_blurred">Screen blurred: additional viewer detected</string>
+    <string name="status_shield_darkened">Screen darkened: additional viewer detected</string>
+    <string name="status_shield_away">Screen hidden while no one is looking</string>
+    <string name="status_shield_test">Showing the viewer shield</string>
 </resources>

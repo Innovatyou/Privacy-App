@@ -13,6 +13,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.innovatyou.privacydisplay.R
+import com.innovatyou.privacydisplay.camera.ViewerSide
 import com.innovatyou.privacydisplay.ui.MainActivity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -78,12 +79,12 @@ class PrivacyNotification @Inject constructor(
     }
 
     @SuppressLint("MissingPermission") // Checked by canPost().
-    fun showViewerAlert() {
+    fun showViewerAlert(side: ViewerSide?) {
         if (!canPost()) return
         val notification = NotificationCompat.Builder(context, ALERT_CHANNEL)
             .setSmallIcon(R.drawable.ic_shield)
             .setContentTitle(context.getString(R.string.alert_title))
-            .setContentText(context.getString(R.string.alert_text))
+            .setContentText(context.getString(alertText(side)))
             .setContentIntent(openAppPendingIntent())
             .setAutoCancel(true)
             .setTimeoutAfter(ALERT_TIMEOUT_MS)
@@ -93,6 +94,14 @@ class PrivacyNotification @Inject constructor(
     }
 
     fun cancelViewerAlert() = manager.cancel(ALERT_ID)
+
+    private fun alertText(side: ViewerSide?): Int = when (side) {
+        ViewerSide.LEFT -> R.string.alert_text_left
+        ViewerSide.RIGHT -> R.string.alert_text_right
+        ViewerSide.ABOVE -> R.string.alert_text_above
+        ViewerSide.BELOW -> R.string.alert_text_below
+        null -> R.string.alert_text
+    }
 
     private fun canPost(): Boolean =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||

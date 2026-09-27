@@ -63,7 +63,12 @@ class MaskRenderer {
             val py = (y + 0.5f) * stepY
             val row = y * w
             for (x in 0 until w) {
-                pixels[row + x] = black(spec.alphaAt((x + 0.5f) * stepX, py), alphaScale)
+                val alpha = spec.alphaAt((x + 0.5f) * stepX, py)
+                pixels[row + x] = if (spec.frosted) {
+                    frost(alpha * grain(x, y), alphaScale)
+                } else {
+                    black(alpha, alphaScale)
+                }
             }
         }
         // A new bitmap each time: the previous one may still be referenced by a pending frame.
@@ -77,7 +82,21 @@ class MaskRenderer {
     private fun black(alpha: Float, scale: Float): Int =
         Color.argb((alpha * scale * 255f).roundToInt().coerceIn(0, 255), 0, 0, 0)
 
+    private fun frost(alpha: Float, scale: Float): Int =
+        Color.argb((alpha * scale * 255f).roundToInt().coerceIn(0, 255), FROST_R, FROST_G, FROST_B)
+
     private companion object {
         const val DOWNSAMPLE = 4f
+        const val FROST_R = 176
+        const val FROST_G = 184
+        const val FROST_B = 196
+
+        /** Deterministic per-cell grain in 0.6–1.4, so the frost looks textured and stable. */
+        fun grain(x: Int, y: Int): Float {
+            var h = x * 374761393 + y * 668265263
+            h = (h xor (h ushr 13)) * 1274126177
+            h = h xor (h ushr 16)
+            return 0.6f + 0.8f * ((h and 0xFFFF) / 65535f)
+        }
     }
 }

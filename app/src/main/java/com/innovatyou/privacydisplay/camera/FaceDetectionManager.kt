@@ -35,7 +35,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 /**
  * Estimates who is looking at the screen with the front camera and ML Kit face detection.
  *
- * The camera only runs while [viewerStates] is being collected. Only an analysis stream is bound
+ * The camera only runs while [viewerReports] is being collected. Only an analysis stream is bound
  * (no preview, no capture), at a low resolution, and frames are dropped unless the analyzer is
  * ready for the next one. Detection runs on-device with the bundled ML Kit model.
  */
@@ -44,8 +44,8 @@ class FaceDetectionManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val orientationManager: OrientationManager,
 ) {
-    fun viewerStates(minIntervalMs: Long): Flow<ViewerState> = callbackFlow {
-        trySend(ViewerState.STARTING)
+    fun viewerReports(minIntervalMs: Long): Flow<ViewerReport> = callbackFlow {
+        trySend(ViewerReport(ViewerState.STARTING))
 
         val provider = try {
             awaitCameraProvider()
@@ -59,7 +59,7 @@ class FaceDetectionManager @Inject constructor(
             false
         }
         if (provider == null || !hasFrontCamera) {
-            trySend(ViewerState.UNAVAILABLE)
+            trySend(ViewerReport(ViewerState.UNAVAILABLE))
             awaitClose { }
             return@callbackFlow
         }
@@ -67,10 +67,15 @@ class FaceDetectionManager @Inject constructor(
         val detector = FaceDetection.getClient(DETECTOR_OPTIONS)
         val executor = Executors.newSingleThreadExecutor()
         val smoother = ViewerStateSmoother()
+        var lastSide: ViewerSide? = null
         val analyzer = CameraAnalyzer(
             detector = detector,
             minIntervalMs = minIntervalMs,
-            onResult = { trySend(smoother.update(it, SystemClock.elapsedRealtime())) },
+            onResult = { observation ->
+                observation.extraViewerSide?.let { lastSide = it }
+                val state = smoother.update(observation, SystemClock.elapsedRealtime())
+                trySend(ViewerReport(state, lastSide.takeIf { state == ViewerState.MULTIPLE_VIEWERS }))
+            },
             onError = { Log.w(TAG, "Face detection failed", it) },
         )
         val analysis = ImageAnalysis.Builder()
@@ -86,13 +91,13 @@ class FaceDetectionManager @Inject constructor(
             camera.cameraInfo.cameraState.observe(owner) { state ->
                 // Another app took the camera, or it failed: do not treat this as "no face".
                 if (state.error != null || state.type == CameraState.Type.PENDING_OPEN) {
-                    trySend(ViewerState.UNAVAILABLE)
+                    trySend(ViewerReport(ViewerState.UNAVAILABLE))
                 }
             }
             owner.start()
         } catch (e: Exception) {
             Log.w(TAG, "Could not start the front camera", e)
-            trySend(ViewerState.UNAVAILABLE)
+            trySend(ViewerReport(ViewerState.UNAVAILABLE))
         }
 
         val rotationJob = launch {

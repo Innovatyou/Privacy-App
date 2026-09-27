@@ -22,8 +22,8 @@ https://github.com/Innovatyou/Privacy-App/releases/download/latest/PrivacyDispla
 
 - **Privacy Mode**: a large on/off toggle, plus a Quick Settings tile (*Privacy Display: On/Off*)
   and a persistent notification with a *Turn off* button.
-- **Mask styles**: black mask, darkened edges, narrow viewing window, gradient mask and custom
-  opacity. Settings for privacy strength (0–100%), clear-area width and height, edge opacity and
+- **Mask styles**: black mask, darkened edges, narrow viewing window, gradient mask, frosted edges
+  (grainy frosted-glass fog) and custom opacity. Settings for privacy strength (0–100%), clear-area width and height, edge opacity and
   edge softness. A live preview on the main screen shows the result.
 - **Orientation aware**: in landscape the clear area keeps the same physical shape, and the overlay
   resizes on rotation, folding and resolution changes.
@@ -32,6 +32,11 @@ https://github.com/Innovatyou/Privacy-App/releases/download/latest/PrivacyDispla
 - **Multiple-viewer protection (optional)**: when a second face is seen, the mask goes to full
   strength, optionally switches to the narrow window, and a notification says
   *"Privacy Mode: Additional viewer detected."*
+- **Viewer shield (blur)**: while face detection sees someone else looking (to your left, right,
+  above or below), the whole screen is blurred with Android 12+ system blur, and the alert says
+  which side they are on. It can also blur the screen while nobody is looking. Blur strength is
+  adjustable, and *Test viewer shield* previews it for 5 seconds. On phones without system blur,
+  the screen is fully darkened instead.
 - **Auto-enable on screen unlock**, **app exclusions** (the mask pauses in apps you choose),
   **battery-saving mode** and a **dark mode** setting.
 - **Accessibility**: labelled controls, state descriptions for TalkBack, headings, touch targets of
@@ -43,29 +48,37 @@ https://github.com/Innovatyou/Privacy-App/releases/download/latest/PrivacyDispla
 These limits apply to every third-party app. The app handles them as follows:
 
 1. **Changing the physical viewing angle.** No public API exists. Built-in privacy displays are
-   controlled by the system and the phone maker.
-2. **A 100% black mask that still lets you use the phone.** On Android 12+, touches are blocked
+   controlled by the system and the phone maker. For the same reason, an app **cannot make the
+   screen look blurry only to people at the side, top or bottom**: every pixel, including the
+   overlay, looks the same from every angle. The viewer shield uses the camera instead. It detects
+   other people and blurs the screen for everyone while they look.
+2. **Blurring only part of the screen.** Android 12+ lets an overlay blur what is behind it
+   (`FLAG_BLUR_BEHIND` / `blurBehindRadius`), but always the whole screen. Blurring only the edges
+   of other apps would need screen capture (MediaProjection), which this app deliberately does not
+   use. The system also turns blur off on some devices and in Battery Saver
+   (`WindowManager.isCrossWindowBlurEnabled()`); the shield then darkens instead.
+3. **A 100% black mask that still lets you use the phone.** On Android 12+, touches are blocked
    under an overlay from another app that is more than **80%** opaque
    (`InputManager.getMaximumObscuringOpacityForTouch()`). The mask window is capped at that limit.
    The app tells you about it and the preview reflects it.
-3. **Covering system screens.** Overlays are not shown over the lock screen, the notification
+4. **Covering system screens.** Overlays are not shown over the lock screen, the notification
    shade or Quick Settings, permission dialogs, or some Settings screens. The mask is also visible
    in screenshots and screen recordings.
-4. **Camera from the background.** Android 11+ only lets a foreground service use the camera if it
+5. **Camera from the background.** Android 11+ only lets a foreground service use the camera if it
    started while the app was visible (on Android 14+ it throws otherwise). If Privacy Mode is
    started by the tile, by an unlock or after a reboot, face detection pauses and the notification
    asks you to open the app once. The camera also pauses while another app uses it. Android 12+
    shows the green camera indicator while detection runs.
-5. **Knowing which app is open.** This needs the special *Usage access* permission, granted in
+6. **Knowing which app is open.** This needs the special *Usage access* permission, granted in
    system settings. Android has no callback for it, so the app checks every 1–2 s, only while
    exclusions are set, Privacy Mode is on and the screen is on.
-6. **Reacting to unlock.** Since Android 8 the unlock broadcast cannot be received from the
+7. **Reacting to unlock.** Since Android 8 the unlock broadcast cannot be received from the
    manifest, so *auto-enable on unlock* keeps the service in standby, with a notification.
-7. **Quick Settings tile.** Android 12+ may refuse to start a service from a tile tap. In that case
+8. **Quick Settings tile.** Android 12+ may refuse to start a service from a tile tap. In that case
    the tile briefly opens an invisible activity to start it.
-8. **Face recognition.** The app only detects faces. It does not know whether a face is yours. The
+9. **Face recognition.** The app only detects faces. It does not know whether a face is yours. The
    largest face is treated as the main user.
-9. **Other apps' appearance.** *Dark mode* themes this app only. Screen brightness is not changed,
+10. **Other apps' appearance.** *Dark mode* themes this app only. Screen brightness is not changed,
    because that would need the `WRITE_SETTINGS` permission.
 
 ## Permissions

@@ -1,6 +1,8 @@
 package com.innovatyou.privacydisplay.service
 
+import com.innovatyou.privacydisplay.camera.ViewerSide
 import com.innovatyou.privacydisplay.camera.ViewerState
+import com.innovatyou.privacydisplay.overlay.ShieldReason
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +18,12 @@ data class PrivacyRuntimeState(
     val pausedForApp: String? = null,
     val viewerState: ViewerState = ViewerState.OFF,
     val boosted: Boolean = false,
+    /** Side of the additional viewer, when one is detected. */
+    val extraViewerSide: ViewerSide? = null,
+    /** Why the viewer shield is on, or null when it is off. */
+    val shield: ShieldReason? = null,
+    /** True when the shield blurs (system blur available) rather than darkens. */
+    val shieldBlurs: Boolean = false,
 )
 
 @Singleton
@@ -28,7 +36,16 @@ class PrivacyRuntime @Inject constructor() {
     /** Increments each time the app UI comes to the foreground. */
     val appForegroundCount: StateFlow<Int> = _appForegroundCount.asStateFlow()
 
+    private val _shieldTest = MutableStateFlow(false)
+
+    /** True while the user previews the viewer shield from settings. */
+    val shieldTest: StateFlow<Boolean> = _shieldTest.asStateFlow()
+
     fun update(transform: (PrivacyRuntimeState) -> PrivacyRuntimeState) = _state.update(transform)
+
+    fun setShieldTest(active: Boolean) {
+        _shieldTest.value = active
+    }
 
     fun onAppForeground() = _appForegroundCount.update { it + 1 }
 }

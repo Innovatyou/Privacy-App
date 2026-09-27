@@ -28,5 +28,46 @@ enum class ViewerState {
     UNAVAILABLE,
 }
 
+/** Where an additional viewer is, as seen by the phone's user looking at the screen. */
+enum class ViewerSide { LEFT, RIGHT, ABOVE, BELOW }
+
 /** Result of analysing one camera frame. Contains no image data. */
-data class FaceObservation(val faceCount: Int, val primaryFacing: Boolean)
+data class FaceObservation(
+    val faceCount: Int,
+    val primaryFacing: Boolean,
+    /** Side of the largest additional face relative to the main user, if there is one. */
+    val extraViewerSide: ViewerSide? = null,
+)
+
+/** Smoothed face detection result reported to the service. */
+data class ViewerReport(
+    val state: ViewerState,
+    /** Side of the additional viewer while [state] is [ViewerState.MULTIPLE_VIEWERS]. */
+    val extraViewerSide: ViewerSide? = null,
+)
+
+object ViewerGeometry {
+    /**
+     * Side of an additional face ([extraX], [extraY]) relative to the main user ([userX], [userY]),
+     * in upright analysis-image coordinates of size [width] x [height].
+     *
+     * CameraX analysis frames from the front camera are not mirrored: the camera faces the user,
+     * so a person on the user's left appears on the right of the image (larger x).
+     */
+    fun sideOf(
+        extraX: Float,
+        extraY: Float,
+        userX: Float,
+        userY: Float,
+        width: Float,
+        height: Float,
+    ): ViewerSide {
+        val dx = (extraX - userX) / width.coerceAtLeast(1f)
+        val dy = (extraY - userY) / height.coerceAtLeast(1f)
+        return if (kotlin.math.abs(dx) >= kotlin.math.abs(dy)) {
+            if (dx > 0f) ViewerSide.LEFT else ViewerSide.RIGHT
+        } else {
+            if (dy < 0f) ViewerSide.ABOVE else ViewerSide.BELOW
+        }
+    }
+}

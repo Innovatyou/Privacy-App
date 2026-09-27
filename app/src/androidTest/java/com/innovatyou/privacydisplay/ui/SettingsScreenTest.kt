@@ -79,6 +79,24 @@ class SettingsScreenTest {
     }
 
     @Test
+    fun viewerShieldNeedsDetectionAndCanBeTested() {
+        var tested = false
+        composeRule.setContent {
+            PrivacyDisplayTheme {
+                SettingsScreen(
+                    state = state.copy(settings = state.settings.copy(enabled = true)),
+                    actions = PrivacyActions(onTestShield = { tested = true }),
+                    onBack = {},
+                    onOpenExclusions = {},
+                )
+            }
+        }
+        composeRule.onNodeWithTag(BLUR_EXTRA_VIEWER_TAG).performScrollTo().assertIsNotEnabled()
+        composeRule.onNodeWithTag(TEST_SHIELD_TAG).performScrollTo().performClick()
+        assertEquals(true, tested)
+    }
+
+    @Test
     fun cameraPermissionIsExplained() {
         composeRule.setContent {
             PrivacyDisplayTheme {

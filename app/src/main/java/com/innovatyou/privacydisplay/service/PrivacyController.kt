@@ -9,6 +9,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -25,6 +27,9 @@ interface PrivacyController {
 
     /** Called when the app UI is visible, which is when Android allows camera use to start. */
     fun onAppForeground()
+
+    /** Shows the viewer shield for a few seconds so the user can see what it looks like. */
+    fun testShield()
 }
 
 @Singleton
@@ -59,7 +64,19 @@ class ServicePrivacyController @Inject constructor(
         scope.launch { syncService() }
     }
 
+    override fun testShield() {
+        shieldTestJob?.cancel()
+        runtime.setShieldTest(true)
+        shieldTestJob = scope.launch {
+            delay(SHIELD_TEST_MS)
+            runtime.setShieldTest(false)
+        }
+    }
+
+    private var shieldTestJob: Job? = null
+
     private companion object {
         const val TAG = "PrivacyController"
+        const val SHIELD_TEST_MS = 5_000L
     }
 }

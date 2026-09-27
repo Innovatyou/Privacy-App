@@ -34,9 +34,15 @@ class CameraAnalyzer(
             return
         }
         lastRunAt = now
-        val input = InputImage.fromMediaImage(mediaImage, image.imageInfo.rotationDegrees)
+        val rotation = image.imageInfo.rotationDegrees
+        val sideways = rotation == 90 || rotation == 270
+        val uprightWidth = if (sideways) image.height else image.width
+        val uprightHeight = if (sideways) image.width else image.height
+        val input = InputImage.fromMediaImage(mediaImage, rotation)
         detector.process(input)
-            .addOnSuccessListener { faces -> onResult(faces.toObservation()) }
+            .addOnSuccessListener { faces ->
+                onResult(faces.toObservation(uprightWidth.toFloat(), uprightHeight.toFloat()))
+            }
             .addOnFailureListener { e -> onError(e) }
             .addOnCompleteListener {
                 image.close()
@@ -51,12 +57,27 @@ class CameraAnalyzer(
         fun isFacing(yawDegrees: Float, pitchDegrees: Float): Boolean =
             abs(yawDegrees) <= FACING_MAX_ANGLE && abs(pitchDegrees) <= FACING_MAX_ANGLE
 
-        /** The primary user is assumed to be the largest (closest) face. No identity matching. */
-        fun List<Face>.toObservation(): FaceObservation {
-            val primary = maxByOrNull { it.boundingBox.width() * it.boundingBox.height() }
+        /**
+         * The primary user is assumed to be the largest (closest) face; the next largest is the
+         * additional viewer. No identity matching. Bounding boxes are in upright image coordinates.
+         */
+        fun List<Face>.toObservation(imageWidth: Float, imageHeight: Float): FaceObservation {
+            val bySize = sortedByDescending { it.boundingBox.width() * it.boundingBox.height() }
+            val primary = bySize.firstOrNull()
+            val extra = bySize.getOrNull(1)
+            val side = if (primary != null && extra != null) {
+                ViewerGeometry.sideOf(
+                    extra.boundingBox.exactCenterX(), extra.boundingBox.exactCenterY(),
+                    primary.boundingBox.exactCenterX(), primary.boundingBox.exactCenterY(),
+                    imageWidth, imageHeight,
+                )
+            } else {
+                null
+            }
             return FaceObservation(
                 faceCount = size,
                 primaryFacing = primary != null && isFacing(primary.headEulerAngleY, primary.headEulerAngleX),
+                extraViewerSide = side,
             )
         }
     }

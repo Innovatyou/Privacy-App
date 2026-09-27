@@ -74,6 +74,46 @@ class PrivacyPolicyTest {
     }
 
     @Test
+    fun `shield turns on for an extra viewer`() {
+        val on = settings.copy(enabled = true)
+        assertEquals(ShieldReason.EXTRA_VIEWER, PrivacyPolicy.shieldReason(on, ViewerState.MULTIPLE_VIEWERS, testing = false))
+        assertEquals(null, PrivacyPolicy.shieldReason(on, ViewerState.USER_PRESENT, testing = false))
+        assertEquals(null, PrivacyPolicy.shieldReason(on.copy(blurOnExtraViewer = false), ViewerState.MULTIPLE_VIEWERS, false))
+        assertEquals(null, PrivacyPolicy.shieldReason(on.copy(multipleViewerProtection = false), ViewerState.MULTIPLE_VIEWERS, false))
+        assertEquals(null, PrivacyPolicy.shieldReason(on.copy(faceDetectionEnabled = false), ViewerState.MULTIPLE_VIEWERS, false))
+    }
+
+    @Test
+    fun `shield when nobody is looking is opt in`() {
+        val on = settings.copy(enabled = true)
+        assertEquals(null, PrivacyPolicy.shieldReason(on, ViewerState.NO_FACE, testing = false))
+        assertEquals(
+            ShieldReason.NOBODY_LOOKING,
+            PrivacyPolicy.shieldReason(on.copy(blurWhenAway = true), ViewerState.LOOKING_AWAY, testing = false),
+        )
+    }
+
+    @Test
+    fun `shield test works only while privacy mode is on`() {
+        assertEquals(ShieldReason.TEST, PrivacyPolicy.shieldReason(settings.copy(enabled = true), ViewerState.OFF, testing = true))
+        assertEquals(null, PrivacyPolicy.shieldReason(settings.copy(enabled = false), ViewerState.OFF, testing = true))
+    }
+
+    @Test
+    fun `without system blur the shield darkens the whole screen`() {
+        val mask = PrivacyPolicy.maskParams(settings, ViewerState.MULTIPLE_VIEWERS)
+        assertTrue(PrivacyPolicy.shieldedMask(mask, ShieldReason.EXTRA_VIEWER, blurAvailable = false).fullCover)
+        assertFalse(PrivacyPolicy.shieldedMask(mask, ShieldReason.EXTRA_VIEWER, blurAvailable = true).fullCover)
+        assertFalse(PrivacyPolicy.shieldedMask(mask, null, blurAvailable = false).fullCover)
+    }
+
+    @Test
+    fun `blur radius grows with strength`() {
+        assertTrue(PrivacyPolicy.blurRadiusDp(1f) > PrivacyPolicy.blurRadiusDp(0f))
+        assertEquals(PrivacyPolicy.blurRadiusDp(1f), PrivacyPolicy.blurRadiusDp(5f), 0f)
+    }
+
+    @Test
     fun `camera problems never change the mask`() {
         for (viewer in listOf(
             ViewerState.USER_PRESENT, ViewerState.UNAVAILABLE, ViewerState.BLOCKED_IN_BACKGROUND,
