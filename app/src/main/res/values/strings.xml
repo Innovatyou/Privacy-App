@@ -1,35 +1,131 @@
 <resources>
-    <string name="app_name">Privacy Screen</string>
-    <string name="tile_label">Privacy filter</string>
+    <string name="app_name">Privacy Display</string>
+    <string name="tile_label">Privacy Display</string>
+    <string name="state_on">On</string>
+    <string name="state_off">Off</string>
+    <string name="toggle_on">ON</string>
+    <string name="toggle_off">OFF</string>
+    <string name="percent_format">%1$d%%</string>
 
-    <string name="status_on">Privacy filter is ON</string>
-    <string name="status_off">Privacy filter is OFF</string>
-    <string name="turn_on">Turn on</string>
-    <string name="turn_off">Turn off</string>
+    <!-- Main screen -->
+    <string name="privacy_title">Privacy Display</string>
+    <string name="cd_privacy_toggle">Privacy Mode</string>
+    <string name="cd_open_settings">Open settings</string>
+    <string name="cd_back">Navigate back</string>
+    <string name="status_active">Privacy Mode is active</string>
+    <string name="status_off">Privacy Mode is off</string>
+    <string name="status_paused_for_app">Paused while %1$s is open</string>
+    <string name="status_additional_viewer">Additional viewer detected. Protection increased.</string>
+    <string name="status_no_viewer">No one is looking at the screen. Protection increased.</string>
+    <string name="status_permission_needed">Allow \"Display over other apps\" to use Privacy Mode.</string>
+    <string name="preview_title">Preview</string>
+    <string name="preview_hint">How the mask looks on your screen with the current settings.</string>
+    <string name="preview_sample_line">Private message preview</string>
+    <string name="privacy_strength">Privacy strength</string>
+    <string name="privacy_strength_hint">How dark the mask is outside the clear area.</string>
+    <string name="viewing_area">Viewing area</string>
+    <string name="viewing_area_hint">Height of the clear reading area in the middle of the screen.</string>
+    <string name="protect_multiple">Protect when multiple people detected</string>
+    <string name="protect_multiple_hint">Makes the mask as strong as possible while a second face is visible.</string>
+    <string name="needs_face_detection">Turn on face detection first.</string>
+    <string name="face_detection">Face detection</string>
+    <string name="face_detection_hint">Uses the front camera on this device only. No photos or videos are saved or uploaded.</string>
+    <string name="auto_enable_unlock">Auto-enable on screen unlock</string>
+    <string name="auto_enable_unlock_hint">Keeps a small notification so Privacy Mode can turn on when you unlock.</string>
+    <string name="disclaimer_title">Software privacy</string>
+    <string name="disclaimer">Software privacy protection cannot physically change your display\'s viewing angle. For maximum privacy, combine this feature with a physical privacy screen protector.</string>
+    <string name="overlay_limit_note">Android limits overlays to %1$d%% darkness so your taps still reach the apps underneath.</string>
 
-    <string name="permission_title">Permission needed</string>
-    <string name="permission_text">To cover the screen while you use other apps, Privacy Screen needs the \"Display over other apps\" permission.</string>
-    <string name="grant_permission">Grant permission</string>
+    <!-- Face detection status -->
+    <string name="face_active">Face detection is on. Everything is processed on this device.</string>
+    <string name="face_starting">Starting face detection…</string>
+    <string name="face_paused_background">Face detection is paused. Open the app to resume it.</string>
+    <string name="face_paused_battery">Face detection is paused while Battery Saver is on.</string>
+    <string name="face_unavailable">The front camera is unavailable. Face detection is paused.</string>
+    <string name="service_start_failed">Android did not allow Privacy Mode to start. Please try again.</string>
+    <string name="camera_denied">Camera permission is needed for face detection.</string>
 
-    <string name="section_darkness">Darkness</string>
-    <string name="section_darkness_hint">A darker screen stays readable when you look straight at it but washes out quickly for people looking from the side.</string>
-    <string name="section_pattern">Privacy pattern</string>
-    <string name="section_pattern_hint">A fine pattern, similar to the slats in a privacy screen protector, that breaks up the image at an angle and at a distance.</string>
-    <string name="pattern_none">None</string>
-    <string name="pattern_lines">Lines</string>
-    <string name="pattern_grid">Grid</string>
-    <string name="pattern_dots">Dots</string>
-    <string name="pattern_strength">Pattern strength</string>
-    <string name="section_spotlight">Reading spotlight</string>
-    <string name="section_spotlight_hint">Black out everything except a band of the screen. Drag the handle on the right edge to move the band.</string>
-    <string name="spotlight_height">Band height</string>
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="section_privacy">Privacy</string>
+    <string name="section_mask">Mask style</string>
+    <string name="section_detection">Viewer detection</string>
+    <string name="section_automation">Automation</string>
+    <string name="section_battery">Battery</string>
+    <string name="section_appearance">Appearance</string>
+    <string name="section_permissions">Permissions</string>
+    <string name="section_about">About</string>
+    <string name="privacy_mode">Privacy Mode</string>
+    <string name="clear_area_width">Clear area width</string>
+    <string name="clear_area_width_hint">Width of the clear area. Narrower is more private from the sides.</string>
+    <string name="clear_area_height">Clear area height</string>
+    <string name="clear_area_height_hint">Height of the clear area.</string>
+    <string name="edge_opacity">Edge opacity</string>
+    <string name="edge_opacity_hint">Darkness at the screen edges for soft masks.</string>
+    <string name="edge_softness">Edge softness</string>
+    <string name="edge_softness_hint">Width of the gradient between the clear area and the edges.</string>
+    <string name="mask_black">Black mask</string>
+    <string name="mask_black_desc">Solid black outside the clear area.</string>
+    <string name="mask_dark_edges">Darkened edges</string>
+    <string name="mask_dark_edges_desc">Soft darkening that fades in toward the edges.</string>
+    <string name="mask_narrow">Narrow viewing window</string>
+    <string name="mask_narrow_desc">A smaller clear window with solid black around it.</string>
+    <string name="mask_gradient">Gradient mask</string>
+    <string name="mask_gradient_desc">An oval clear area that fades to dark at the edges.</string>
+    <string name="mask_custom">Custom opacity</string>
+    <string name="mask_custom_desc">Edges use Edge opacity. Privacy strength also dims the clear area.</string>
+    <string name="strongest_mask">Use the strongest mask for extra viewers</string>
+    <string name="strongest_mask_hint">Switches to the narrow viewing window while more than one face is visible.</string>
+    <string name="app_exclusions">Auto-disable in selected apps</string>
+    <string name="app_exclusions_summary">Selected apps: %1$d</string>
+    <string name="usage_access_needed">Needs Usage access</string>
+    <string name="battery_saver">Battery-saving mode</string>
+    <string name="battery_saver_hint">Checks the camera less often and pauses face detection while Battery Saver is on.</string>
+    <string name="dark_mode">Dark mode</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
 
-    <string name="tips_title">Tips for best privacy</string>
-    <string name="tips_text">• Lower your phone\'s brightness: the filter works best on a dim screen.\n• Turn on dark mode in the apps you use.\n• Use the reading spotlight in crowded places.\n\nNote: an app can\'t change how the display\'s pixels emit light, so no software filter can fully hide the screen from side angles the way a hardware privacy protector can. For the strongest protection, combine this app with a privacy screen protector.</string>
+    <!-- Permissions -->
+    <string name="perm_overlay_title">Display over other apps</string>
+    <string name="perm_overlay_why">Required. Draws the privacy mask on top of the apps you use.</string>
+    <string name="perm_camera_title">Camera</string>
+    <string name="perm_camera_why">Optional. Only used for face detection. Frames are processed in memory on this device and never saved or uploaded.</string>
+    <string name="perm_notifications_title">Notifications</string>
+    <string name="perm_notifications_why">Shows that Privacy Mode is active, with a button to turn it off, and alerts you about extra viewers.</string>
+    <string name="perm_usage_title">Usage access</string>
+    <string name="perm_usage_why">Optional. Only used to pause the mask while an app you excluded is open.</string>
+    <string name="perm_granted">Allowed</string>
+    <string name="perm_grant">Allow</string>
 
-    <string name="handle_description">Drag to move the reading band</string>
-    <string name="notification_channel">Privacy filter</string>
-    <string name="notification_title">Privacy filter is on</string>
-    <string name="notification_text">Tap to adjust the filter</string>
-    <string name="action_stop">Turn off</string>
+    <!-- About -->
+    <string name="about_hardware_title">Hardware vs. software privacy</string>
+    <string name="about_hardware">A hardware privacy display uses special display layers that physically narrow the viewing angle. It needs display hardware support.\n\nSoftware privacy, like this app, uses overlays, masking and optional face detection. It makes the screen harder to read from the side, but it cannot change how your display emits light.</string>
+    <string name="about_data_title">Your data</string>
+    <string name="about_data">Privacy Display stores only its own settings, on this device. It never uploads camera frames, never saves face images, does not recognise who you are, and never reads your contacts, messages, passwords or screen contents.</string>
+
+    <!-- App exclusions -->
+    <string name="exclusions_title">App exclusions</string>
+    <string name="exclusions_hint">Privacy Mode pauses while one of these apps is open.</string>
+    <string name="exclusions_search">Search apps</string>
+    <string name="exclusions_empty">No apps found</string>
+    <string name="usage_access_rationale">To know when an excluded app is open, Privacy Display needs Usage access. It is only used to check which app is in front.</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_status">Privacy status</string>
+    <string name="notification_channel_status_desc">Shows while Privacy Display is running.</string>
+    <string name="notification_channel_alerts">Viewer alerts</string>
+    <string name="notification_channel_alerts_desc">Alerts when another person may be looking at your screen.</string>
+    <string name="notif_starting">Starting Privacy Display…</string>
+    <string name="notif_active_title">Privacy Mode is active</string>
+    <string name="notif_active_text">Tap to adjust privacy settings.</string>
+    <string name="notif_standby_title">Privacy Display is on standby</string>
+    <string name="notif_standby_text">Privacy Mode turns on when you unlock your phone.</string>
+    <string name="notif_paused_title">Privacy Mode is paused</string>
+    <string name="notif_permission_title">Permission needed</string>
+    <string name="notif_permission_text">Allow \"Display over other apps\" to show the privacy mask.</string>
+    <string name="notif_action_turn_off">Turn off</string>
+    <string name="notif_action_turn_on">Turn on</string>
+    <string name="alert_title">Privacy Mode</string>
+    <string name="alert_text">Additional viewer detected.</string>
 </resources>

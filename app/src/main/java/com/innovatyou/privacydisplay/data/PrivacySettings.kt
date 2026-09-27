@@ -1,0 +1,65 @@
+package com.innovatyou.privacydisplay.data
+
+/** How the privacy mask is drawn. */
+enum class MaskMode {
+    /** Solid black outside the clear area, with a hard edge. */
+    BLACK,
+
+    /** Soft darkening that fades in toward the screen edges. */
+    DARK_EDGES,
+
+    /** A smaller clear window with solid black around it. The strongest mask. */
+    NARROW_WINDOW,
+
+    /** An oval clear area with a radial gradient to the edges. */
+    GRADIENT,
+
+    /** Edge opacity is used as-is and privacy strength also dims the clear area. */
+    CUSTOM,
+}
+
+enum class ThemeMode { SYSTEM, LIGHT, DARK }
+
+/**
+ * All user settings. Fractions and opacities are in the range 0.0–1.0; the UI shows them as
+ * percentages.
+ */
+data class PrivacySettings(
+    val enabled: Boolean = false,
+    /** Overall darkness of the mask. */
+    val strength: Float = 0.75f,
+    /** Width of the clear area as a fraction of the screen width (portrait). */
+    val clearAreaWidth: Float = 0.85f,
+    /** Height of the clear area as a fraction of the screen height (portrait). */
+    val clearAreaHeight: Float = 0.45f,
+    /** Maximum opacity at the screen edges for the soft masks. */
+    val edgeOpacity: Float = 0.9f,
+    val faceDetectionEnabled: Boolean = false,
+    val multipleViewerProtection: Boolean = false,
+    val maskMode: MaskMode = MaskMode.DARK_EDGES,
+    /** Width of the soft edge as a fraction of the shorter screen side. */
+    val gradientWidth: Float = 0.12f,
+    val strongestMaskOnMultipleViewers: Boolean = true,
+    val autoEnableOnUnlock: Boolean = false,
+    val batterySaver: Boolean = true,
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    /** Package names of apps in which the mask is paused. */
+    val excludedApps: Set<String> = emptySet(),
+) {
+    /** Returns a copy with every numeric value clamped to its valid range. */
+    fun sanitized(): PrivacySettings = copy(
+        strength = strength.coerceIn(0f, 1f),
+        clearAreaWidth = clearAreaWidth.coerceIn(MIN_CLEAR_AREA, 1f),
+        clearAreaHeight = clearAreaHeight.coerceIn(MIN_CLEAR_AREA, 1f),
+        edgeOpacity = edgeOpacity.coerceIn(0f, 1f),
+        gradientWidth = gradientWidth.coerceIn(0f, MAX_GRADIENT_WIDTH),
+    )
+
+    /** Whether the overlay service needs to keep running (active or waiting for an unlock). */
+    val needsService: Boolean get() = enabled || autoEnableOnUnlock
+
+    companion object {
+        const val MIN_CLEAR_AREA = 0.1f
+        const val MAX_GRADIENT_WIDTH = 0.5f
+    }
+}

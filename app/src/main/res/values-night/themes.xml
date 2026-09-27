@@ -1,5 +1,5 @@
 <resources>
-    <style name="Theme.PrivacyScreen" parent="Theme.Material3.DayNight">
-        <item name="colorPrimary">#9DB8FF</item>
+    <style name="Theme.PrivacyDisplay" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
     </style>
 </resources>

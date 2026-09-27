@@ -1,5 +1,10 @@
 <resources>
-    <style name="Theme.PrivacyScreen" parent="Theme.Material3.DayNight">
-        <item name="colorPrimary">@color/brand</item>
+    <!-- Window theme shown before Compose draws. Compose provides the Material 3 theme. -->
+    <style name="Theme.PrivacyDisplay" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+    </style>
+
+    <style name="Theme.PrivacyDisplay.Translucent" parent="android:Theme.Translucent.NoTitleBar">
+        <item name="android:windowAnimationStyle">@null</item>
     </style>
 </resources>

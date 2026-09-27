@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "PrivacyScreen"
+rootProject.name = "PrivacyDisplay"
 include(":app")

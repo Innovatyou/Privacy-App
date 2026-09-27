@@ -12,3 +12,6 @@
 *.aab
 *.keystore
 *.jks
+
+# The debug key is intentionally shared so CI builds install over each other.
+!app/debug.keystore
