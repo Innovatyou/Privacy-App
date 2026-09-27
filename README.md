@@ -56,6 +56,6 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 ```
 
 Each push also builds the debug APK on GitHub Actions (`.github/workflows/android.yml`).
-The latest APK is published as a release: https://github.com/Innovatyou/Privacy-App/releases/latest/download/PrivacyScreen.apk
+The latest APK is published as a release: https://github.com/Innovatyou/Privacy-App/releases/download/latest/PrivacyScreen.apk
 
 Minimum Android version: 8.0 (API 26).
