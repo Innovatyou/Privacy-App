@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">Privacy Screen</string>
+    <string name="tile_label">Privacy filter</string>
+
+    <string name="status_on">Privacy filter is ON</string>
+    <string name="status_off">Privacy filter is OFF</string>
+    <string name="turn_on">Turn on</string>
+    <string name="turn_off">Turn off</string>
+
+    <string name="permission_title">Permission needed</string>
+    <string name="permission_text">To cover the screen while you use other apps, Privacy Screen needs the \"Display over other apps\" permission.</string>
+    <string name="grant_permission">Grant permission</string>
+
+    <string name="section_darkness">Darkness</string>
+    <string name="section_darkness_hint">A darker screen stays readable when you look straight at it but washes out quickly for people looking from the side.</string>
+    <string name="section_pattern">Privacy pattern</string>
+    <string name="section_pattern_hint">A fine pattern, similar to the slats in a privacy screen protector, that breaks up the image at an angle and at a distance.</string>
+    <string name="pattern_none">None</string>
+    <string name="pattern_lines">Lines</string>
+    <string name="pattern_grid">Grid</string>
+    <string name="pattern_dots">Dots</string>
+    <string name="pattern_strength">Pattern strength</string>
+    <string name="section_spotlight">Reading spotlight</string>
+    <string name="section_spotlight_hint">Black out everything except a band of the screen. Drag the handle on the right edge to move the band.</string>
+    <string name="spotlight_height">Band height</string>
+
+    <string name="tips_title">Tips for best privacy</string>
+    <string name="tips_text">• Lower your phone\'s brightness: the filter works best on a dim screen.\n• Turn on dark mode in the apps you use.\n• Use the reading spotlight in crowded places.\n\nNote: an app can\'t change how the display\'s pixels emit light, so no software filter can fully hide the screen from side angles the way a hardware privacy protector can. For the strongest protection, combine this app with a privacy screen protector.</string>
+
+    <string name="handle_description">Drag to move the reading band</string>
+    <string name="notification_channel">Privacy filter</string>
+    <string name="notification_title">Privacy filter is on</string>
+    <string name="notification_text">Tap to adjust the filter</string>
+    <string name="action_stop">Turn off</string>
+</resources>
