@@ -34,7 +34,7 @@ import androidx.core.content.ContextCompat
 class PrivacyOverlayService : Service(), SharedPreferences.OnSharedPreferenceChangeListener {
 
     private lateinit var windowManager: WindowManager
-    private var overlay: PrivacyOverlayView? = null
+    private var filterView: PrivacyOverlayView? = null
     private var handle: View? = null
     private val overlayParams by lazy { buildOverlayParams() }
     private val handleParams by lazy { buildHandleParams() }
@@ -56,15 +56,15 @@ class PrivacyOverlayService : Service(), SharedPreferences.OnSharedPreferenceCha
             stopSelf()
             return START_NOT_STICKY
         }
-        if (overlay == null) showOverlay()
+        if (filterView == null) showOverlay()
         return START_STICKY
     }
 
     override fun onDestroy() {
         PrivacySettings.prefs(this).unregisterOnSharedPreferenceChangeListener(this)
-        overlay?.let { windowManager.removeView(it) }
+        filterView?.let { windowManager.removeView(it) }
         handle?.let { windowManager.removeView(it) }
-        overlay = null
+        filterView = null
         handle = null
         setRunning(this, false)
         super.onDestroy()
@@ -73,7 +73,7 @@ class PrivacyOverlayService : Service(), SharedPreferences.OnSharedPreferenceCha
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         // Screen rotated or resized: stretch the overlay to the new bounds.
-        overlay?.let {
+        filterView?.let {
             applyScreenSize(overlayParams)
             windowManager.updateViewLayout(it, overlayParams)
         }
@@ -87,14 +87,14 @@ class PrivacyOverlayService : Service(), SharedPreferences.OnSharedPreferenceCha
     private fun showOverlay() {
         val view = PrivacyOverlayView(this, overlayParams.alpha)
         windowManager.addView(view, overlayParams)
-        overlay = view
+        filterView = view
         PrivacySettings.prefs(this).registerOnSharedPreferenceChangeListener(this)
         applySettings(PrivacySettings.load(this))
         setRunning(this, true)
     }
 
     private fun applySettings(settings: PrivacySettings) {
-        overlay?.settings = settings
+        filterView?.settings = settings
         if (settings.spotlight && handle == null) {
             val view = createHandle()
             windowManager.addView(view, handleParams)
@@ -122,12 +122,12 @@ class PrivacyOverlayService : Service(), SharedPreferences.OnSharedPreferenceCha
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     downRawY = event.rawY
-                    downCenter = overlay?.settings?.spotlightCenter ?: 0.5f
+                    downCenter = filterView?.settings?.spotlightCenter ?: 0.5f
                 }
                 MotionEvent.ACTION_MOVE, MotionEvent.ACTION_UP -> {
                     val center = (downCenter + (event.rawY - downRawY) / screenHeight).coerceIn(0f, 1f)
-                    val updated = (overlay?.settings ?: PrivacySettings()).copy(spotlightCenter = center)
-                    overlay?.settings = updated
+                    val updated = (filterView?.settings ?: PrivacySettings()).copy(spotlightCenter = center)
+                    filterView?.settings = updated
                     positionHandle()
                     // Persist only when the finger lifts to avoid a flood of preference writes.
                     if (event.actionMasked == MotionEvent.ACTION_UP) updated.save(this@PrivacyOverlayService)
@@ -139,7 +139,7 @@ class PrivacyOverlayService : Service(), SharedPreferences.OnSharedPreferenceCha
 
     private fun positionHandle() {
         val view = handle ?: return
-        val settings = overlay?.settings ?: return
+        val settings = filterView?.settings ?: return
         val screenHeight = screenBounds().height()
         val bandHeight = screenHeight * settings.spotlightHeightPercent / 100f
         val top = (screenHeight * settings.spotlightCenter - bandHeight / 2)
