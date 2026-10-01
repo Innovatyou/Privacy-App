@@ -44,6 +44,7 @@ import com.innovatyou.privacydisplay.data.MaskMode
 import com.innovatyou.privacydisplay.data.PrivacySettings
 import com.innovatyou.privacydisplay.data.ThemeMode
 import com.innovatyou.privacydisplay.ui.components.InfoCard
+import com.innovatyou.privacydisplay.ui.components.NavigationRow
 import com.innovatyou.privacydisplay.ui.components.PercentSlider
 import com.innovatyou.privacydisplay.ui.components.PermissionRow
 import com.innovatyou.privacydisplay.ui.components.SectionHeader
@@ -186,11 +187,7 @@ fun SettingsScreen(
                 )
                 NavigationRow(
                     title = stringResource(R.string.app_exclusions),
-                    subtitle = if (permissions.usageAccess || settings.excludedApps.isEmpty()) {
-                        stringResource(R.string.app_exclusions_summary, settings.excludedApps.size)
-                    } else {
-                        stringResource(R.string.usage_access_needed)
-                    },
+                    subtitle = exclusionsSummary(settings.excludedApps.size, permissions.usageAccess),
                     onClick = onOpenExclusions,
                 )
             }
@@ -354,22 +351,12 @@ private fun MaskModeRow(mode: MaskMode, selected: Boolean, onSelect: () -> Unit)
     }
 }
 
+/** Summary for the "Apps to ignore" row. */
 @Composable
-private fun NavigationRow(title: String, subtitle: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 64.dp)
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = 20.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.bodyLarge)
-            Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
-    }
+fun exclusionsSummary(count: Int, usageAccess: Boolean): String = when {
+    count == 0 -> stringResource(R.string.app_exclusions_none)
+    !usageAccess -> stringResource(R.string.usage_access_needed)
+    else -> stringResource(R.string.app_exclusions_summary, count)
 }
 
 @StringRes

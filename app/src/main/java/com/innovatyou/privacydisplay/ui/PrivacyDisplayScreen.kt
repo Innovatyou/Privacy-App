@@ -40,6 +40,7 @@ import com.innovatyou.privacydisplay.camera.ViewerState
 import com.innovatyou.privacydisplay.overlay.PrivacyPolicy
 import com.innovatyou.privacydisplay.overlay.ShieldReason
 import com.innovatyou.privacydisplay.ui.components.InfoCard
+import com.innovatyou.privacydisplay.ui.components.NavigationRow
 import com.innovatyou.privacydisplay.ui.components.PercentSlider
 import com.innovatyou.privacydisplay.ui.components.PrivacyMaskPreview
 import com.innovatyou.privacydisplay.ui.components.PrivacyToggle
@@ -50,6 +51,7 @@ import kotlin.math.roundToInt
 
 const val STRENGTH_SLIDER_TAG = "strength_slider"
 const val VIEWING_AREA_SLIDER_TAG = "viewing_area_slider"
+const val EXCLUSIONS_ROW_TAG = "exclusions_row"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,6 +60,7 @@ fun PrivacyDisplayScreen(
     actions: PrivacyActions,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
+    onOpenExclusions: () -> Unit = {},
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     val settings = state.settings
@@ -165,6 +168,30 @@ fun PrivacyDisplayScreen(
                     checked = settings.autoEnableOnUnlock,
                     onCheckedChange = actions.onAutoEnableOnUnlockChange,
                 )
+            }
+
+            SettingsCard {
+                NavigationRow(
+                    title = stringResource(R.string.app_exclusions),
+                    subtitle = exclusionsSummary(settings.excludedApps.size, state.permissions.usageAccess),
+                    onClick = onOpenExclusions,
+                    testTag = EXCLUSIONS_ROW_TAG,
+                )
+                if (settings.excludedApps.isNotEmpty() && !state.permissions.usageAccess) {
+                    Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
+                        Text(
+                            stringResource(R.string.usage_access_rationale),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        FilledTonalButton(
+                            onClick = actions.onGrantUsageAccess,
+                            modifier = Modifier.padding(top = 8.dp),
+                        ) {
+                            Text(stringResource(R.string.perm_grant))
+                        }
+                    }
+                }
             }
 
             Text(

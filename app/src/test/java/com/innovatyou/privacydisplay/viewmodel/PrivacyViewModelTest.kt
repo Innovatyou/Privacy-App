@@ -5,6 +5,7 @@ import com.innovatyou.privacydisplay.data.InstalledAppsRepository
 import com.innovatyou.privacydisplay.data.MaskMode
 import com.innovatyou.privacydisplay.data.PreferencesRepository
 import com.innovatyou.privacydisplay.data.PrivacySettings
+import com.innovatyou.privacydisplay.data.RecommendedExclusions
 import com.innovatyou.privacydisplay.service.PrivacyController
 import com.innovatyou.privacydisplay.service.PrivacyRuntime
 import com.innovatyou.privacydisplay.util.PermissionManager
@@ -110,10 +111,18 @@ class PrivacyViewModelTest {
     fun `excluded apps can be added and removed`() = runTest(dispatcher) {
         viewModel.toggleExcludedApp("com.example.bank")
         advanceUntilIdle()
-        assertEquals(setOf("com.example.bank"), repository.state.value.excludedApps)
+        assertEquals(RecommendedExclusions.PACKAGES + "com.example.bank", repository.state.value.excludedApps)
         viewModel.toggleExcludedApp("com.example.bank")
         advanceUntilIdle()
-        assertTrue(repository.state.value.excludedApps.isEmpty())
+        assertEquals(RecommendedExclusions.PACKAGES, repository.state.value.excludedApps)
+    }
+
+    @Test
+    fun `play store is ignored by default and can be un-ignored`() = runTest(dispatcher) {
+        assertTrue(RecommendedExclusions.PLAY_STORE in repository.state.value.excludedApps)
+        viewModel.toggleExcludedApp(RecommendedExclusions.PLAY_STORE)
+        advanceUntilIdle()
+        assertFalse(RecommendedExclusions.PLAY_STORE in repository.state.value.excludedApps)
     }
 
     @Test
@@ -147,6 +156,7 @@ class PrivacyViewModelTest {
         viewModel.loadApps()
         advanceUntilIdle()
         assertEquals(listOf("Maps"), viewModel.apps.value?.map { it.label })
+        assertEquals(listOf("Google Play Store"), viewModel.recommendedApps.value.map { it.label })
     }
 }
 
@@ -191,4 +201,5 @@ private class FakePermissions : PermissionManager {
 
 private class FakeApps : InstalledAppsRepository {
     override suspend fun launchableApps() = listOf(InstalledApp("com.example.maps", "Maps"))
+    override suspend fun recommendedApps() = listOf(InstalledApp(RecommendedExclusions.PLAY_STORE, "Google Play Store"))
 }

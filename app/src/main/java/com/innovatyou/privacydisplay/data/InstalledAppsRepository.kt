@@ -15,6 +15,9 @@ data class InstalledApp(val packageName: String, val label: String)
 /** Lists apps the user can exclude. Only launcher apps are visible (see `<queries>`). */
 interface InstalledAppsRepository {
     suspend fun launchableApps(): List<InstalledApp>
+
+    /** Installed apps from [RecommendedExclusions], including ones without a launcher icon. */
+    suspend fun recommendedApps(): List<InstalledApp>
 }
 
 @Singleton
@@ -36,5 +39,22 @@ class PackageManagerAppsRepository @Inject constructor(
             .filter { it.packageName != context.packageName }
             .distinctBy { it.packageName }
             .sortedBy { it.label.lowercase() }
+    }
+
+    override suspend fun recommendedApps(): List<InstalledApp> = withContext(Dispatchers.IO) {
+        val pm = context.packageManager
+        RecommendedExclusions.PACKAGES.mapNotNull { packageName ->
+            try {
+                val info = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    pm.getApplicationInfo(packageName, PackageManager.ApplicationInfoFlags.of(0L))
+                } else {
+                    @Suppress("DEPRECATION")
+                    pm.getApplicationInfo(packageName, 0)
+                }
+                InstalledApp(packageName, pm.getApplicationLabel(info).toString())
+            } catch (e: PackageManager.NameNotFoundException) {
+                null
+            }
+        }
     }
 }

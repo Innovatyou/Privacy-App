@@ -32,7 +32,7 @@ class PrivacyDisplayScreenTest {
 
     private fun state(enabled: Boolean = false, overlay: Boolean = true) = PrivacyUiState(
         settings = PrivacySettings(enabled = enabled),
-        permissions = PermissionState(overlay = overlay, camera = true, notifications = true),
+        permissions = PermissionState(overlay = overlay, camera = true, notifications = true, usageAccess = true),
         maxOverlayOpacity = 0.8f,
         loaded = true,
     )
@@ -80,6 +80,23 @@ class PrivacyDisplayScreenTest {
         composeRule.onNodeWithTag(VIEWING_AREA_SLIDER_TAG)
             .performScrollTo()
             .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "45%"))
+    }
+
+    @Test
+    fun appsToIgnoreOpenFromTheMainScreen() {
+        var opened = false
+        composeRule.setContent {
+            PrivacyDisplayTheme {
+                PrivacyDisplayScreen(
+                    state = state(),
+                    actions = PrivacyActions(),
+                    onOpenSettings = {},
+                    onOpenExclusions = { opened = true },
+                )
+            }
+        }
+        composeRule.onNodeWithTag(EXCLUSIONS_ROW_TAG).performScrollTo().performClick()
+        assertEquals(true, opened)
     }
 
     @Test

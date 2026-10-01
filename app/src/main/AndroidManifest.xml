@@ -29,6 +29,10 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent>
+        <!-- Recommended apps to ignore, which may have no launcher icon. -->
+        <package android:name="com.android.vending" />
+        <package android:name="com.google.android.packageinstaller" />
+        <package android:name="com.android.packageinstaller" />
     </queries>
 
     <application

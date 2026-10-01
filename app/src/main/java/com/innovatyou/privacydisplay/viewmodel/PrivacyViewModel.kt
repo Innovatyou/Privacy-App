@@ -68,6 +68,11 @@ class PrivacyViewModel @Inject constructor(
     private val _apps = MutableStateFlow<List<InstalledApp>?>(null)
     val apps: StateFlow<List<InstalledApp>?> = _apps.asStateFlow()
 
+    private val _recommendedApps = MutableStateFlow<List<InstalledApp>>(emptyList())
+
+    /** Installed apps that are known not to work under an overlay, such as Google Play Store. */
+    val recommendedApps: StateFlow<List<InstalledApp>> = _recommendedApps.asStateFlow()
+
     private val _events = Channel<PrivacyEvent>(Channel.BUFFERED)
     val events: Flow<PrivacyEvent> = _events.receiveAsFlow()
 
@@ -147,7 +152,10 @@ class PrivacyViewModel @Inject constructor(
 
     fun loadApps() {
         if (_apps.value != null) return
-        viewModelScope.launch { _apps.value = appsRepository.launchableApps() }
+        viewModelScope.launch {
+            _recommendedApps.value = appsRepository.recommendedApps()
+            _apps.value = appsRepository.launchableApps()
+        }
     }
 
     private fun update(transform: (PrivacySettings) -> PrivacySettings) {

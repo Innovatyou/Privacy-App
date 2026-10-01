@@ -37,7 +37,11 @@ https://github.com/Innovatyou/Privacy-App/releases/download/latest/PrivacyDispla
   which side they are on. It can also blur the screen while nobody is looking. Blur strength is
   adjustable, and *Test viewer shield* previews it for 5 seconds. On phones without system blur,
   the screen is fully darkened instead.
-- **Auto-enable on screen unlock**, **app exclusions** (the mask pauses in apps you choose),
+- **Apps to ignore**: Privacy Mode turns off by itself while chosen apps are open, and back on
+  when you leave them. Open it from the main screen. Google Play Store and the Android package
+  installer are ignored by default, because their Install and Update buttons refuse taps while
+  another app draws over the screen (an Android tap-jacking protection). Needs *Usage access*.
+- **Auto-enable on screen unlock**,
   **battery-saving mode** and a **dark mode** setting.
 - **Accessibility**: labelled controls, state descriptions for TalkBack, headings, touch targets of
   48 dp or more, and colour contrast of WCAG AA or better. The mask itself is hidden from
@@ -89,7 +93,7 @@ These limits apply to every third-party app. The app handles them as follows:
 | `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_SPECIAL_USE` | Keep the mask running while you use other apps | Yes |
 | `POST_NOTIFICATIONS` | "Privacy Mode is active" notification, *Turn off* button, viewer alerts | Recommended |
 | `CAMERA`, `FOREGROUND_SERVICE_CAMERA` | Optional face detection | Only for face detection |
-| `PACKAGE_USAGE_STATS` (Usage access) | Optional app exclusions | Only for exclusions |
+| `PACKAGE_USAGE_STATS` (Usage access) | *Apps to ignore*: know which app is open | Only for apps to ignore |
 | `RECEIVE_BOOT_COMPLETED` | Restore standby after a reboot when auto-enable is on | Install-time only |
 
 The app has no internet permission.

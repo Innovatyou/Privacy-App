@@ -45,7 +45,10 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
@@ -55,10 +58,13 @@ import com.innovatyou.privacydisplay.ui.components.InfoCard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+fun appRowTag(packageName: String) = "app_row_$packageName"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppExclusionsScreen(
     apps: List<InstalledApp>?,
+    recommended: List<InstalledApp>,
     excluded: Set<String>,
     usageAccessGranted: Boolean,
     onToggle: (String) -> Unit,
@@ -67,8 +73,12 @@ fun AppExclusionsScreen(
     modifier: Modifier = Modifier,
 ) {
     var query by rememberSaveable { mutableStateOf("") }
-    val filtered = remember(apps, query) {
-        apps.orEmpty().filter { query.isBlank() || it.label.contains(query, ignoreCase = true) }
+    val recommendedPackages = remember(recommended) { recommended.map { it.packageName }.toSet() }
+    val filtered = remember(apps, query, recommendedPackages) {
+        apps.orEmpty().filter {
+            it.packageName !in recommendedPackages &&
+                (query.isBlank() || it.label.contains(query, ignoreCase = true))
+        }
     }
 
     Scaffold(
@@ -112,6 +122,21 @@ fun AppExclusionsScreen(
                     )
                 }
             }
+            if (recommended.isNotEmpty() && query.isBlank()) {
+                item { ListHeader(stringResource(R.string.exclusions_recommended)) }
+                item {
+                    Text(
+                        stringResource(R.string.exclusions_recommended_hint),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp),
+                    )
+                }
+                items(recommended, key = { "recommended_${it.packageName}" }) { app ->
+                    AppRow(app = app, checked = app.packageName in excluded, onToggle = { onToggle(app.packageName) })
+                }
+                item { ListHeader(stringResource(R.string.exclusions_all_apps)) }
+            }
             item {
                 OutlinedTextField(
                     value = query,
@@ -147,12 +172,25 @@ fun AppExclusionsScreen(
 }
 
 @Composable
+private fun ListHeader(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier
+            .padding(start = 4.dp, top = 16.dp, bottom = 4.dp)
+            .semantics { heading() },
+    )
+}
+
+@Composable
 private fun AppRow(app: InstalledApp, checked: Boolean, onToggle: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 60.dp)
             .toggleable(value = checked, role = Role.Checkbox, onValueChange = { onToggle() })
+            .testTag(appRowTag(app.packageName))
             .padding(horizontal = 4.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

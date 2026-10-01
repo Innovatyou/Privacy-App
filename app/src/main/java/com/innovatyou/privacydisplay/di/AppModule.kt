@@ -9,6 +9,7 @@ import com.innovatyou.privacydisplay.data.DataStorePreferencesRepository
 import com.innovatyou.privacydisplay.data.InstalledAppsRepository
 import com.innovatyou.privacydisplay.data.PackageManagerAppsRepository
 import com.innovatyou.privacydisplay.data.PreferencesRepository
+import com.innovatyou.privacydisplay.data.RecommendedExclusions
 import com.innovatyou.privacydisplay.service.PrivacyController
 import com.innovatyou.privacydisplay.service.ServicePrivacyController
 import com.innovatyou.privacydisplay.util.AndroidPermissionManager
@@ -45,6 +46,7 @@ object AppModule {
         @ApplicationContext context: Context,
         @ApplicationScope scope: CoroutineScope,
     ): DataStore<Preferences> = PreferenceDataStoreFactory.create(
+        migrations = listOf(RecommendedExclusions.migration),
         scope = CoroutineScope(scope.coroutineContext + Dispatchers.IO),
         produceFile = { context.preferencesDataStoreFile("privacy_settings") },
     )

@@ -46,8 +46,8 @@ data class PrivacySettings(
     val autoEnableOnUnlock: Boolean = false,
     val batterySaver: Boolean = true,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
-    /** Package names of apps in which the mask is paused. */
-    val excludedApps: Set<String> = emptySet(),
+    /** Package names of apps in which the mask is paused ("Apps to ignore"). */
+    val excludedApps: Set<String> = RecommendedExclusions.PACKAGES,
     /** Blur the whole screen while face detection sees an additional viewer. */
     val blurOnExtraViewer: Boolean = true,
     /** Blur the whole screen while nobody is looking at it (no face, or looking away). */

@@ -78,9 +78,10 @@
     <string name="mask_custom_desc">Edges use Edge opacity. Privacy strength also dims the clear area.</string>
     <string name="strongest_mask">Use the strongest mask for extra viewers</string>
     <string name="strongest_mask_hint">Switches to the narrow viewing window while more than one face is visible.</string>
-    <string name="app_exclusions">Auto-disable in selected apps</string>
-    <string name="app_exclusions_summary">Selected apps: %1$d</string>
-    <string name="usage_access_needed">Needs Usage access</string>
+    <string name="app_exclusions">Apps to ignore</string>
+    <string name="app_exclusions_summary">Privacy Mode turns off in %1$d apps</string>
+    <string name="app_exclusions_none">Choose apps where Privacy Mode should turn off</string>
+    <string name="usage_access_needed">Not working yet: allow Usage access</string>
     <string name="battery_saver">Battery-saving mode</string>
     <string name="battery_saver_hint">Checks the camera less often and pauses face detection while Battery Saver is on.</string>
     <string name="dark_mode">Dark mode</string>
@@ -107,8 +108,11 @@
     <string name="about_data">Privacy Display stores only its own settings, on this device. It never uploads camera frames, never saves face images, does not recognise who you are, and never reads your contacts, messages, passwords or screen contents.</string>
 
     <!-- App exclusions -->
-    <string name="exclusions_title">App exclusions</string>
-    <string name="exclusions_hint">Privacy Mode pauses while one of these apps is open.</string>
+    <string name="exclusions_title">Apps to ignore</string>
+    <string name="exclusions_hint">Privacy Mode turns off by itself while one of these apps is open, and turns back on when you leave it.</string>
+    <string name="exclusions_recommended">Recommended</string>
+    <string name="exclusions_recommended_hint">Google Play Store and the Android installer ignore taps while another app draws over the screen, so buttons like Install and Update stop working. Keep them ignored.</string>
+    <string name="exclusions_all_apps">All apps</string>
     <string name="exclusions_search">Search apps</string>
     <string name="exclusions_empty">No apps found</string>
     <string name="usage_access_rationale">To know when an excluded app is open, Privacy Display needs Usage access. It is only used to check which app is in front.</string>

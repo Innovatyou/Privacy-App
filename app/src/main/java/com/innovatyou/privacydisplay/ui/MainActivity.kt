@@ -134,6 +134,7 @@ private fun PrivacyApp(viewModel: PrivacyViewModel) {
                 state = state,
                 actions = actions,
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+                onOpenExclusions = { navController.navigate(Routes.EXCLUSIONS) },
                 snackbarHostState = snackbarHostState,
             )
         }
@@ -147,9 +148,11 @@ private fun PrivacyApp(viewModel: PrivacyViewModel) {
         }
         composable(Routes.EXCLUSIONS) {
             val apps by viewModel.apps.collectAsStateWithLifecycle()
+            val recommended by viewModel.recommendedApps.collectAsStateWithLifecycle()
             LaunchedEffect(Unit) { viewModel.loadApps() }
             AppExclusionsScreen(
                 apps = apps,
+                recommended = recommended,
                 excluded = state.settings.excludedApps,
                 usageAccessGranted = state.permissions.usageAccess,
                 onToggle = viewModel::toggleExcludedApp,

@@ -38,7 +38,8 @@ class ForegroundAppMonitor @Inject constructor(
                 events.getNextEvent(event)
                 if (event.eventType == RESUMED_EVENT) current = event.packageName
             }
-            since = now
+            // Overlap the windows slightly so events logged right at the boundary are not missed.
+            since = now - QUERY_OVERLAP_MS
             emit(current)
             delay(intervalMs)
         }
@@ -46,6 +47,7 @@ class ForegroundAppMonitor @Inject constructor(
 
     private companion object {
         const val INITIAL_LOOKBACK_MS = 60 * 60 * 1000L
+        const val QUERY_OVERLAP_MS = 2_000L
 
         val RESUMED_EVENT = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             UsageEvents.Event.ACTIVITY_RESUMED
