@@ -14,6 +14,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.innovatyou.privacydisplay.R
 import com.innovatyou.privacydisplay.data.PrivacySettings
 import com.innovatyou.privacydisplay.owner.EnrollmentCollector
+import com.innovatyou.privacydisplay.owner.OwnerDecision
 import com.innovatyou.privacydisplay.ui.theme.PrivacyDisplayTheme
 import com.innovatyou.privacydisplay.util.PermissionState
 import com.innovatyou.privacydisplay.viewmodel.FaceSetupHint
@@ -90,6 +91,39 @@ class OwnerProtectionUiTest {
         }
         composeRule.onNodeWithTag(START_SHARING_TAG).performScrollTo().performClick()
         assertEquals(true, lent)
+    }
+
+    @Test
+    fun lowLightOptionsAreAvailableWithProtection() {
+        var strict: Boolean? = null
+        var added = false
+        composeRule.setContent {
+            PrivacyDisplayTheme {
+                SettingsScreen(
+                    state = state(enrolled = true, protection = true),
+                    actions = PrivacyActions(onBlockWhenTooDarkChange = { strict = it }, onAddFaceSamples = { added = true }),
+                    onBack = {},
+                    onOpenExclusions = {},
+                )
+            }
+        }
+        composeRule.onNodeWithTag(BLOCK_WHEN_DARK_TAG).performScrollTo().assertIsOff().performClick()
+        assertEquals(true, strict)
+        composeRule.onNodeWithTag(ADD_SAMPLES_TAG).performScrollTo().performClick()
+        assertEquals(true, added)
+    }
+
+    @Test
+    fun mainScreenShowsTheLiveOwnerStatus() {
+        val dark = state(enrolled = true, protection = true).let {
+            it.copy(runtime = it.runtime.copy(ownerStatus = OwnerDecision.TOO_DARK))
+        }
+        composeRule.setContent {
+            PrivacyDisplayTheme {
+                PrivacyDisplayScreen(state = dark, actions = PrivacyActions(), onOpenSettings = {})
+            }
+        }
+        composeRule.onNodeWithText(context.getString(R.string.owner_status_dark)).assertIsDisplayed()
     }
 
     @Test

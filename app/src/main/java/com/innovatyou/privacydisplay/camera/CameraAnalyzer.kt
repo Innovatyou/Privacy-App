@@ -10,6 +10,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetector
 import com.google.mlkit.vision.face.FaceLandmark
+import com.innovatyou.privacydisplay.owner.LowLight
 import com.innovatyou.privacydisplay.owner.OwnerCheck
 import com.innovatyou.privacydisplay.owner.OwnerMatching
 import kotlin.math.abs
@@ -24,7 +25,7 @@ import kotlin.math.abs
 class CameraAnalyzer(
     private val detector: FaceDetector,
     private val minIntervalMs: Long,
-    private val onResult: (FaceObservation, OwnerCheck?) -> Unit,
+    private val onResult: (FaceObservation, OwnerCheck?, FrameStats) -> Unit,
     private val ownerCheck: OwnerCheckFn? = null,
     private val ownerIntervalMs: Long = 1_000L,
     private val clock: () -> Long = SystemClock::elapsedRealtime,
@@ -32,8 +33,11 @@ class CameraAnalyzer(
 
     /** Compares one face in one frame with the owner. Receives the frame while it is still open. */
     fun interface OwnerCheckFn {
-        fun check(image: ImageProxy, landmarks: FloatArray): OwnerCheck
+        fun check(image: ImageProxy, landmarks: FloatArray): OwnerResult
     }
+
+    /** Owner check result plus the brightness of the face (null when no face was checked). */
+    data class OwnerResult(val check: OwnerCheck, val faceLuma: Float? = null)
 
     private var lastRunAt = Long.MIN_VALUE / 2
     private var lastOwnerCheckAt = Long.MIN_VALUE / 2
@@ -58,36 +62,56 @@ class CameraAnalyzer(
                 return
             }
             val observation = faces.toObservation(uprightWidth, uprightHeight)
+            val plane = image.planes[0]
+            val frameLuma = LowLight.meanLuma(plane.buffer, plane.rowStride, plane.pixelStride, image.width, image.height)
+            val primary = faces.maxByOrNull { it.boundingBox.width() * it.boundingBox.height() }
 
-            var owner: OwnerCheck? = null
+            var owner: OwnerResult? = null
             val check = ownerCheck
             if (check != null && now - lastOwnerCheckAt >= ownerIntervalMs) {
                 lastOwnerCheckAt = now
-                owner = ownerCheckFor(faces, uprightWidth, image, check)
+                owner = ownerCheckFor(primary, frameLuma, uprightWidth, image, check)
             }
-            onResult(observation, owner)
+            onResult(observation, owner?.check, FrameStats(frameLuma, owner?.faceLuma, primary?.eyesOpen()))
         }
     }
 
-    private fun ownerCheckFor(faces: List<Face>, imageWidth: Float, image: ImageProxy, check: OwnerCheckFn): OwnerCheck {
-        val primary = faces.maxByOrNull { it.boundingBox.width() * it.boundingBox.height() }
-            ?: return OwnerCheck.UNCLEAR
+    private fun ownerCheckFor(
+        primary: Face?,
+        frameLuma: Float,
+        imageWidth: Float,
+        image: ImageProxy,
+        check: OwnerCheckFn,
+    ): OwnerResult {
+        val dark = frameLuma < LowLight.DARK_FRAME_LUMA
+        // No face: too dark to see one, or simply nobody in front of the phone.
+        primary ?: return OwnerResult(if (dark) OwnerCheck.TOO_DARK else OwnerCheck.UNCLEAR)
         val usable = OwnerMatching.isUsableFace(
             primary.boundingBox.width() / imageWidth, primary.headEulerAngleY, primary.headEulerAngleX,
         )
         val landmarks = primary.alignmentLandmarks()
-        if (!usable || landmarks == null) return OwnerCheck.UNCLEAR
+        if (!usable || landmarks == null) return OwnerResult(if (dark) OwnerCheck.TOO_DARK else OwnerCheck.UNCLEAR)
         return try {
             check.check(image, landmarks)
         } catch (e: Exception) {
             Log.w(TAG, "Owner check failed", e)
-            OwnerCheck.UNCLEAR
+            OwnerResult(OwnerCheck.UNCLEAR)
         }
     }
 
     private companion object {
         const val TAG = "CameraAnalyzer"
     }
+}
+
+/** Per-frame measurements: brightness of the frame and the face, and how open the eyes are. */
+data class FrameStats(val frameLuma: Float, val faceLuma: Float? = null, val eyesOpen: Float? = null)
+
+/** Average eye-open probability (0–1), when ML Kit classification is enabled. */
+fun Face.eyesOpen(): Float? {
+    val left = leftEyeOpenProbability ?: return null
+    val right = rightEyeOpenProbability ?: return null
+    return (left + right) / 2f
 }
 
 /** Head rotation (degrees) beyond which a face is treated as looking away. */

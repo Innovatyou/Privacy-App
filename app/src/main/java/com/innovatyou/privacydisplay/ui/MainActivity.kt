@@ -22,7 +22,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
+import androidx.navigation.navArgument
+import com.innovatyou.privacydisplay.viewmodel.FaceSetupViewModel
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.innovatyou.privacydisplay.R
@@ -62,7 +65,9 @@ private object Routes {
     const val HOME = "home"
     const val SETTINGS = "settings"
     const val EXCLUSIONS = "exclusions"
-    const val FACE_SETUP = "face_setup"
+    const val FACE_SETUP = "face_setup?${FaceSetupViewModel.ARG_ADD}={${FaceSetupViewModel.ARG_ADD}}"
+
+    fun faceSetup(add: Boolean) = "face_setup?${FaceSetupViewModel.ARG_ADD}=$add"
 }
 
 @Composable
@@ -98,7 +103,7 @@ private fun PrivacyApp(viewModel: PrivacyViewModel) {
                     }
                 PrivacyEvent.ServiceStartFailed -> snackbarHostState.showSnackbar(startFailed)
                 PrivacyEvent.CameraPermissionDenied -> snackbarHostState.showSnackbar(cameraDenied)
-                PrivacyEvent.OpenFaceSetup -> navController.navigate(Routes.FACE_SETUP)
+                is PrivacyEvent.OpenFaceSetup -> navController.navigate(Routes.faceSetup(event.add))
                 PrivacyEvent.ScreenLockNeeded -> {
                     snackbarHostState.showSnackbar(screenLockNeeded)
                 }
@@ -146,6 +151,9 @@ private fun PrivacyApp(viewModel: PrivacyViewModel) {
             onOwnerProtectionChange = viewModel::setOwnerProtection,
             onSetUpFace = viewModel::setUpFace,
             onDeleteFace = viewModel::deleteFace,
+            onAddFaceSamples = viewModel::addFaceSamples,
+            onBlockWhenTooDarkChange = viewModel::setBlockWhenTooDark,
+            onLowLightAssistChange = viewModel::setLowLightAssist,
             onOpenSecuritySettings = {
                 context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             },
@@ -180,7 +188,15 @@ private fun PrivacyApp(viewModel: PrivacyViewModel) {
                 onOpenExclusions = { navController.navigate(Routes.EXCLUSIONS) },
             )
         }
-        composable(Routes.FACE_SETUP) {
+        composable(
+            Routes.FACE_SETUP,
+            arguments = listOf(
+                navArgument(FaceSetupViewModel.ARG_ADD) {
+                    type = NavType.BoolType
+                    defaultValue = false
+                }
+            ),
+        ) {
             FaceSetupRoute(
                 onDone = {
                     viewModel.onFaceSetUp()

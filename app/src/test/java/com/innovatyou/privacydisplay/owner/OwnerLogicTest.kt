@@ -45,6 +45,32 @@ class OwnerLogicTest {
     }
 
     @Test
+    fun `darkness alone never blocks unless strict mode is on`() {
+        assertFalse(OwnerPolicy.nextLocked(false, OwnerDecision.TOO_DARK, ownerTrusted = false, blockWhenTooDark = false))
+        assertTrue(OwnerPolicy.nextLocked(false, OwnerDecision.TOO_DARK, ownerTrusted = false, blockWhenTooDark = true))
+        assertFalse(OwnerPolicy.nextLocked(false, OwnerDecision.TOO_DARK, ownerTrusted = true, blockWhenTooDark = true))
+        assertTrue(OwnerPolicy.nextLocked(true, OwnerDecision.TOO_DARK, ownerTrusted = false, blockWhenTooDark = false))
+    }
+
+    @Test
+    fun `the owner's face unblocks only after a blink`() {
+        assertTrue(OwnerPolicy.nextLocked(true, OwnerDecision.OWNER, ownerTrusted = false, blinked = false))
+        assertFalse(OwnerPolicy.nextLocked(true, OwnerDecision.OWNER, ownerTrusted = false, blinked = true))
+        // Not blocked: no blink needed to stay unblocked.
+        assertFalse(OwnerPolicy.nextLocked(false, OwnerDecision.OWNER, ownerTrusted = false, blinked = false))
+    }
+
+    @Test
+    fun `darkness needs several checks and does not erase a decision`() {
+        val verifier = OwnerVerifier(strangerConfirmations = 2, darkConfirmations = 3)
+        assertEquals(OwnerDecision.OWNER, verifier.update(OwnerCheck.OWNER))
+        assertEquals(OwnerDecision.OWNER, verifier.update(OwnerCheck.TOO_DARK))
+        assertEquals(OwnerDecision.OWNER, verifier.update(OwnerCheck.TOO_DARK))
+        assertEquals(OwnerDecision.TOO_DARK, verifier.update(OwnerCheck.TOO_DARK))
+        assertEquals(OwnerDecision.OWNER, verifier.update(OwnerCheck.OWNER))
+    }
+
+    @Test
     fun `block screen hides while sharing or unlocking`() {
         assertTrue(OwnerPolicy.showBlockScreen(active = true, locked = true, sharing = false, unlockScreenOpen = false))
         assertFalse(OwnerPolicy.showBlockScreen(active = true, locked = true, sharing = true, unlockScreenOpen = false))

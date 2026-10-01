@@ -57,6 +57,8 @@ fun maskModeTag(mode: MaskMode) = "mask_mode_${mode.name}"
 const val BLUR_EXTRA_VIEWER_TAG = "blur_extra_viewer"
 const val OWNER_PROTECTION_TAG = "owner_protection"
 const val SET_UP_FACE_TAG = "set_up_face"
+const val ADD_SAMPLES_TAG = "add_face_samples"
+const val BLOCK_WHEN_DARK_TAG = "block_when_dark"
 const val TEST_SHIELD_TAG = "test_shield"
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -314,6 +316,29 @@ private fun OwnerProtectionCard(state: PrivacyUiState, actions: PrivacyActions) 
             subtitle = stringResource(R.string.face_setup_privacy),
             onClick = actions.onSetUpFace,
             testTag = SET_UP_FACE_TAG,
+        )
+        if (state.ownerEnrolled) {
+            NavigationRow(
+                title = stringResource(R.string.owner_add_samples),
+                subtitle = stringResource(R.string.owner_add_samples_hint),
+                onClick = actions.onAddFaceSamples,
+                testTag = ADD_SAMPLES_TAG,
+            )
+        }
+        SwitchRow(
+            title = stringResource(R.string.block_when_too_dark),
+            subtitle = stringResource(R.string.block_when_too_dark_hint),
+            checked = state.settings.blockWhenTooDark,
+            onCheckedChange = actions.onBlockWhenTooDarkChange,
+            enabled = state.ownerProtectionReady,
+            testTag = BLOCK_WHEN_DARK_TAG,
+        )
+        SwitchRow(
+            title = stringResource(R.string.low_light_assist),
+            subtitle = stringResource(R.string.low_light_assist_hint),
+            checked = state.settings.lowLightAssist,
+            onCheckedChange = actions.onLowLightAssistChange,
+            enabled = state.ownerProtectionReady,
         )
         if (state.ownerEnrolled) {
             NavigationRow(

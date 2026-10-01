@@ -188,7 +188,7 @@ class PrivacyViewModelTest {
     fun `owner protection needs a face set up first`() = runTest(dispatcher) {
         viewModel.setOwnerProtection(true)
         advanceUntilIdle()
-        assertEquals(PrivacyEvent.OpenFaceSetup, viewModel.events.first())
+        assertEquals(PrivacyEvent.OpenFaceSetup(), viewModel.events.first())
         assertFalse(repository.state.value.ownerProtection)
     }
 
@@ -246,6 +246,28 @@ class PrivacyViewModelTest {
         advanceUntilIdle()
         assertFalse(ownerFaces.enrolled.value)
         assertFalse(repository.state.value.ownerProtection)
+    }
+
+    @Test
+    fun `adding face samples needs the owner when protected`() = runTest(dispatcher) {
+        ownerFaces.save(listOf(FloatArray(128)))
+        repository.state.value = PrivacySettings(enabled = true, faceDetectionEnabled = true, ownerProtection = true)
+        advanceUntilIdle()
+        viewModel.addFaceSamples()
+        advanceUntilIdle()
+        assertEquals(PrivacyEvent.Authenticate(GatedAction.ADD_FACE_SAMPLES), viewModel.events.first())
+        viewModel.onAuthenticated(GatedAction.ADD_FACE_SAMPLES)
+        advanceUntilIdle()
+        assertEquals(PrivacyEvent.OpenFaceSetup(add = true), viewModel.events.first())
+    }
+
+    @Test
+    fun `low light settings are saved`() = runTest(dispatcher) {
+        viewModel.setBlockWhenTooDark(true)
+        viewModel.setLowLightAssist(true)
+        advanceUntilIdle()
+        assertTrue(repository.state.value.blockWhenTooDark)
+        assertTrue(repository.state.value.lowLightAssist)
     }
 
     @Test

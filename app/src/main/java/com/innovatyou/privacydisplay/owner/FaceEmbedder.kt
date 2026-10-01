@@ -14,6 +14,9 @@ import java.nio.FloatBuffer
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** A face print, or null when the face was too dark, plus the face's brightness (0–255). */
+class FaceSample(val embedding: FloatArray?, val luma: Float)
+
 /**
  * Turns a face into a 128-number face print with the SFace model, entirely on the device.
  * The aligned 112x112 face crop only exists in memory for the duration of the call.
@@ -36,12 +39,27 @@ class FaceEmbedder @Inject constructor(
      * @return L2-normalized face print.
      */
     @Synchronized
-    fun embed(frame: Bitmap, rotationDegrees: Int, landmarks: FloatArray): FloatArray {
+    fun embed(frame: Bitmap, rotationDegrees: Int, landmarks: FloatArray): FloatArray =
+        run(FaceAlignment.toModelInput(alignedPixels(frame, rotationDegrees, landmarks)))
+
+    /**
+     * Like [embed], but first measures how bright the aligned face is and skips the model when it
+     * is darker than [minLuma] (a face print from a near-black image is meaningless).
+     */
+    @Synchronized
+    fun embedIfBright(frame: Bitmap, rotationDegrees: Int, landmarks: FloatArray, minLuma: Float): FaceSample {
+        val pixels = alignedPixels(frame, rotationDegrees, landmarks)
+        val luma = LowLight.meanLuma(pixels)
+        val embedding = if (luma >= minLuma) run(FaceAlignment.toModelInput(pixels)) else null
+        return FaceSample(embedding, luma)
+    }
+
+    private fun alignedPixels(frame: Bitmap, rotationDegrees: Int, landmarks: FloatArray): IntArray {
         val aligned = align(frame, rotationDegrees, landmarks)
         val pixels = IntArray(FaceAlignment.SIZE * FaceAlignment.SIZE)
         aligned.getPixels(pixels, 0, FaceAlignment.SIZE, 0, 0, FaceAlignment.SIZE, FaceAlignment.SIZE)
         aligned.recycle()
-        return run(FaceAlignment.toModelInput(pixels))
+        return pixels
     }
 
     /** Runs the model on an already prepared input (RGB, 0–255, NCHW 1x3x112x112). */

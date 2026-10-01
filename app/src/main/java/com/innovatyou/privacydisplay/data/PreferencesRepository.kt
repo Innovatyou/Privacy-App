@@ -63,6 +63,8 @@ internal object PreferenceKeys {
     val BLUR_STRENGTH = floatPreferencesKey("blur_strength")
     val SHARE_MINUTES = intPreferencesKey("share_minutes")
     val OWNER_PROTECTION = booleanPreferencesKey("owner_protection")
+    val BLOCK_WHEN_TOO_DARK = booleanPreferencesKey("block_when_too_dark")
+    val LOW_LIGHT_ASSIST = booleanPreferencesKey("low_light_assist")
 }
 
 internal fun Preferences.toPrivacySettings(): PrivacySettings {
@@ -87,6 +89,8 @@ internal fun Preferences.toPrivacySettings(): PrivacySettings {
         blurStrength = this[PreferenceKeys.BLUR_STRENGTH] ?: d.blurStrength,
         shareMinutes = this[PreferenceKeys.SHARE_MINUTES] ?: d.shareMinutes,
         ownerProtection = this[PreferenceKeys.OWNER_PROTECTION] ?: d.ownerProtection,
+        blockWhenTooDark = this[PreferenceKeys.BLOCK_WHEN_TOO_DARK] ?: d.blockWhenTooDark,
+        lowLightAssist = this[PreferenceKeys.LOW_LIGHT_ASSIST] ?: d.lowLightAssist,
     ).sanitized()
 }
 
@@ -110,6 +114,8 @@ internal fun MutablePreferences.writePrivacySettings(s: PrivacySettings) {
     this[PreferenceKeys.BLUR_STRENGTH] = s.blurStrength
     this[PreferenceKeys.SHARE_MINUTES] = s.shareMinutes
     this[PreferenceKeys.OWNER_PROTECTION] = s.ownerProtection
+    this[PreferenceKeys.BLOCK_WHEN_TOO_DARK] = s.blockWhenTooDark
+    this[PreferenceKeys.LOW_LIGHT_ASSIST] = s.lowLightAssist
 }
 
 private inline fun <reified T : Enum<T>> enumOrDefault(name: String?, default: T): T =

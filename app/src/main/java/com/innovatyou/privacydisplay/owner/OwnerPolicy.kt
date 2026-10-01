@@ -10,12 +10,23 @@ object OwnerPolicy {
         settings.enabled && settings.ownerProtection && enrolled
 
     /**
-     * New lock state after a face check. Seeing the owner unlocks; a confirmed stranger locks,
-     * unless the owner recently unlocked with a fingerprint or PIN ([ownerTrusted]).
+     * New lock state after a face check.
+     * - A confirmed stranger locks, unless the owner recently unlocked with a fingerprint or PIN
+     *   ([ownerTrusted]).
+     * - The owner's face unlocks a locked phone only after a recent blink ([blinked]), so a
+     *   printed photo cannot unlock it.
+     * - Too dark to check: locks only with "block when too dark" ([blockWhenTooDark]).
      */
-    fun nextLocked(locked: Boolean, decision: OwnerDecision, ownerTrusted: Boolean): Boolean = when (decision) {
-        OwnerDecision.OWNER -> false
+    fun nextLocked(
+        locked: Boolean,
+        decision: OwnerDecision,
+        ownerTrusted: Boolean,
+        blockWhenTooDark: Boolean = false,
+        blinked: Boolean = true,
+    ): Boolean = when (decision) {
+        OwnerDecision.OWNER -> locked && !blinked
         OwnerDecision.STRANGER -> if (ownerTrusted) locked else true
+        OwnerDecision.TOO_DARK -> if (blockWhenTooDark && !ownerTrusted) true else locked
         OwnerDecision.UNKNOWN -> locked
     }
 

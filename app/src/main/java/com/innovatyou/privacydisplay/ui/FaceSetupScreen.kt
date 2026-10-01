@@ -79,7 +79,9 @@ fun FaceSetupScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.face_setup_title)) },
+                title = {
+                    Text(stringResource(if (state.adding) R.string.owner_add_samples else R.string.face_setup_title))
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -104,7 +106,7 @@ fun FaceSetupScreen(
                     textAlign = TextAlign.Center,
                 )
                 Text(
-                    stringResource(R.string.face_setup_done_text),
+                    stringResource(if (state.adding) R.string.face_samples_added else R.string.face_setup_done_text),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -146,6 +148,7 @@ private fun instruction(state: FaceSetupState): Int = when {
     state.hint == FaceSetupHint.ONE_FACE_ONLY -> R.string.face_setup_one_face
     state.hint == FaceSetupHint.MOVE_CLOSER -> R.string.face_setup_closer
     state.hint == FaceSetupHint.HOLD_STILL -> R.string.face_setup_hold_still
+    state.hint == FaceSetupHint.TOO_DARK -> R.string.face_setup_too_dark
     state.pose == EnrollmentCollector.Pose.LEFT -> R.string.face_setup_turn_one_side
     state.pose == EnrollmentCollector.Pose.RIGHT -> R.string.face_setup_turn_other_side
     else -> R.string.face_setup_look_straight

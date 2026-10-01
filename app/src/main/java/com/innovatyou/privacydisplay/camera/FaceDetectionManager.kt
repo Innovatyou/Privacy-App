@@ -16,7 +16,11 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
+import androidx.camera.core.Camera
+import com.innovatyou.privacydisplay.owner.BlinkDetector
 import com.innovatyou.privacydisplay.owner.FaceEmbedder
+import com.innovatyou.privacydisplay.owner.LowLight
+import com.innovatyou.privacydisplay.owner.OwnerCheck
 import com.innovatyou.privacydisplay.owner.OwnerMatching
 import com.innovatyou.privacydisplay.owner.OwnerVerifier
 import com.innovatyou.privacydisplay.util.OrientationManager
@@ -52,7 +56,11 @@ class FaceDetectionManager @Inject constructor(
      * @param ownerFacePrint when not null, the main face is also compared with the owner's face
      *   print and [ViewerReport.owner] is filled in.
      */
-    fun viewerReports(minIntervalMs: Long, ownerFacePrint: List<FloatArray>? = null): Flow<ViewerReport> = callbackFlow {
+    fun viewerReports(
+        minIntervalMs: Long,
+        ownerFacePrint: List<FloatArray>? = null,
+        ownerIntervalMs: Long = DEFAULT_OWNER_INTERVAL_MS,
+    ): Flow<ViewerReport> = callbackFlow {
         trySend(ViewerReport(ViewerState.STARTING))
 
         val provider = try {
@@ -77,15 +85,21 @@ class FaceDetectionManager @Inject constructor(
         val executor = Executors.newSingleThreadExecutor()
         val smoother = ViewerStateSmoother()
         val verifier = OwnerVerifier()
+        val blinks = BlinkDetector()
         var lastSide: ViewerSide? = null
+        var lastFaceLuma: Float? = null
+        var camera: Camera? = null
+        var exposureIndex = 0
         val ownerCheck = if (recognize) {
             CameraAnalyzer.OwnerCheckFn { image, landmarks ->
                 val frame = image.toBitmap()
                 try {
-                    OwnerMatching.check(
-                        embedder.embed(frame, image.imageInfo.rotationDegrees, landmarks),
-                        ownerFacePrint.orEmpty(),
+                    val sample = embedder.embedIfBright(
+                        frame, image.imageInfo.rotationDegrees, landmarks, LowLight.MIN_FACE_LUMA,
                     )
+                    val check = sample.embedding?.let { OwnerMatching.check(it, ownerFacePrint.orEmpty()) }
+                        ?: OwnerCheck.TOO_DARK
+                    CameraAnalyzer.OwnerResult(check, sample.luma)
                 } finally {
                     frame.recycle()
                 }
@@ -98,11 +112,37 @@ class FaceDetectionManager @Inject constructor(
             detector = detector,
             minIntervalMs = minIntervalMs,
             ownerCheck = ownerCheck,
-            onResult = { observation, owner ->
+            ownerIntervalMs = ownerIntervalMs,
+            onResult = { observation, owner, stats ->
+                val now = SystemClock.elapsedRealtime()
                 observation.extraViewerSide?.let { lastSide = it }
-                val state = smoother.update(observation, SystemClock.elapsedRealtime())
+                stats.faceLuma?.let { lastFaceLuma = it }
+                if (observation.faceCount == 0) lastFaceLuma = null
+                val state = smoother.update(observation, now)
                 val decision = if (owner != null) verifier.update(owner) else verifier.decision
-                trySend(ViewerReport(state, lastSide.takeIf { state == ViewerState.MULTIPLE_VIEWERS }, decision))
+                blinks.update(stats.eyesOpen, now)
+
+                // Low light: ask the camera for more exposure, and back to normal when bright.
+                camera?.let { cam ->
+                    val exposure = cam.cameraInfo.exposureState
+                    if (exposure.isExposureCompensationSupported) {
+                        val target = LowLight.exposureTarget(stats.frameLuma, exposure.exposureCompensationRange.upper)
+                        if (target != null && target != exposureIndex) {
+                            exposureIndex = target
+                            cam.cameraControl.setExposureCompensationIndex(target)
+                        }
+                    }
+                }
+
+                trySend(
+                    ViewerReport(
+                        state = state,
+                        extraViewerSide = lastSide.takeIf { state == ViewerState.MULTIPLE_VIEWERS },
+                        owner = decision,
+                        recentBlink = blinks.blinkedWithin(BlinkDetector.WINDOW_MS, now),
+                        lowLight = LowLight.isDim(stats.frameLuma, lastFaceLuma),
+                    )
+                )
             },
         )
         val analysis = ImageAnalysis.Builder()
@@ -114,8 +154,9 @@ class FaceDetectionManager @Inject constructor(
 
         val owner = CameraLifecycleOwner()
         try {
-            val camera = provider.bindToLifecycle(owner, CameraSelector.DEFAULT_FRONT_CAMERA, analysis)
-            camera.cameraInfo.cameraState.observe(owner) { state ->
+            val bound = provider.bindToLifecycle(owner, CameraSelector.DEFAULT_FRONT_CAMERA, analysis)
+            camera = bound
+            bound.cameraInfo.cameraState.observe(owner) { state ->
                 // Another app took the camera, or it failed: do not treat this as "no face".
                 if (state.error != null || state.type == CameraState.Type.PENDING_OPEN) {
                     trySend(ViewerReport(ViewerState.UNAVAILABLE))
@@ -181,11 +222,16 @@ class FaceDetectionManager @Inject constructor(
             .setMinFaceSize(0.1f)
             .build()
 
-        /** Same as above plus landmarks, which owner recognition needs to align the face. */
+        const val DEFAULT_OWNER_INTERVAL_MS = 1_000L
+
+        /**
+         * Same as above plus landmarks, which owner recognition needs to align the face, and eye
+         * classification for the blink (liveness) check.
+         */
         val RECOGNITION_OPTIONS: FaceDetectorOptions = FaceDetectorOptions.Builder()
             .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
             .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
-            .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_NONE)
+            .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
             .setContourMode(FaceDetectorOptions.CONTOUR_MODE_NONE)
             .setMinFaceSize(0.1f)
             .build()

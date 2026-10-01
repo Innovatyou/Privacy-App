@@ -58,6 +58,10 @@ data class PrivacySettings(
     val shareMinutes: Int = DEFAULT_SHARE_MINUTES,
     /** Block the phone for anyone whose face is not the owner's (needs a set-up face print). */
     val ownerProtection: Boolean = false,
+    /** Strict mode: block the phone when it is too dark to confirm the owner's face. */
+    val blockWhenTooDark: Boolean = false,
+    /** Light the owner's face with a soft glow around the screen edges in dim rooms. */
+    val lowLightAssist: Boolean = false,
 ) {
     /** Returns a copy with every numeric value clamped to its valid range. */
     fun sanitized(): PrivacySettings = copy(

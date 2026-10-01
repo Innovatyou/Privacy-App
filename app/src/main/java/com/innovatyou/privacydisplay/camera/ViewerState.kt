@@ -48,6 +48,10 @@ data class ViewerReport(
     val extraViewerSide: ViewerSide? = null,
     /** Whether the main face is the owner (only when owner protection is on). */
     val owner: OwnerDecision = OwnerDecision.UNKNOWN,
+    /** The owner blinked recently (liveness check against photos). */
+    val recentBlink: Boolean = false,
+    /** The scene or face is dim: exposure is raised and the optional screen glow can help. */
+    val lowLight: Boolean = false,
 )
 
 object ViewerGeometry {

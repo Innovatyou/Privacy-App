@@ -3,10 +3,10 @@ package com.innovatyou.privacydisplay.owner
 import kotlin.math.sqrt
 
 /** Result of comparing one camera frame with the owner's face print. */
-enum class OwnerCheck { OWNER, STRANGER, UNCLEAR }
+enum class OwnerCheck { OWNER, STRANGER, UNCLEAR, TOO_DARK }
 
 /** Smoothed decision used to lock and unlock the phone. */
-enum class OwnerDecision { OWNER, STRANGER, UNKNOWN }
+enum class OwnerDecision { OWNER, STRANGER, UNKNOWN, TOO_DARK }
 
 object OwnerMatching {
     /**
@@ -51,12 +51,18 @@ object OwnerMatching {
  * Smooths per-frame checks: one clear owner match is enough to recognise the owner, while a
  * stranger must be seen in [strangerConfirmations] checks in a row before the phone locks.
  */
-class OwnerVerifier(private val strangerConfirmations: Int = 2) {
+class OwnerVerifier(
+    private val strangerConfirmations: Int = 2,
+    /** Checks in a row that must be too dark before reporting [OwnerDecision.TOO_DARK]. */
+    private val darkConfirmations: Int = 3,
+) {
     private var strangerStreak = 0
+    private var darkStreak = 0
     var decision: OwnerDecision = OwnerDecision.UNKNOWN
         private set
 
     fun update(check: OwnerCheck): OwnerDecision {
+        if (check != OwnerCheck.TOO_DARK) darkStreak = 0
         decision = when (check) {
             OwnerCheck.OWNER -> {
                 strangerStreak = 0
@@ -65,6 +71,12 @@ class OwnerVerifier(private val strangerConfirmations: Int = 2) {
             OwnerCheck.STRANGER -> {
                 strangerStreak++
                 if (strangerStreak >= strangerConfirmations) OwnerDecision.STRANGER else decision
+            }
+            OwnerCheck.TOO_DARK -> {
+                strangerStreak = 0
+                darkStreak++
+                // Darkness never turns a recognised owner or a confirmed stranger into the other.
+                if (darkStreak >= darkConfirmations) OwnerDecision.TOO_DARK else decision
             }
             OwnerCheck.UNCLEAR -> decision
         }

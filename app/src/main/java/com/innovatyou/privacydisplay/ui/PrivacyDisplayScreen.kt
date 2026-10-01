@@ -41,6 +41,7 @@ import com.innovatyou.privacydisplay.R
 import com.innovatyou.privacydisplay.camera.ViewerState
 import com.innovatyou.privacydisplay.overlay.PrivacyPolicy
 import com.innovatyou.privacydisplay.overlay.ShieldReason
+import com.innovatyou.privacydisplay.owner.OwnerDecision
 import com.innovatyou.privacydisplay.ui.components.InfoCard
 import com.innovatyou.privacydisplay.ui.components.NavigationRow
 import com.innovatyou.privacydisplay.ui.components.PercentSlider
@@ -55,6 +56,7 @@ const val STRENGTH_SLIDER_TAG = "strength_slider"
 const val VIEWING_AREA_SLIDER_TAG = "viewing_area_slider"
 const val EXCLUSIONS_ROW_TAG = "exclusions_row"
 const val START_SHARING_TAG = "start_sharing"
+const val OWNER_STATUS_TAG = "owner_status"
 const val STOP_SHARING_TAG = "stop_sharing"
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -106,6 +108,17 @@ fun PrivacyDisplayScreen(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
             )
+            ownerStatusText(state)?.let {
+                Text(
+                    stringResource(it),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .semantics { liveRegion = LiveRegionMode.Polite }
+                        .testTag(OWNER_STATUS_TAG),
+                )
+            }
             pausedAppText(state)?.let {
                 Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -273,6 +286,19 @@ private fun SharingCard(state: PrivacyUiState, actions: PrivacyActions) {
                 ) { Text(stringResource(if (lend) R.string.lend_phone else R.string.share_screen)) }
             }
         }
+    }
+}
+
+/** Live owner-recognition status, shown while owner protection is running. */
+@StringRes
+internal fun ownerStatusText(state: PrivacyUiState): Int? {
+    if (!state.settings.enabled || !state.ownerProtectionReady || state.sharingUntil != null) return null
+    return when (state.runtime.ownerStatus) {
+        OwnerDecision.OWNER -> R.string.owner_status_recognised
+        OwnerDecision.TOO_DARK ->
+            if (state.settings.blockWhenTooDark) R.string.owner_status_dark_blocking else R.string.owner_status_dark
+        OwnerDecision.STRANGER -> R.string.owner_status_stranger
+        OwnerDecision.UNKNOWN -> R.string.owner_status_checking
     }
 }
 

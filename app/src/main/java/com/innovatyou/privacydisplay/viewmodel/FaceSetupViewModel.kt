@@ -5,7 +5,9 @@ import android.util.Log
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import com.innovatyou.privacydisplay.owner.LowLight
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.vision.common.InputImage
@@ -27,7 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-enum class FaceSetupHint { NO_FACE, ONE_FACE_ONLY, MOVE_CLOSER, HOLD_STILL, FOLLOW_POSE }
+enum class FaceSetupHint { NO_FACE, ONE_FACE_ONLY, MOVE_CLOSER, HOLD_STILL, TOO_DARK, FOLLOW_POSE }
 
 data class FaceSetupState(
     val collected: Int = 0,
@@ -36,6 +38,8 @@ data class FaceSetupState(
     val hint: FaceSetupHint = FaceSetupHint.NO_FACE,
     val saving: Boolean = false,
     val done: Boolean = false,
+    /** Adding samples to an existing face print instead of replacing it. */
+    val adding: Boolean = false,
 )
 
 /**
@@ -48,10 +52,13 @@ class FaceSetupViewModel @Inject constructor(
     private val embedder: FaceEmbedder,
     private val store: OwnerFaceStore,
     private val runtime: PrivacyRuntime,
+    savedState: SavedStateHandle,
 ) : ViewModel() {
 
-    private val collector = EnrollmentCollector()
-    private val _state = MutableStateFlow(FaceSetupState(total = collector.total))
+    /** "Add more samples" mode, for example in the lighting used at night. */
+    private val adding: Boolean = savedState.get<Boolean>(ARG_ADD) ?: false
+    private val collector = if (adding) EnrollmentCollector(straightSamples = 2, sideSamples = 1) else EnrollmentCollector()
+    private val _state = MutableStateFlow(FaceSetupState(total = collector.total, adding = adding))
     val state: StateFlow<FaceSetupState> = _state.asStateFlow()
 
     private val detector = FaceDetection.getClient(
@@ -104,10 +111,16 @@ class FaceSetupViewModel @Inject constructor(
             lastSampleAt = now
 
             val frame = image.toBitmap()
-            val embedding = try {
-                embedder.embed(frame, rotation, landmarks)
+            val sample = try {
+                embedder.embedIfBright(frame, rotation, landmarks, LowLight.MIN_FACE_LUMA)
             } finally {
                 frame.recycle()
+            }
+            val embedding = sample.embedding
+            if (embedding == null) {
+                // Samples must be bright enough to be usable for recognition later.
+                _state.update { it.copy(hint = FaceSetupHint.TOO_DARK) }
+                return
             }
             if (collector.offer(face.headEulerAngleY, embedding)) {
                 _state.update {
@@ -121,7 +134,15 @@ class FaceSetupViewModel @Inject constructor(
     private fun save() {
         _state.update { it.copy(saving = true) }
         viewModelScope.launch {
-            store.save(collector.embeddings())
+            val new = collector.embeddings()
+            val samples = if (adding) {
+                // Keep the original setup and the most recent extra samples.
+                val existing = store.load()
+                existing.take(ORIGINAL_SAMPLES) + (existing.drop(ORIGINAL_SAMPLES) + new).takeLast(MAX_EXTRA_SAMPLES)
+            } else {
+                new
+            }
+            store.save(samples)
             _state.update { it.copy(saving = false, done = true) }
         }
     }
@@ -133,10 +154,14 @@ class FaceSetupViewModel @Inject constructor(
         super.onCleared()
     }
 
-    private companion object {
-        const val TAG = "FaceSetup"
-        const val MIN_FACE_WIDTH = 0.25f
-        const val MAX_PITCH = 20f
-        const val SAMPLE_GAP_MS = 500L
+    companion object {
+        /** Navigation argument: true to add samples to the existing face print. */
+        const val ARG_ADD = "add"
+        private const val ORIGINAL_SAMPLES = 7
+        private const val MAX_EXTRA_SAMPLES = 13
+        private const val TAG = "FaceSetup"
+        private const val MIN_FACE_WIDTH = 0.25f
+        private const val MAX_PITCH = 20f
+        private const val SAMPLE_GAP_MS = 500L
     }
 }

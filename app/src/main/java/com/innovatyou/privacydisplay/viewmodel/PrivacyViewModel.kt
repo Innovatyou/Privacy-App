@@ -51,6 +51,7 @@ enum class GatedAction {
     DISABLE_OWNER_PROTECTION,
     DELETE_FACE,
     SET_UP_FACE_AGAIN,
+    ADD_FACE_SAMPLES,
     START_SHARING,
 }
 
@@ -65,8 +66,8 @@ sealed interface PrivacyEvent {
     /** Ask for the owner's fingerprint or PIN, then call [PrivacyViewModel.onAuthenticated]. */
     data class Authenticate(val action: GatedAction) : PrivacyEvent
 
-    /** Open the face set-up screen. */
-    data object OpenFaceSetup : PrivacyEvent
+    /** Open the face set-up screen; [add] adds samples instead of starting over. */
+    data class OpenFaceSetup(val add: Boolean = false) : PrivacyEvent
 
     /** Owner protection needs a screen lock (PIN, pattern or password) first. */
     data object ScreenLockNeeded : PrivacyEvent
@@ -187,7 +188,7 @@ class PrivacyViewModel @Inject constructor(
         when {
             !permissionManager.hasScreenLock() -> send(PrivacyEvent.ScreenLockNeeded)
             !permissionManager.hasCameraPermission() -> send(PrivacyEvent.RequestCameraPermission)
-            !ownerFaces.enrolled.value -> send(PrivacyEvent.OpenFaceSetup)
+            !ownerFaces.enrolled.value -> send(PrivacyEvent.OpenFaceSetup())
             else -> update { it.copy(ownerProtection = true, faceDetectionEnabled = true) }
         }
     }
@@ -197,9 +198,21 @@ class PrivacyViewModel @Inject constructor(
         when {
             !permissionManager.hasScreenLock() -> send(PrivacyEvent.ScreenLockNeeded)
             !permissionManager.hasCameraPermission() -> send(PrivacyEvent.RequestCameraPermission)
-            !gate(GatedAction.SET_UP_FACE_AGAIN) -> send(PrivacyEvent.OpenFaceSetup)
+            !gate(GatedAction.SET_UP_FACE_AGAIN) -> send(PrivacyEvent.OpenFaceSetup())
         }
     }
+
+    /** Adds samples to the face print, for example in the lighting used at night. Needs the owner. */
+    fun addFaceSamples() {
+        when {
+            !permissionManager.hasCameraPermission() -> send(PrivacyEvent.RequestCameraPermission)
+            !gate(GatedAction.ADD_FACE_SAMPLES) -> send(PrivacyEvent.OpenFaceSetup(add = true))
+        }
+    }
+
+    fun setBlockWhenTooDark(enabled: Boolean) = update { it.copy(blockWhenTooDark = enabled) }
+
+    fun setLowLightAssist(enabled: Boolean) = update { it.copy(lowLightAssist = enabled) }
 
     /** Called when face set-up finished: protection is switched on. */
     fun onFaceSetUp() = update { it.copy(ownerProtection = true, faceDetectionEnabled = true) }
@@ -227,7 +240,8 @@ class PrivacyViewModel @Inject constructor(
                 repository.update { it.copy(ownerProtection = false) }
                 ownerFaces.delete()
             }
-            GatedAction.SET_UP_FACE_AGAIN -> send(PrivacyEvent.OpenFaceSetup)
+            GatedAction.SET_UP_FACE_AGAIN -> send(PrivacyEvent.OpenFaceSetup())
+            GatedAction.ADD_FACE_SAMPLES -> send(PrivacyEvent.OpenFaceSetup(add = true))
             GatedAction.START_SHARING -> controller.startSharing()
         }
     }

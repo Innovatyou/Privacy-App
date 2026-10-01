@@ -3,6 +3,7 @@ package com.innovatyou.privacydisplay.service
 import com.innovatyou.privacydisplay.camera.ViewerSide
 import com.innovatyou.privacydisplay.camera.ViewerState
 import com.innovatyou.privacydisplay.overlay.ShieldReason
+import com.innovatyou.privacydisplay.owner.OwnerDecision
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +25,10 @@ data class PrivacyRuntimeState(
     val shield: ShieldReason? = null,
     /** True when the shield blurs (system blur available) rather than darkens. */
     val shieldBlurs: Boolean = false,
+    /** Live owner-recognition result while owner protection is active. */
+    val ownerStatus: OwnerDecision = OwnerDecision.UNKNOWN,
+    /** The phone is blocked because someone other than the owner was seen. */
+    val blocked: Boolean = false,
 )
 
 @Singleton

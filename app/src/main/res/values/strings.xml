@@ -185,7 +185,7 @@ It is a deterrent, not a replacement for your lock screen: a photo of you could 
     <string name="lend_phone_hint">Let someone else use your phone for a while. You confirm with your fingerprint or PIN.</string>
     <string name="status_blocked">Blocked: someone else is using the phone</string>
     <string name="block_title">This phone is protected</string>
-    <string name="block_text">Only the owner can use it right now.</string>
+    <string name="block_text">Only the owner can use it right now. Owner: look at the screen and blink, or tap Unlock.</string>
     <string name="block_unlock">Unlock</string>
     <string name="block_unlock_description">Unlock with the owner\'s fingerprint or PIN</string>
     <string name="auth_title">Confirm it\'s you</string>
@@ -210,4 +210,17 @@ It is a deterrent, not a replacement for your lock screen: a photo of you could 
     <string name="face_setup_done">Your face is set up</string>
     <string name="face_setup_done_text">Owner protection is on. If someone else uses the phone, it is blocked until you unlock it with your fingerprint or PIN.</string>
     <string name="done">Done</string>
+    <string name="face_setup_too_dark">Too dark. Add a little light, for example from a lamp or the screen.</string>
+    <string name="owner_add_samples">Add more face samples</string>
+    <string name="owner_add_samples_hint">Helps recognition in other lighting, for example your bedroom at night.</string>
+    <string name="face_samples_added">Samples added. Recognition now also uses these conditions.</string>
+    <string name="block_when_too_dark">Block when too dark</string>
+    <string name="block_when_too_dark_hint">If it is too dark to confirm it\'s you for a few seconds, block the phone until you unlock it.</string>
+    <string name="low_light_assist">Low-light screen glow</string>
+    <string name="low_light_assist_hint">In dim rooms, a soft glow around the screen edges lights your face so the camera can see you.</string>
+    <string name="owner_status_recognised">Owner recognised</string>
+    <string name="owner_status_checking">Checking who is using the phone…</string>
+    <string name="owner_status_dark">Too dark to check your face. Not blocking.</string>
+    <string name="owner_status_dark_blocking">Too dark to check your face. The phone will be blocked.</string>
+    <string name="owner_status_stranger">Someone else is using the phone</string>
 </resources>

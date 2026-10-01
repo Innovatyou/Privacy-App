@@ -127,6 +127,27 @@ The app has no internet permission.
   fingerprint or PIN. After you unlock, other faces are ignored until the screen turns off (at
   most 30 minutes).
 
+**Low light and photos.**
+
+- **Darkness check:** the app measures the brightness of each camera frame and of the aligned face.
+  When the face is too dark (average brightness below 50 of 255), it makes no decision instead of
+  guessing, so you are not blocked by mistake. The main screen shows "Too dark to check your face".
+- **Brighter exposure:** in dim rooms the camera's exposure compensation is raised to the maximum,
+  and set back to normal when it is bright again.
+- **Block when too dark** (optional, off by default): if it stays too dark to confirm you for about
+  three checks, the phone is blocked until you unlock it.
+- **Low-light screen glow** (optional): a soft white glow around the screen edges lights your face,
+  like a selfie front-flash.
+- **Add more face samples:** add samples taken in other lighting (for example your bedroom at
+  night) without redoing the setup. Up to 20 samples are kept.
+- **Blink check:** when the phone is blocked, your face only unblocks it after you blink (ML Kit
+  eye-open probabilities: open, closed, open). A printed photo cannot blink. A video still can, so
+  the fingerprint/PIN is the secure way to unlock.
+- **Live status** on the main screen: owner recognised, checking, too dark, or someone else.
+
+In complete darkness no app can recognise a face with a normal camera; that needs infrared
+hardware (as used by some phones' own face unlock), which Android does not let apps use.
+
 **What it cannot do.** This is a deterrent, not a replacement for your lock screen:
 
 1. Android does not give apps access to the phone's own Face Unlock data, so the app keeps its own
