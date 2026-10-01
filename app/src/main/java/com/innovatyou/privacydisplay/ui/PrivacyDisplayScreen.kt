@@ -28,6 +28,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
@@ -52,6 +54,8 @@ import kotlin.math.roundToInt
 const val STRENGTH_SLIDER_TAG = "strength_slider"
 const val VIEWING_AREA_SLIDER_TAG = "viewing_area_slider"
 const val EXCLUSIONS_ROW_TAG = "exclusions_row"
+const val START_SHARING_TAG = "start_sharing"
+const val STOP_SHARING_TAG = "stop_sharing"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -107,6 +111,8 @@ fun PrivacyDisplayScreen(
             }
 
             PrivacyToggle(checked = settings.enabled, onCheckedChange = actions.onPrivacyToggle)
+
+            if (settings.enabled) SharingCard(state, actions)
 
             if (!state.permissions.overlay) {
                 InfoCard(
@@ -224,12 +230,51 @@ fun PrivacyDisplayScreen(
     }
 }
 
+@Composable
+private fun SharingCard(state: PrivacyUiState, actions: PrivacyActions) {
+    val until = state.sharingUntil
+    SettingsCard {
+        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)) {
+            if (until != null) {
+                val time = android.text.format.DateFormat.getTimeFormat(LocalContext.current)
+                    .format(java.util.Date(until))
+                Text(stringResource(R.string.sharing_title), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    stringResource(R.string.sharing_until, time),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                FilledTonalButton(
+                    onClick = actions.onStopSharing,
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .testTag(STOP_SHARING_TAG),
+                ) { Text(stringResource(R.string.resume_privacy)) }
+            } else {
+                Text(stringResource(R.string.share_screen), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    stringResource(R.string.share_screen_hint, state.settings.shareMinutes),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                FilledTonalButton(
+                    onClick = actions.onStartSharing,
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .testTag(START_SHARING_TAG),
+                ) { Text(stringResource(R.string.share_screen)) }
+            }
+        }
+    }
+}
+
 @StringRes
 internal fun statusText(state: PrivacyUiState): Int {
     val runtime = state.runtime
     return when {
         !state.permissions.overlay -> R.string.status_permission_needed
         !state.settings.enabled -> R.string.status_off
+        state.sharingUntil != null -> R.string.sharing_title
         runtime.shield == ShieldReason.TEST -> R.string.status_shield_test
         runtime.shield == ShieldReason.EXTRA_VIEWER ->
             if (runtime.shieldBlurs) R.string.status_shield_blurred else R.string.status_shield_darkened

@@ -155,4 +155,15 @@
     <string name="status_shield_darkened">Screen darkened: additional viewer detected</string>
     <string name="status_shield_away">Screen hidden while no one is looking</string>
     <string name="status_shield_test">Showing the viewer shield</string>
+    <string name="blur_strength_hint">Drag to preview: the shield shows while you adjust it.</string>
+
+    <!-- Share screen -->
+    <string name="share_screen">Share screen</string>
+    <string name="share_screen_description">Share screen: turn privacy off so the other person can see</string>
+    <string name="share_screen_hint">Want someone to look with you? Turns privacy, blur and face detection off for %1$d minutes.</string>
+    <string name="share_duration">Share screen for</string>
+    <string name="minutes_format">%1$d min</string>
+    <string name="sharing_title">Screen shared</string>
+    <string name="sharing_until">Privacy Mode turns back on at %1$s.</string>
+    <string name="resume_privacy">Resume privacy</string>
 </resources>

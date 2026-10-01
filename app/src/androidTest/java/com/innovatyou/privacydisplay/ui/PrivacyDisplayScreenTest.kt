@@ -1,5 +1,8 @@
 package com.innovatyou.privacydisplay.ui
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
@@ -97,6 +100,28 @@ class PrivacyDisplayScreenTest {
         }
         composeRule.onNodeWithTag(EXCLUSIONS_ROW_TAG).performScrollTo().performClick()
         assertEquals(true, opened)
+    }
+
+    @Test
+    fun shareScreenStartsAndStopsSharing() {
+        var started = false
+        var stopped = false
+        var sharingUntil: Long? by mutableStateOf(null)
+        composeRule.setContent {
+            PrivacyDisplayTheme {
+                PrivacyDisplayScreen(
+                    state = state(enabled = true).copy(sharingUntil = sharingUntil),
+                    actions = PrivacyActions(onStartSharing = { started = true }, onStopSharing = { stopped = true }),
+                    onOpenSettings = {},
+                )
+            }
+        }
+        composeRule.onNodeWithTag(START_SHARING_TAG).performScrollTo().performClick()
+        assertEquals(true, started)
+
+        sharingUntil = System.currentTimeMillis() + 60_000
+        composeRule.onNodeWithTag(STOP_SHARING_TAG).performScrollTo().performClick()
+        assertEquals(true, stopped)
     }
 
     @Test

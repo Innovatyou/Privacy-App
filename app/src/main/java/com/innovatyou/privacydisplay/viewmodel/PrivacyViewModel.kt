@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -33,6 +34,8 @@ data class PrivacyUiState(
     /** Highest mask opacity Android allows while keeping touches working. */
     val maxOverlayOpacity: Float = 1f,
     val loaded: Boolean = false,
+    /** Wall-clock time (ms) until which the screen is shared, or null when not sharing. */
+    val sharingUntil: Long? = null,
 )
 
 /** One-off requests from the ViewModel that the UI must carry out. */
@@ -57,8 +60,10 @@ class PrivacyViewModel @Inject constructor(
     private val maxOverlayOpacity = permissionManager.maxOverlayOpacity()
 
     val uiState: StateFlow<PrivacyUiState> =
-        combine(repository.settings, runtime.state, permissions) { settings, runtimeState, perms ->
-            PrivacyUiState(settings, runtimeState, perms, maxOverlayOpacity, loaded = true)
+        combine(
+            repository.settings, runtime.state, permissions, runtime.sharingUntil,
+        ) { settings, runtimeState, perms, sharingUntil ->
+            PrivacyUiState(settings, runtimeState, perms, maxOverlayOpacity, loaded = true, sharingUntil = sharingUntil)
         }.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
@@ -106,7 +111,20 @@ class PrivacyViewModel @Inject constructor(
     fun setThemeMode(mode: ThemeMode) = update { it.copy(themeMode = mode) }
     fun setBlurOnExtraViewer(enabled: Boolean) = update { it.copy(blurOnExtraViewer = enabled) }
     fun setBlurWhenAway(enabled: Boolean) = update { it.copy(blurWhenAway = enabled) }
-    fun setBlurStrength(value: Float) = update { it.copy(blurStrength = value) }
+    /** Saves the blur strength and shows the shield live, so the user sees each step. */
+    fun setBlurStrength(value: Float) {
+        viewModelScope.launch {
+            repository.update { it.copy(blurStrength = value) }
+            if (repository.settings.first().enabled) controller.testShield()
+        }
+    }
+
+    fun setShareMinutes(minutes: Int) = update { it.copy(shareMinutes = minutes) }
+
+    /** Turns privacy off for the share time so another person can look at the screen too. */
+    fun startSharing() = controller.startSharing()
+
+    fun stopSharing() = controller.stopSharing()
 
     /** Shows the viewer shield for a few seconds. Only visible while Privacy Mode is on. */
     fun testShield() = controller.testShield()

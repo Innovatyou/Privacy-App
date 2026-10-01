@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
+import android.text.format.DateFormat
+import java.util.Date
 import android.os.Build
 import android.os.SystemClock
 import android.util.Log
@@ -60,12 +62,15 @@ class PrivacyOverlayService : LifecycleService() {
     @Inject lateinit var orientation: OrientationManager
     @Inject lateinit var permissions: PermissionManager
     @Inject lateinit var blurSupport: BlurSupport
+    @Inject lateinit var controller: PrivacyController
 
     private var overlay: PrivacyOverlayWindow? = null
     private var shieldWindow: BlurShieldWindow? = null
+    private var shareButton: ShareButtonWindow? = null
     private var status: StatusContent? = null
     private var cameraTypeGranted = false
     private var alertShowing = false
+    private val timeFormat by lazy { DateFormat.getTimeFormat(this) }
     private var lastAlertAt = 0L
 
     override fun onCreate() {
@@ -82,12 +87,16 @@ class PrivacyOverlayService : LifecycleService() {
         when (intent?.action) {
             ACTION_DISABLE -> lifecycleScope.launch { repository.update { it.copy(enabled = false) } }
             ACTION_ENABLE -> lifecycleScope.launch { repository.update { it.copy(enabled = true) } }
+            ACTION_SHARE -> controller.startSharing()
+            ACTION_STOP_SHARING -> controller.stopSharing()
         }
         return START_STICKY
     }
 
     override fun onDestroy() {
         hideShield()
+        shareButton?.hide()
+        shareButton = null
         overlay?.hide()
         overlay = null
         notifications.cancelViewerAlert()
@@ -139,10 +148,15 @@ class PrivacyOverlayService : LifecycleService() {
             }
         }.distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, null)
 
+        val sharing: Flow<Boolean> = runtime.sharingUntil.map { it != null }.distinctUntilChanged()
+
         val cameraDecision: Flow<CameraDecision> =
-            combine(settingsFlow, device, pausedForPackage, runtime.appForegroundCount) { s, d, paused, appVisits ->
+            combine(
+                settingsFlow, device, pausedForPackage, runtime.appForegroundCount, sharing,
+            ) { s, d, paused, appVisits, isSharing ->
                 when {
-                    !s.enabled || !s.faceDetectionEnabled || paused != null || !d.screenOn -> CameraDecision.Off
+                    !s.enabled || !s.faceDetectionEnabled || paused != null || !d.screenOn || isSharing ->
+                        CameraDecision.Off
                     s.batterySaver && d.powerSaveMode -> CameraDecision.PausedForBattery
                     !permissions.hasCameraPermission() -> CameraDecision.Unavailable
                     // Retry after the user opens the app, when Android allows camera use again.
@@ -169,9 +183,12 @@ class PrivacyOverlayService : LifecycleService() {
 
         scope.launch {
             combine(
-                settingsFlow, pausedForPackage, viewerReports, blurSupport.availability(), runtime.shieldTest,
-            ) { s, paused, report, blurAvailable, testing ->
-                RenderInput(s, paused, report, blurAvailable, testing)
+                combine(settingsFlow, pausedForPackage, runtime.sharingUntil) { s, p, u -> Triple(s, p, u) },
+                viewerReports,
+                blurSupport.availability(),
+                runtime.shieldTest,
+            ) { (s, paused, sharingUntil), report, blurAvailable, testing ->
+                RenderInput(s, paused, report, blurAvailable, testing, sharingUntil)
             }.collect { render(it) }
         }
     }
@@ -181,7 +198,8 @@ class PrivacyOverlayService : LifecycleService() {
         val pausedForPackage = input.pausedForPackage
         val viewer = input.report.state
         val canDraw = permissions.canDrawOverlays()
-        val show = settings.enabled && pausedForPackage == null && canDraw
+        val sharing = input.sharingUntil != null
+        val show = settings.enabled && pausedForPackage == null && !sharing && canDraw
         val shield = if (show) PrivacyPolicy.shieldReason(settings, viewer, input.shieldTest) else null
         val shieldBlurs = shield != null && input.blurAvailable
         val mask = PrivacyPolicy.shieldedMask(
@@ -199,7 +217,15 @@ class PrivacyOverlayService : LifecycleService() {
         } else {
             overlay?.hide()
         }
-        if (shieldBlurs) showShield(PrivacyPolicy.blurRadiusDp(settings.blurStrength)) else hideShield()
+        if (shieldBlurs) {
+            showShield(
+                PrivacyPolicy.blurRadiusDp(settings.blurStrength),
+                PrivacyPolicy.shieldVeilAlpha(settings.blurStrength),
+            )
+        } else {
+            hideShield()
+        }
+        updateShareButton(show && PrivacyPolicy.offerSharing(settings, viewer, shield))
         val visible = overlay?.isShowing == true
         val pausedLabel = pausedForPackage?.let(::appLabel)
 
@@ -219,13 +245,26 @@ class PrivacyOverlayService : LifecycleService() {
             visible && settings.multipleViewerProtection && viewer == ViewerState.MULTIPLE_VIEWERS,
             input.report.extraViewerSide,
         )
-        updateStatus(statusContent(settings, pausedLabel, input.report, canDraw))
+        updateStatus(statusContent(settings, pausedLabel, input.report, canDraw, input.sharingUntil))
     }
 
-    private fun showShield(radiusDp: Float) {
+    private fun updateShareButton(visible: Boolean) {
+        if (!visible) {
+            shareButton?.hide()
+            return
+        }
+        try {
+            (shareButton ?: ShareButtonWindow(this) { controller.startSharing() }.also { shareButton = it }).show()
+        } catch (e: RuntimeException) {
+            Log.w(TAG, "Could not show the share button", e)
+            shareButton = null
+        }
+    }
+
+    private fun showShield(radiusDp: Float, veilAlpha: Float) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
         try {
-            (shieldWindow ?: BlurShieldWindow(this).also { shieldWindow = it }).show(radiusDp)
+            (shieldWindow ?: BlurShieldWindow(this).also { shieldWindow = it }).show(radiusDp, veilAlpha)
         } catch (e: RuntimeException) {
             Log.w(TAG, "Could not show the viewer shield", e)
             shieldWindow = null
@@ -255,7 +294,14 @@ class PrivacyOverlayService : LifecycleService() {
         pausedLabel: String?,
         report: ViewerReport,
         canDraw: Boolean,
+        sharingUntil: Long?,
     ): StatusContent = when {
+        settings.enabled && sharingUntil != null -> StatusContent(
+            getString(R.string.sharing_title),
+            getString(R.string.sharing_until, timeFormat.format(Date(sharingUntil))),
+            privacyEnabled = true,
+            sharing = true,
+        )
         !settings.enabled -> StatusContent(
             getString(R.string.notif_standby_title), getString(R.string.notif_standby_text), false
         )
@@ -349,6 +395,7 @@ class PrivacyOverlayService : LifecycleService() {
         val report: ViewerReport,
         val blurAvailable: Boolean,
         val shieldTest: Boolean,
+        val sharingUntil: Long?,
     )
 
     private sealed interface CameraDecision {
@@ -361,6 +408,8 @@ class PrivacyOverlayService : LifecycleService() {
     companion object {
         const val ACTION_DISABLE = "com.innovatyou.privacydisplay.action.DISABLE"
         const val ACTION_ENABLE = "com.innovatyou.privacydisplay.action.ENABLE"
+        const val ACTION_SHARE = "com.innovatyou.privacydisplay.action.SHARE"
+        const val ACTION_STOP_SHARING = "com.innovatyou.privacydisplay.action.STOP_SHARING"
         private const val TAG = "PrivacyOverlayService"
 
         /** Time between face detection runs. */

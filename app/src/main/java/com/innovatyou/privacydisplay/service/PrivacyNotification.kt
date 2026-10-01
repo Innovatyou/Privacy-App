@@ -20,7 +20,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /** Content of the persistent service notification. */
-data class StatusContent(val title: String, val text: String, val privacyEnabled: Boolean)
+data class StatusContent(
+    val title: String,
+    val text: String,
+    val privacyEnabled: Boolean,
+    val sharing: Boolean = false,
+)
 
 @Singleton
 class PrivacyNotification @Inject constructor(
@@ -47,7 +52,12 @@ class PrivacyNotification @Inject constructor(
     }
 
     fun buildStatus(content: StatusContent): Notification {
-        val action = if (content.privacyEnabled) {
+        val action = if (content.sharing) {
+            NotificationCompat.Action(
+                0, context.getString(R.string.resume_privacy),
+                servicePendingIntent(PrivacyOverlayService.ACTION_STOP_SHARING, REQUEST_STOP_SHARING),
+            )
+        } else if (content.privacyEnabled) {
             NotificationCompat.Action(
                 0, context.getString(R.string.notif_action_turn_off),
                 servicePendingIntent(PrivacyOverlayService.ACTION_DISABLE, REQUEST_DISABLE),
@@ -86,6 +96,10 @@ class PrivacyNotification @Inject constructor(
             .setContentTitle(context.getString(R.string.alert_title))
             .setContentText(context.getString(alertText(side)))
             .setContentIntent(openAppPendingIntent())
+            .addAction(
+                0, context.getString(R.string.share_screen),
+                servicePendingIntent(PrivacyOverlayService.ACTION_SHARE, REQUEST_SHARE),
+            )
             .setAutoCancel(true)
             .setTimeoutAfter(ALERT_TIMEOUT_MS)
             .setCategory(NotificationCompat.CATEGORY_STATUS)
@@ -129,6 +143,8 @@ class PrivacyNotification @Inject constructor(
         private const val REQUEST_OPEN = 0
         private const val REQUEST_DISABLE = 1
         private const val REQUEST_ENABLE = 2
+        private const val REQUEST_SHARE = 3
+        private const val REQUEST_STOP_SHARING = 4
         private const val ALERT_TIMEOUT_MS = 15_000L
     }
 }

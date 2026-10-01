@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import java.io.IOException
@@ -60,6 +61,7 @@ internal object PreferenceKeys {
     val BLUR_ON_EXTRA_VIEWER = booleanPreferencesKey("blur_on_extra_viewer")
     val BLUR_WHEN_AWAY = booleanPreferencesKey("blur_when_away")
     val BLUR_STRENGTH = floatPreferencesKey("blur_strength")
+    val SHARE_MINUTES = intPreferencesKey("share_minutes")
 }
 
 internal fun Preferences.toPrivacySettings(): PrivacySettings {
@@ -82,6 +84,7 @@ internal fun Preferences.toPrivacySettings(): PrivacySettings {
         blurOnExtraViewer = this[PreferenceKeys.BLUR_ON_EXTRA_VIEWER] ?: d.blurOnExtraViewer,
         blurWhenAway = this[PreferenceKeys.BLUR_WHEN_AWAY] ?: d.blurWhenAway,
         blurStrength = this[PreferenceKeys.BLUR_STRENGTH] ?: d.blurStrength,
+        shareMinutes = this[PreferenceKeys.SHARE_MINUTES] ?: d.shareMinutes,
     ).sanitized()
 }
 
@@ -103,6 +106,7 @@ internal fun MutablePreferences.writePrivacySettings(s: PrivacySettings) {
     this[PreferenceKeys.BLUR_ON_EXTRA_VIEWER] = s.blurOnExtraViewer
     this[PreferenceKeys.BLUR_WHEN_AWAY] = s.blurWhenAway
     this[PreferenceKeys.BLUR_STRENGTH] = s.blurStrength
+    this[PreferenceKeys.SHARE_MINUTES] = s.shareMinutes
 }
 
 private inline fun <reified T : Enum<T>> enumOrDefault(name: String?, default: T): T =

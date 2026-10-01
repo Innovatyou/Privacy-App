@@ -274,6 +274,7 @@ fun SettingsScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ViewerShieldCard(state: PrivacyUiState, actions: PrivacyActions) {
     val settings = state.settings
@@ -296,6 +297,7 @@ private fun ViewerShieldCard(state: PrivacyUiState, actions: PrivacyActions) {
         )
         PercentSlider(
             label = stringResource(R.string.blur_strength),
+            supportingText = stringResource(R.string.blur_strength_hint),
             value = settings.blurStrength,
             onValueChange = actions.onBlurStrengthChange,
             enabled = state.permissions.windowBlur,
@@ -307,6 +309,27 @@ private fun ViewerShieldCard(state: PrivacyUiState, actions: PrivacyActions) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
             )
+        }
+        Text(
+            stringResource(R.string.share_duration),
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+        )
+        SingleChoiceSegmentedButtonRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 4.dp),
+        ) {
+            val options = PrivacySettings.SHARE_MINUTE_OPTIONS
+            options.forEachIndexed { index, minutes ->
+                SegmentedButton(
+                    selected = settings.shareMinutes == minutes,
+                    onClick = { actions.onShareMinutesChange(minutes) },
+                    shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+                ) {
+                    Text(stringResource(R.string.minutes_format, minutes))
+                }
+            }
         }
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
             FilledTonalButton(

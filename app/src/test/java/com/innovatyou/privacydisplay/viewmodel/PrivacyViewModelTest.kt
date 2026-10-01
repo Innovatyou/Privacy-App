@@ -146,6 +146,37 @@ class PrivacyViewModelTest {
     }
 
     @Test
+    fun `dragging the blur slider previews the shield while privacy is on`() = runTest(dispatcher) {
+        viewModel.setBlurStrength(0.5f)
+        advanceUntilIdle()
+        assertEquals(0, controller.shieldTests) // Privacy Mode is off: nothing to preview on.
+
+        repository.state.value = repository.state.value.copy(enabled = true)
+        viewModel.setBlurStrength(0.4f)
+        advanceUntilIdle()
+        assertEquals(0.4f, repository.state.value.blurStrength, 0f)
+        assertEquals(1, controller.shieldTests)
+    }
+
+    @Test
+    fun `sharing the screen can be started and stopped`() = runTest(dispatcher) {
+        viewModel.setShareMinutes(30)
+        advanceUntilIdle()
+        assertEquals(30, repository.state.value.shareMinutes)
+        viewModel.startSharing()
+        assertTrue(controller.sharing)
+        viewModel.stopSharing()
+        assertFalse(controller.sharing)
+    }
+
+    @Test
+    fun `invalid share durations fall back to the default`() = runTest(dispatcher) {
+        viewModel.setShareMinutes(7)
+        advanceUntilIdle()
+        assertEquals(PrivacySettings.DEFAULT_SHARE_MINUTES, repository.state.value.shareMinutes)
+    }
+
+    @Test
     fun `testing the shield goes through the controller`() = runTest(dispatcher) {
         viewModel.testShield()
         assertEquals(1, controller.shieldTests)
@@ -184,6 +215,13 @@ private class FakeController(private val repository: FakeRepository) : PrivacyCo
     var shieldTests = 0
     override fun testShield() {
         shieldTests++
+    }
+    var sharing = false
+    override fun startSharing() {
+        sharing = true
+    }
+    override fun stopSharing() {
+        sharing = false
     }
 }
 

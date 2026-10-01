@@ -30,6 +30,12 @@ interface PrivacyController {
 
     /** Shows the viewer shield for a few seconds so the user can see what it looks like. */
     fun testShield()
+
+    /** Turns privacy off for the "Share screen" time so someone else can look too. */
+    fun startSharing()
+
+    /** Ends sharing early and brings privacy back. */
+    fun stopSharing()
 }
 
 @Singleton
@@ -74,6 +80,26 @@ class ServicePrivacyController @Inject constructor(
     }
 
     private var shieldTestJob: Job? = null
+
+    override fun startSharing() {
+        sharingJob?.cancel()
+        sharingJob = scope.launch {
+            val minutes = repository.settings.first().shareMinutes
+            val durationMs = minutes * 60_000L
+            runtime.setShieldTest(false)
+            runtime.setSharingUntil(System.currentTimeMillis() + durationMs)
+            delay(durationMs)
+            runtime.setSharingUntil(null)
+        }
+    }
+
+    override fun stopSharing() {
+        sharingJob?.cancel()
+        sharingJob = null
+        runtime.setSharingUntil(null)
+    }
+
+    private var sharingJob: Job? = null
 
     private companion object {
         const val TAG = "PrivacyController"

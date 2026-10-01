@@ -108,6 +108,26 @@ class PrivacyPolicyTest {
     }
 
     @Test
+    fun `half strength gives a visibly partial shield`() {
+        val low = PrivacyPolicy.shieldVeilAlpha(0f)
+        val half = PrivacyPolicy.shieldVeilAlpha(0.5f)
+        val full = PrivacyPolicy.shieldVeilAlpha(1f)
+        assertEquals((low + full) / 2f, half, 0.0001f)
+        assertTrue(PrivacyPolicy.blurRadiusDp(0.5f) > PrivacyPolicy.blurRadiusDp(0f))
+        assertTrue(PrivacyPolicy.blurRadiusDp(0.5f) < PrivacyPolicy.blurRadiusDp(1f))
+    }
+
+    @Test
+    fun `sharing is offered while someone else is looking`() {
+        val on = settings.copy(enabled = true)
+        assertTrue(PrivacyPolicy.offerSharing(on, ViewerState.MULTIPLE_VIEWERS, ShieldReason.EXTRA_VIEWER))
+        assertTrue(PrivacyPolicy.offerSharing(on, ViewerState.OFF, ShieldReason.TEST))
+        assertTrue(PrivacyPolicy.offerSharing(on.copy(blurOnExtraViewer = false), ViewerState.MULTIPLE_VIEWERS, null))
+        assertFalse(PrivacyPolicy.offerSharing(on, ViewerState.USER_PRESENT, null))
+        assertFalse(PrivacyPolicy.offerSharing(on, ViewerState.NO_FACE, ShieldReason.NOBODY_LOOKING))
+    }
+
+    @Test
     fun `blur radius grows with strength`() {
         assertTrue(PrivacyPolicy.blurRadiusDp(1f) > PrivacyPolicy.blurRadiusDp(0f))
         assertEquals(PrivacyPolicy.blurRadiusDp(1f), PrivacyPolicy.blurRadiusDp(5f), 0f)

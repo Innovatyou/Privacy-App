@@ -54,6 +54,8 @@ data class PrivacySettings(
     val blurWhenAway: Boolean = false,
     /** Strength of the viewer-shield blur. */
     val blurStrength: Float = 0.6f,
+    /** How long "Share screen" turns privacy off for, in minutes. */
+    val shareMinutes: Int = DEFAULT_SHARE_MINUTES,
 ) {
     /** Returns a copy with every numeric value clamped to its valid range. */
     fun sanitized(): PrivacySettings = copy(
@@ -63,6 +65,7 @@ data class PrivacySettings(
         edgeOpacity = edgeOpacity.coerceIn(0f, 1f),
         gradientWidth = gradientWidth.coerceIn(0f, MAX_GRADIENT_WIDTH),
         blurStrength = blurStrength.coerceIn(0f, 1f),
+        shareMinutes = shareMinutes.takeIf { it in SHARE_MINUTE_OPTIONS } ?: DEFAULT_SHARE_MINUTES,
     )
 
     /** Whether the overlay service needs to keep running (active or waiting for an unlock). */
@@ -71,5 +74,7 @@ data class PrivacySettings(
     companion object {
         const val MIN_CLEAR_AREA = 0.1f
         const val MAX_GRADIENT_WIDTH = 0.5f
+        const val DEFAULT_SHARE_MINUTES = 10
+        val SHARE_MINUTE_OPTIONS = listOf(5, 10, 30)
     }
 }

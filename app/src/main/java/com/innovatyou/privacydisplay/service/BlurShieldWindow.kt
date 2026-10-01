@@ -32,23 +32,27 @@ class BlurShieldWindow(serviceContext: Context) {
 
     val isShowing: Boolean get() = view != null
 
-    fun show(radiusDp: Float) {
+    /**
+     * @param radiusDp blur radius.
+     * @param veilAlpha opacity (0–1) of the frosted veil drawn on top of the blur.
+     */
+    fun show(radiusDp: Float, veilAlpha: Float) {
         val radiusPx = (radiusDp * density).roundToInt()
+        val veil = Color.argb((veilAlpha.coerceIn(0f, 1f) * 255).roundToInt(), VEIL_GREY, VEIL_GREY, VEIL_GREY)
         val current = view
-        if (current == null) {
+        if (current != null && layoutParams.blurBehindRadius != radiusPx) {
+            // Some devices ignore a blur radius changed on a window that is already showing, so
+            // the window is re-added to make the new strength take effect.
+            hide()
+        }
+        val shield = view ?: View(windowContext).also {
             layoutParams.blurBehindRadius = radiusPx
             OverlayWindows.applyScreenSize(windowManager, layoutParams)
-            val shield = View(windowContext).apply {
-                // A light veil makes it obvious that the shield is on.
-                setBackgroundColor(Color.argb(VEIL_ALPHA, 0, 0, 0))
-                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-            }
-            windowManager.addView(shield, layoutParams)
-            view = shield
-        } else if (layoutParams.blurBehindRadius != radiusPx) {
-            layoutParams.blurBehindRadius = radiusPx
-            windowManager.updateViewLayout(current, layoutParams)
+            it.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+            windowManager.addView(it, layoutParams)
+            view = it
         }
+        shield.setBackgroundColor(veil)
     }
 
     fun hide() {
@@ -64,6 +68,6 @@ class BlurShieldWindow(serviceContext: Context) {
     }
 
     private companion object {
-        const val VEIL_ALPHA = 40
+        const val VEIL_GREY = 40
     }
 }

@@ -35,8 +35,13 @@ https://github.com/Innovatyou/Privacy-App/releases/download/latest/PrivacyDispla
 - **Viewer shield (blur)**: while face detection sees someone else looking (to your left, right,
   above or below), the whole screen is blurred with Android 12+ system blur, and the alert says
   which side they are on. It can also blur the screen while nobody is looking. Blur strength is
-  adjustable, and *Test viewer shield* previews it for 5 seconds. On phones without system blur,
+  adjustable (the shield previews live while you drag the slider, with a frosted veil that scales
+  with the strength), and *Test viewer shield* previews it for 5 seconds. On phones without system blur,
   the screen is fully darkened instead.
+- **Share screen**: when you want someone to look with you, tap **Share screen** (a button that
+  appears over the blur when a second face is detected, the alert notification, or the main
+  screen). Privacy, blur and face detection turn off for 5, 10 or 30 minutes, and **Resume
+  privacy** brings them back early.
 - **Apps to ignore**: Privacy Mode turns off by itself while chosen apps are open, and back on
   when you leave them. Open it from the main screen. Google Play Store and the Android package
   installer are ignored by default, because their Install and Update buttons refuse taps while

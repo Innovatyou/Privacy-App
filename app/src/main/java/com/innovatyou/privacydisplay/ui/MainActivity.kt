@@ -115,6 +115,9 @@ private fun PrivacyApp(viewModel: PrivacyViewModel) {
             onBlurWhenAwayChange = viewModel::setBlurWhenAway,
             onBlurStrengthChange = viewModel::setBlurStrength,
             onTestShield = viewModel::testShield,
+            onStartSharing = viewModel::startSharing,
+            onStopSharing = viewModel::stopSharing,
+            onShareMinutesChange = viewModel::setShareMinutes,
             onGrantOverlay = { context.startActivity(PermissionIntents.overlaySettings(context)) },
             onGrantCamera = { cameraPermission.launch(Manifest.permission.CAMERA) },
             onGrantNotifications = {

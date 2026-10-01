@@ -47,5 +47,14 @@ class PrivacyRuntime @Inject constructor() {
         _shieldTest.value = active
     }
 
+    private val _sharingUntil = MutableStateFlow<Long?>(null)
+
+    /** Wall-clock time (ms) until which the screen is shared and privacy is off, or null. */
+    val sharingUntil: StateFlow<Long?> = _sharingUntil.asStateFlow()
+
+    fun setSharingUntil(epochMs: Long?) {
+        _sharingUntil.value = epochMs
+    }
+
     fun onAppForeground() = _appForegroundCount.update { it + 1 }
 }

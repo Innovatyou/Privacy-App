@@ -86,6 +86,20 @@ object PrivacyPolicy {
     /** Blur radius in dp for a 0–1 strength. */
     fun blurRadiusDp(strength: Float): Float = MIN_BLUR_DP + (MAX_BLUR_DP - MIN_BLUR_DP) * strength.coerceIn(0f, 1f)
 
-    private const val MIN_BLUR_DP = 8f
-    private const val MAX_BLUR_DP = 60f
+    /**
+     * Opacity of the frosted veil drawn with the blur. It follows the strength linearly, so the
+     * shield gets visibly stronger step by step even on phones whose system blur is not linear.
+     */
+    fun shieldVeilAlpha(strength: Float): Float =
+        MIN_VEIL + (MAX_VEIL - MIN_VEIL) * strength.coerceIn(0f, 1f)
+
+    /** Whether to offer the "Share screen" button: someone else is looking (or the user is testing). */
+    fun offerSharing(settings: PrivacySettings, viewer: ViewerState, shield: ShieldReason?): Boolean =
+        shield == ShieldReason.TEST || shield == ShieldReason.EXTRA_VIEWER ||
+            (settings.faceDetectionEnabled && settings.multipleViewerProtection && viewer == ViewerState.MULTIPLE_VIEWERS)
+
+    private const val MIN_BLUR_DP = 2f
+    private const val MAX_BLUR_DP = 80f
+    private const val MIN_VEIL = 0.05f
+    private const val MAX_VEIL = 0.55f
 }
