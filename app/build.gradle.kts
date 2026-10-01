@@ -19,9 +19,14 @@ android {
         applicationId = "com.innovatyou.privacydisplay"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "2.3.0"
+        versionCode = 6
+        versionName = "2.4.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            // Phones (arm) and the x86_64 emulator used for UI tests; 32-bit x86 is dropped to
+            // keep the APK smaller, since the face models ship native code for every ABI.
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+        }
     }
 
     signingConfigs {
@@ -70,6 +75,12 @@ android {
     packaging {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
     }
+
+    androidResources {
+        // The face recognition model is read once into memory; storing it uncompressed avoids
+        // inflating 19 MB on every start.
+        noCompress += "onnx"
+    }
 }
 
 kotlin {
@@ -104,7 +115,10 @@ dependencies {
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
     implementation(libs.mlkit.face.detection)
+    implementation(libs.onnxruntime.android)
+    implementation(libs.androidx.biometric)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

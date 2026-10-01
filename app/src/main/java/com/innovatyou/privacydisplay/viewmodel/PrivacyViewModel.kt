@@ -8,6 +8,7 @@ import com.innovatyou.privacydisplay.data.MaskMode
 import com.innovatyou.privacydisplay.data.PreferencesRepository
 import com.innovatyou.privacydisplay.data.PrivacySettings
 import com.innovatyou.privacydisplay.data.ThemeMode
+import com.innovatyou.privacydisplay.owner.OwnerFaceStore
 import com.innovatyou.privacydisplay.service.PrivacyController
 import com.innovatyou.privacydisplay.service.PrivacyRuntime
 import com.innovatyou.privacydisplay.service.PrivacyRuntimeState
@@ -36,7 +37,22 @@ data class PrivacyUiState(
     val loaded: Boolean = false,
     /** Wall-clock time (ms) until which the screen is shared, or null when not sharing. */
     val sharingUntil: Long? = null,
-)
+    /** The owner's face print is set up. */
+    val ownerEnrolled: Boolean = false,
+) {
+    /** Owner protection is switched on and has a face print to compare with. */
+    val ownerProtectionReady: Boolean get() = settings.ownerProtection && ownerEnrolled
+}
+
+/** Actions that weaken owner protection and therefore need the owner's fingerprint or PIN. */
+enum class GatedAction {
+    DISABLE_PRIVACY,
+    DISABLE_FACE_DETECTION,
+    DISABLE_OWNER_PROTECTION,
+    DELETE_FACE,
+    SET_UP_FACE_AGAIN,
+    START_SHARING,
+}
 
 /** One-off requests from the ViewModel that the UI must carry out. */
 sealed interface PrivacyEvent {
@@ -45,6 +61,15 @@ sealed interface PrivacyEvent {
     data object RequestNotificationPermission : PrivacyEvent
     data object ServiceStartFailed : PrivacyEvent
     data object CameraPermissionDenied : PrivacyEvent
+
+    /** Ask for the owner's fingerprint or PIN, then call [PrivacyViewModel.onAuthenticated]. */
+    data class Authenticate(val action: GatedAction) : PrivacyEvent
+
+    /** Open the face set-up screen. */
+    data object OpenFaceSetup : PrivacyEvent
+
+    /** Owner protection needs a screen lock (PIN, pattern or password) first. */
+    data object ScreenLockNeeded : PrivacyEvent
 }
 
 @HiltViewModel
@@ -54,6 +79,7 @@ class PrivacyViewModel @Inject constructor(
     private val permissionManager: PermissionManager,
     private val appsRepository: InstalledAppsRepository,
     runtime: PrivacyRuntime,
+    private val ownerFaces: OwnerFaceStore,
 ) : ViewModel() {
 
     private val permissions = MutableStateFlow(permissionManager.snapshot())
@@ -61,9 +87,12 @@ class PrivacyViewModel @Inject constructor(
 
     val uiState: StateFlow<PrivacyUiState> =
         combine(
-            repository.settings, runtime.state, permissions, runtime.sharingUntil,
-        ) { settings, runtimeState, perms, sharingUntil ->
-            PrivacyUiState(settings, runtimeState, perms, maxOverlayOpacity, loaded = true, sharingUntil = sharingUntil)
+            repository.settings, runtime.state, permissions, runtime.sharingUntil, ownerFaces.enrolled,
+        ) { settings, runtimeState, perms, sharingUntil, enrolled ->
+            PrivacyUiState(
+                settings, runtimeState, perms, maxOverlayOpacity, loaded = true,
+                sharingUntil = sharingUntil, ownerEnrolled = enrolled,
+            )
         }.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
@@ -87,6 +116,7 @@ class PrivacyViewModel @Inject constructor(
     }
 
     fun setPrivacyEnabled(enabled: Boolean) {
+        if (!enabled && gate(GatedAction.DISABLE_PRIVACY)) return
         viewModelScope.launch {
             if (enabled && !permissionManager.canDrawOverlays()) {
                 _events.send(PrivacyEvent.RequestOverlayPermission)
@@ -122,7 +152,9 @@ class PrivacyViewModel @Inject constructor(
     fun setShareMinutes(minutes: Int) = update { it.copy(shareMinutes = minutes) }
 
     /** Turns privacy off for the share time so another person can look at the screen too. */
-    fun startSharing() = controller.startSharing()
+    fun startSharing() {
+        if (!gate(GatedAction.START_SHARING)) controller.startSharing()
+    }
 
     fun stopSharing() = controller.stopSharing()
 
@@ -130,6 +162,7 @@ class PrivacyViewModel @Inject constructor(
     fun testShield() = controller.testShield()
 
     fun setFaceDetection(enabled: Boolean) {
+        if (!enabled && gate(GatedAction.DISABLE_FACE_DETECTION)) return
         if (enabled && !permissionManager.hasCameraPermission()) {
             viewModelScope.launch { _events.send(PrivacyEvent.RequestCameraPermission) }
             return
@@ -139,8 +172,84 @@ class PrivacyViewModel @Inject constructor(
                 faceDetectionEnabled = enabled,
                 // Multiple-viewer protection depends on face detection.
                 multipleViewerProtection = enabled && it.multipleViewerProtection,
+                ownerProtection = enabled && it.ownerProtection,
             )
         }
+    }
+
+    /** Turns owner protection on (after a face is set up) or off (needs the owner). */
+    fun setOwnerProtection(enabled: Boolean) {
+        if (!enabled) {
+            if (gate(GatedAction.DISABLE_OWNER_PROTECTION)) return
+            update { it.copy(ownerProtection = false) }
+            return
+        }
+        when {
+            !permissionManager.hasScreenLock() -> send(PrivacyEvent.ScreenLockNeeded)
+            !permissionManager.hasCameraPermission() -> send(PrivacyEvent.RequestCameraPermission)
+            !ownerFaces.enrolled.value -> send(PrivacyEvent.OpenFaceSetup)
+            else -> update { it.copy(ownerProtection = true, faceDetectionEnabled = true) }
+        }
+    }
+
+    /** Opens face set-up; setting up again replaces the owner, so it needs the owner. */
+    fun setUpFace() {
+        when {
+            !permissionManager.hasScreenLock() -> send(PrivacyEvent.ScreenLockNeeded)
+            !permissionManager.hasCameraPermission() -> send(PrivacyEvent.RequestCameraPermission)
+            !gate(GatedAction.SET_UP_FACE_AGAIN) -> send(PrivacyEvent.OpenFaceSetup)
+        }
+    }
+
+    /** Called when face set-up finished: protection is switched on. */
+    fun onFaceSetUp() = update { it.copy(ownerProtection = true, faceDetectionEnabled = true) }
+
+    fun deleteFace() {
+        if (gate(GatedAction.DELETE_FACE)) return
+        viewModelScope.launch {
+            repository.update { it.copy(ownerProtection = false) }
+            ownerFaces.delete()
+        }
+    }
+
+    /** The owner confirmed with a fingerprint or PIN: carry out the action that needed it. */
+    fun onAuthenticated(action: GatedAction) {
+        controller.ownerAuthenticated()
+        when (action) {
+            GatedAction.DISABLE_PRIVACY -> viewModelScope.launch {
+                if (!controller.setPrivacyEnabled(false)) _events.send(PrivacyEvent.ServiceStartFailed)
+            }
+            GatedAction.DISABLE_FACE_DETECTION -> update {
+                it.copy(faceDetectionEnabled = false, multipleViewerProtection = false, ownerProtection = false)
+            }
+            GatedAction.DISABLE_OWNER_PROTECTION -> update { it.copy(ownerProtection = false) }
+            GatedAction.DELETE_FACE -> viewModelScope.launch {
+                repository.update { it.copy(ownerProtection = false) }
+                ownerFaces.delete()
+            }
+            GatedAction.SET_UP_FACE_AGAIN -> send(PrivacyEvent.OpenFaceSetup)
+            GatedAction.START_SHARING -> controller.startSharing()
+        }
+    }
+
+    /**
+     * Returns true (and asks for the owner's fingerprint or PIN) when owner protection is on, so
+     * the caller must not carry out the action yet.
+     */
+    private fun gate(action: GatedAction): Boolean {
+        val protected = ownerFaces.enrolled.value && lastSettings?.ownerProtection == true
+        if (protected) send(PrivacyEvent.Authenticate(action))
+        return protected
+    }
+
+    private fun send(event: PrivacyEvent) {
+        viewModelScope.launch { _events.send(event) }
+    }
+
+    @Volatile private var lastSettings: PrivacySettings? = null
+
+    init {
+        viewModelScope.launch { repository.settings.collect { lastSettings = it } }
     }
 
     fun onCameraPermissionResult(granted: Boolean) {

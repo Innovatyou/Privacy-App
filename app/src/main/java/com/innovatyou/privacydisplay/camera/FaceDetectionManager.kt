@@ -16,6 +16,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
+import com.innovatyou.privacydisplay.owner.FaceEmbedder
+import com.innovatyou.privacydisplay.owner.OwnerMatching
+import com.innovatyou.privacydisplay.owner.OwnerVerifier
 import com.innovatyou.privacydisplay.util.OrientationManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.Executors
@@ -43,8 +46,13 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 class FaceDetectionManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val orientationManager: OrientationManager,
+    private val embedder: FaceEmbedder,
 ) {
-    fun viewerReports(minIntervalMs: Long): Flow<ViewerReport> = callbackFlow {
+    /**
+     * @param ownerFacePrint when not null, the main face is also compared with the owner's face
+     *   print and [ViewerReport.owner] is filled in.
+     */
+    fun viewerReports(minIntervalMs: Long, ownerFacePrint: List<FloatArray>? = null): Flow<ViewerReport> = callbackFlow {
         trySend(ViewerReport(ViewerState.STARTING))
 
         val provider = try {
@@ -64,19 +72,38 @@ class FaceDetectionManager @Inject constructor(
             return@callbackFlow
         }
 
-        val detector = FaceDetection.getClient(DETECTOR_OPTIONS)
+        val recognize = !ownerFacePrint.isNullOrEmpty()
+        val detector = FaceDetection.getClient(if (recognize) RECOGNITION_OPTIONS else DETECTOR_OPTIONS)
         val executor = Executors.newSingleThreadExecutor()
         val smoother = ViewerStateSmoother()
+        val verifier = OwnerVerifier()
         var lastSide: ViewerSide? = null
+        val ownerCheck = if (recognize) {
+            CameraAnalyzer.OwnerCheckFn { image, landmarks ->
+                val frame = image.toBitmap()
+                try {
+                    OwnerMatching.check(
+                        embedder.embed(frame, image.imageInfo.rotationDegrees, landmarks),
+                        ownerFacePrint.orEmpty(),
+                    )
+                } finally {
+                    frame.recycle()
+                }
+            }
+        } else {
+            null
+        }
+        // Called on the single analysis thread; trySend is thread-safe.
         val analyzer = CameraAnalyzer(
             detector = detector,
             minIntervalMs = minIntervalMs,
-            onResult = { observation ->
+            ownerCheck = ownerCheck,
+            onResult = { observation, owner ->
                 observation.extraViewerSide?.let { lastSide = it }
                 val state = smoother.update(observation, SystemClock.elapsedRealtime())
-                trySend(ViewerReport(state, lastSide.takeIf { state == ViewerState.MULTIPLE_VIEWERS }))
+                val decision = if (owner != null) verifier.update(owner) else verifier.decision
+                trySend(ViewerReport(state, lastSide.takeIf { state == ViewerState.MULTIPLE_VIEWERS }, decision))
             },
-            onError = { Log.w(TAG, "Face detection failed", it) },
         )
         val analysis = ImageAnalysis.Builder()
             .setResolutionSelector(RESOLUTION_SELECTOR)
@@ -151,6 +178,15 @@ class FaceDetectionManager @Inject constructor(
             .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_NONE)
             .setContourMode(FaceDetectorOptions.CONTOUR_MODE_NONE)
             // Small faces too, so people further away (looking over a shoulder) are counted.
+            .setMinFaceSize(0.1f)
+            .build()
+
+        /** Same as above plus landmarks, which owner recognition needs to align the face. */
+        val RECOGNITION_OPTIONS: FaceDetectorOptions = FaceDetectorOptions.Builder()
+            .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+            .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
+            .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_NONE)
+            .setContourMode(FaceDetectorOptions.CONTOUR_MODE_NONE)
             .setMinFaceSize(0.1f)
             .build()
 

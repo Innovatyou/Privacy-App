@@ -56,6 +56,8 @@ data class PrivacySettings(
     val blurStrength: Float = 0.6f,
     /** How long "Share screen" turns privacy off for, in minutes. */
     val shareMinutes: Int = DEFAULT_SHARE_MINUTES,
+    /** Block the phone for anyone whose face is not the owner's (needs a set-up face print). */
+    val ownerProtection: Boolean = false,
 ) {
     /** Returns a copy with every numeric value clamped to its valid range. */
     fun sanitized(): PrivacySettings = copy(
@@ -75,6 +77,6 @@ data class PrivacySettings(
         const val MIN_CLEAR_AREA = 0.1f
         const val MAX_GRADIENT_WIDTH = 0.5f
         const val DEFAULT_SHARE_MINUTES = 10
-        val SHARE_MINUTE_OPTIONS = listOf(5, 10, 30)
+        val SHARE_MINUTE_OPTIONS = listOf(5, 10, 15, 30, 60)
     }
 }

@@ -1,0 +1,8 @@
+Face recognition model: SFace (MobileFaceNet trained with the SFace loss)
+Source: https://github.com/opencv/opencv_zoo/tree/main/models/face_recognition_sface
+Paper: "SFace: Sigmoid-Constrained Hypersphere Loss for Robust Face Recognition", Zhong et al.
+License: Apache License 2.0 (see SFACE_LICENSE.txt)
+
+Modification: the weights of face_recognition_sface_2021dec.onnx were stored as float16 and are
+converted back to float32 when the model is loaded (Cast nodes), to reduce the app size. Graph
+inputs that duplicated initializers were removed.

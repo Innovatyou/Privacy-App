@@ -9,7 +9,10 @@ import android.service.quicksettings.TileService
 import com.innovatyou.privacydisplay.R
 import com.innovatyou.privacydisplay.data.PreferencesRepository
 import com.innovatyou.privacydisplay.ui.MainActivity
+import com.innovatyou.privacydisplay.owner.OwnerFaceStore
+import com.innovatyou.privacydisplay.owner.OwnerPolicy
 import com.innovatyou.privacydisplay.ui.ToggleActivity
+import com.innovatyou.privacydisplay.ui.UnlockActivity
 import com.innovatyou.privacydisplay.util.PermissionManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -26,6 +29,7 @@ class PrivacyTileService : TileService() {
     @Inject lateinit var repository: PreferencesRepository
     @Inject lateinit var controller: PrivacyController
     @Inject lateinit var permissions: PermissionManager
+    @Inject lateinit var ownerFaces: OwnerFaceStore
 
     private val scope = MainScope()
     private var listening: Job? = null
@@ -55,7 +59,13 @@ class PrivacyTileService : TileService() {
             return
         }
         scope.launch {
-            val enable = !repository.settings.first().enabled
+            val settings = repository.settings.first()
+            val enable = !settings.enabled
+            if (!enable && OwnerPolicy.isActive(settings, ownerFaces.enrolled.value)) {
+                // Owner protection: only the owner may turn privacy off.
+                openActivity(UnlockActivity.intent(this@PrivacyTileService, UnlockActivity.Mode.DISABLE), REQUEST_UNLOCK)
+                return@launch
+            }
             updateTile(enable)
             if (!controller.setPrivacyEnabled(enable)) {
                 // Android refused a background service start: hand over to an invisible activity.
@@ -93,5 +103,6 @@ class PrivacyTileService : TileService() {
     private companion object {
         const val REQUEST_MAIN = 10
         const val REQUEST_TOGGLE = 11
+        const val REQUEST_UNLOCK = 12
     }
 }

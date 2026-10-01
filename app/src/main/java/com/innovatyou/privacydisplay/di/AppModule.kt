@@ -10,6 +10,8 @@ import com.innovatyou.privacydisplay.data.InstalledAppsRepository
 import com.innovatyou.privacydisplay.data.PackageManagerAppsRepository
 import com.innovatyou.privacydisplay.data.PreferencesRepository
 import com.innovatyou.privacydisplay.data.RecommendedExclusions
+import com.innovatyou.privacydisplay.owner.KeystoreOwnerFaceStore
+import com.innovatyou.privacydisplay.owner.OwnerFaceStore
 import com.innovatyou.privacydisplay.service.PrivacyController
 import com.innovatyou.privacydisplay.service.ServicePrivacyController
 import com.innovatyou.privacydisplay.util.AndroidPermissionManager
@@ -66,4 +68,7 @@ abstract class BindingsModule {
 
     @Binds
     abstract fun bindInstalledAppsRepository(impl: PackageManagerAppsRepository): InstalledAppsRepository
+
+    @Binds
+    abstract fun bindOwnerFaceStore(impl: KeystoreOwnerFaceStore): OwnerFaceStore
 }

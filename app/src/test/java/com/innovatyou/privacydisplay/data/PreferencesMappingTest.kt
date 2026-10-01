@@ -33,6 +33,7 @@ class PreferencesMappingTest {
             blurWhenAway = true,
             blurStrength = 0.25f,
             shareMinutes = 30,
+            ownerProtection = true,
         )
         val prefs = mutablePreferencesOf()
         prefs.writePrivacySettings(settings)

@@ -56,5 +56,44 @@ class PrivacyRuntime @Inject constructor() {
         _sharingUntil.value = epochMs
     }
 
+    private val _locked = MutableStateFlow(false)
+
+    /** True while the phone is blocked because a face other than the owner's was seen. */
+    val locked: StateFlow<Boolean> = _locked.asStateFlow()
+
+    fun setLocked(locked: Boolean) {
+        _locked.value = locked
+    }
+
+    private val _ownerTrustedUntil = MutableStateFlow<Long?>(null)
+
+    /**
+     * After the owner unlocks with a fingerprint or PIN, strangers are ignored until this time
+     * (elapsed realtime) or until the screen turns off.
+     */
+    val ownerTrustedUntil: StateFlow<Long?> = _ownerTrustedUntil.asStateFlow()
+
+    fun setOwnerTrustedUntil(elapsedMs: Long?) {
+        _ownerTrustedUntil.value = elapsedMs
+    }
+
+    private val _cameraBusy = MutableStateFlow(false)
+
+    /** True while the app's own screens use the camera (face setup), so the service lets go of it. */
+    val cameraBusy: StateFlow<Boolean> = _cameraBusy.asStateFlow()
+
+    fun setCameraBusy(busy: Boolean) {
+        _cameraBusy.value = busy
+    }
+
+    private val _unlockScreenOpen = MutableStateFlow(false)
+
+    /** True while the fingerprint/PIN screen is open, so the block screen does not cover it. */
+    val unlockScreenOpen: StateFlow<Boolean> = _unlockScreenOpen.asStateFlow()
+
+    fun setUnlockScreenOpen(open: Boolean) {
+        _unlockScreenOpen.value = open
+    }
+
     fun onAppForeground() = _appForegroundCount.update { it + 1 }
 }

@@ -6,6 +6,7 @@ import com.innovatyou.privacydisplay.data.MaskMode
 import com.innovatyou.privacydisplay.data.PreferencesRepository
 import com.innovatyou.privacydisplay.data.PrivacySettings
 import com.innovatyou.privacydisplay.data.RecommendedExclusions
+import com.innovatyou.privacydisplay.owner.OwnerFaceStore
 import com.innovatyou.privacydisplay.service.PrivacyController
 import com.innovatyou.privacydisplay.service.PrivacyRuntime
 import com.innovatyou.privacydisplay.util.PermissionManager
@@ -33,12 +34,13 @@ class PrivacyViewModelTest {
     private val repository = FakeRepository()
     private val controller = FakeController(repository)
     private val permissions = FakePermissions()
+    private val ownerFaces = FakeOwnerFaceStore()
     private lateinit var viewModel: PrivacyViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        viewModel = PrivacyViewModel(repository, controller, permissions, FakeApps(), PrivacyRuntime())
+        viewModel = PrivacyViewModel(repository, controller, permissions, FakeApps(), PrivacyRuntime(), ownerFaces)
     }
 
     @After
@@ -183,6 +185,70 @@ class PrivacyViewModelTest {
     }
 
     @Test
+    fun `owner protection needs a face set up first`() = runTest(dispatcher) {
+        viewModel.setOwnerProtection(true)
+        advanceUntilIdle()
+        assertEquals(PrivacyEvent.OpenFaceSetup, viewModel.events.first())
+        assertFalse(repository.state.value.ownerProtection)
+    }
+
+    @Test
+    fun `owner protection needs a screen lock`() = runTest(dispatcher) {
+        permissions.screenLock = false
+        viewModel.setOwnerProtection(true)
+        advanceUntilIdle()
+        assertEquals(PrivacyEvent.ScreenLockNeeded, viewModel.events.first())
+    }
+
+    @Test
+    fun `finishing face setup turns protection on`() = runTest(dispatcher) {
+        ownerFaces.save(listOf(FloatArray(128)))
+        viewModel.onFaceSetUp()
+        advanceUntilIdle()
+        assertTrue(repository.state.value.ownerProtection)
+        assertTrue(repository.state.value.faceDetectionEnabled)
+    }
+
+    @Test
+    fun `with owner protection turning privacy off asks for the owner`() = runTest(dispatcher) {
+        ownerFaces.save(listOf(FloatArray(128)))
+        repository.state.value = PrivacySettings(enabled = true, faceDetectionEnabled = true, ownerProtection = true)
+        advanceUntilIdle()
+
+        viewModel.setPrivacyEnabled(false)
+        advanceUntilIdle()
+        assertEquals(PrivacyEvent.Authenticate(GatedAction.DISABLE_PRIVACY), viewModel.events.first())
+        assertTrue(controller.calls.isEmpty())
+
+        viewModel.onAuthenticated(GatedAction.DISABLE_PRIVACY)
+        advanceUntilIdle()
+        assertEquals(listOf(false), controller.calls)
+        assertEquals(1, controller.ownerConfirmations)
+    }
+
+    @Test
+    fun `with owner protection lending and deleting the face need the owner`() = runTest(dispatcher) {
+        ownerFaces.save(listOf(FloatArray(128)))
+        repository.state.value = PrivacySettings(enabled = true, faceDetectionEnabled = true, ownerProtection = true)
+        advanceUntilIdle()
+
+        viewModel.startSharing()
+        advanceUntilIdle()
+        assertEquals(PrivacyEvent.Authenticate(GatedAction.START_SHARING), viewModel.events.first())
+        assertFalse(controller.sharing)
+
+        viewModel.deleteFace()
+        advanceUntilIdle()
+        assertEquals(PrivacyEvent.Authenticate(GatedAction.DELETE_FACE), viewModel.events.first())
+        assertTrue(ownerFaces.enrolled.value)
+
+        viewModel.onAuthenticated(GatedAction.DELETE_FACE)
+        advanceUntilIdle()
+        assertFalse(ownerFaces.enrolled.value)
+        assertFalse(repository.state.value.ownerProtection)
+    }
+
+    @Test
     fun `installed apps are loaded once`() = runTest(dispatcher) {
         viewModel.loadApps()
         advanceUntilIdle()
@@ -217,8 +283,12 @@ private class FakeController(private val repository: FakeRepository) : PrivacyCo
         shieldTests++
     }
     var sharing = false
-    override fun startSharing() {
+    override fun startSharing(minutes: Int?) {
         sharing = true
+    }
+    var ownerConfirmations = 0
+    override fun ownerAuthenticated() {
+        ownerConfirmations++
     }
     override fun stopSharing() {
         sharing = false
@@ -234,7 +304,23 @@ private class FakePermissions : PermissionManager {
     override fun hasUsageAccess() = false
     override fun hasFrontCamera() = true
     override fun supportsWindowBlur() = true
+    var screenLock = true
+    override fun hasScreenLock() = screenLock
     override fun maxOverlayOpacity() = 0.8f
+}
+
+private class FakeOwnerFaceStore : OwnerFaceStore {
+    override val enrolled = MutableStateFlow(false)
+    var saved: List<FloatArray> = emptyList()
+    override suspend fun save(embeddings: List<FloatArray>) {
+        saved = embeddings
+        enrolled.value = true
+    }
+    override suspend fun load() = saved
+    override suspend fun delete() {
+        saved = emptyList()
+        enrolled.value = false
+    }
 }
 
 private class FakeApps : InstalledAppsRepository {

@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Process
 import android.provider.Settings
 import androidx.core.content.ContextCompat
+import com.innovatyou.privacydisplay.owner.OwnerAuthenticator
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,6 +25,8 @@ data class PermissionState(
     val frontCamera: Boolean = true,
     /** System blur (Android 12+ cross-window blur) is available for the viewer shield. */
     val windowBlur: Boolean = false,
+    /** The phone has a screen lock (needed to unlock owner protection with a fingerprint/PIN). */
+    val screenLock: Boolean = false,
 )
 
 interface PermissionManager {
@@ -33,6 +36,7 @@ interface PermissionManager {
     fun hasUsageAccess(): Boolean
     fun hasFrontCamera(): Boolean
     fun supportsWindowBlur(): Boolean
+    fun hasScreenLock(): Boolean
 
     /**
      * The most opaque an overlay may be while still letting touches through to the apps below.
@@ -47,6 +51,7 @@ interface PermissionManager {
         usageAccess = hasUsageAccess(),
         frontCamera = hasFrontCamera(),
         windowBlur = supportsWindowBlur(),
+        screenLock = hasScreenLock(),
     )
 }
 
@@ -87,6 +92,8 @@ class AndroidPermissionManager @Inject constructor(
         context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT)
 
     override fun supportsWindowBlur(): Boolean = blurSupport.isAvailable()
+
+    override fun hasScreenLock(): Boolean = OwnerAuthenticator.isAvailable(context)
 
     override fun maxOverlayOpacity(): Float = maxOverlayOpacity(context)
 

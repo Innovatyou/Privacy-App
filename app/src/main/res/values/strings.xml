@@ -93,7 +93,7 @@
     <string name="perm_overlay_title">Display over other apps</string>
     <string name="perm_overlay_why">Required. Draws the privacy mask on top of the apps you use.</string>
     <string name="perm_camera_title">Camera</string>
-    <string name="perm_camera_why">Optional. Only used for face detection. Frames are processed in memory on this device and never saved or uploaded.</string>
+    <string name="perm_camera_why">Optional. Used for face detection and owner protection. Frames are processed in memory on this device and never saved or uploaded.</string>
     <string name="perm_notifications_title">Notifications</string>
     <string name="perm_notifications_why">Shows that Privacy Mode is active, with a button to turn it off, and alerts you about extra viewers.</string>
     <string name="perm_usage_title">Usage access</string>
@@ -105,7 +105,7 @@
     <string name="about_hardware_title">Hardware vs. software privacy</string>
     <string name="about_hardware">A hardware privacy display uses special display layers that physically narrow the viewing angle. It needs display hardware support.\n\nSoftware privacy, like this app, uses overlays, masking and optional face detection. It makes the screen harder to read from the side, but it cannot change how your display emits light.</string>
     <string name="about_data_title">Your data</string>
-    <string name="about_data">Privacy Display stores only its own settings, on this device. It never uploads camera frames, never saves face images, does not recognise who you are, and never reads your contacts, messages, passwords or screen contents.</string>
+    <string name="about_data">Privacy Display stores only its own settings, on this device. It never uploads camera frames, never saves face images or videos, and never reads your contacts, messages, passwords or screen contents. Face recognition only runs if you turn on owner protection: your face print (numbers, not a photo) is then stored encrypted on this phone and you can delete it at any time.</string>
 
     <!-- App exclusions -->
     <string name="exclusions_title">Apps to ignore</string>
@@ -166,4 +166,48 @@
     <string name="sharing_title">Screen shared</string>
     <string name="sharing_until">Privacy Mode turns back on at %1$s.</string>
     <string name="resume_privacy">Resume privacy</string>
+
+    <!-- Owner protection -->
+    <string name="section_owner">Owner protection</string>
+    <string name="owner_protection">Block other people</string>
+    <string name="owner_protection_hint">Blocks the phone when someone other than you is using it.</string>
+    <string name="owner_not_set_up">Set up your face first.</string>
+    <string name="owner_setup">Set up my face</string>
+    <string name="owner_setup_again">Set up my face again</string>
+    <string name="owner_delete">Delete my face data</string>
+    <string name="owner_explainer_title">How owner protection works</string>
+    <string name="owner_explainer">The front camera checks whether the person using the phone is you. If not, the screen goes black and taps are blocked until you unlock with your fingerprint or PIN.
+
+It is a deterrent, not a replacement for your lock screen: a photo of you could fool it, it may not recognise you in the dark, and it cannot stop someone from opening Android Settings. It also uses the camera whenever the screen is on, which uses more battery.</string>
+    <string name="screen_lock_needed">Set a screen lock (PIN, pattern or password) first, so you can always unlock with it.</string>
+    <string name="open_security_settings">Open security settings</string>
+    <string name="lend_phone">Lend phone</string>
+    <string name="lend_phone_hint">Let someone else use your phone for a while. You confirm with your fingerprint or PIN.</string>
+    <string name="status_blocked">Blocked: someone else is using the phone</string>
+    <string name="block_title">This phone is protected</string>
+    <string name="block_text">Only the owner can use it right now.</string>
+    <string name="block_unlock">Unlock</string>
+    <string name="block_unlock_description">Unlock with the owner\'s fingerprint or PIN</string>
+    <string name="auth_title">Confirm it\'s you</string>
+    <string name="auth_subtitle_unlock">Unlock this phone</string>
+    <string name="auth_subtitle_disable">Turn off Privacy Mode</string>
+    <string name="auth_subtitle_share">Let someone else use the phone</string>
+    <string name="auth_subtitle_settings">Change owner protection</string>
+    <string name="lend_title">Lend your phone?</string>
+    <string name="lend_text">Privacy Mode and owner protection turn off for the time you choose, then come back on by themselves.</string>
+    <string name="lend_for_minutes">Lend for %1$d minutes</string>
+    <string name="its_me">It\'s me, just unlock</string>
+    <string name="face_setup_title">Set up your face</string>
+    <string name="face_setup_look_straight">Look straight at the screen</string>
+    <string name="face_setup_turn_one_side">Turn your head slightly to one side</string>
+    <string name="face_setup_turn_other_side">Now turn slightly to the other side</string>
+    <string name="face_setup_no_face">Place your face in the circle</string>
+    <string name="face_setup_one_face">Make sure only your face is in view</string>
+    <string name="face_setup_closer">Move a little closer</string>
+    <string name="face_setup_hold_still">Hold still and look at the screen</string>
+    <string name="face_setup_saving">Saving…</string>
+    <string name="face_setup_privacy">No photos are saved. Only a face print (numbers) is stored, encrypted, on this phone.</string>
+    <string name="face_setup_done">Your face is set up</string>
+    <string name="face_setup_done_text">Owner protection is on. If someone else uses the phone, it is blocked until you unlock it with your fingerprint or PIN.</string>
+    <string name="done">Done</string>
 </resources>

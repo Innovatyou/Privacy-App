@@ -1,6 +1,7 @@
 package com.innovatyou.privacydisplay.service
 
 import android.content.Context
+import android.os.SystemClock
 import android.util.Log
 import androidx.core.content.ContextCompat
 import com.innovatyou.privacydisplay.data.PreferencesRepository
@@ -31,11 +32,17 @@ interface PrivacyController {
     /** Shows the viewer shield for a few seconds so the user can see what it looks like. */
     fun testShield()
 
-    /** Turns privacy off for the "Share screen" time so someone else can look too. */
-    fun startSharing()
+    /**
+     * Turns privacy off so someone else can look at or use the phone.
+     * @param minutes how long; the "Share screen for" setting when null.
+     */
+    fun startSharing(minutes: Int? = null)
 
     /** Ends sharing early and brings privacy back. */
     fun stopSharing()
+
+    /** The owner confirmed with a fingerprint or PIN: unblock and trust the current user for a while. */
+    fun ownerAuthenticated()
 }
 
 @Singleton
@@ -81,16 +88,21 @@ class ServicePrivacyController @Inject constructor(
 
     private var shieldTestJob: Job? = null
 
-    override fun startSharing() {
+    override fun startSharing(minutes: Int?) {
         sharingJob?.cancel()
         sharingJob = scope.launch {
-            val minutes = repository.settings.first().shareMinutes
-            val durationMs = minutes * 60_000L
+            val durationMs = (minutes ?: repository.settings.first().shareMinutes) * 60_000L
             runtime.setShieldTest(false)
+            runtime.setLocked(false)
             runtime.setSharingUntil(System.currentTimeMillis() + durationMs)
             delay(durationMs)
             runtime.setSharingUntil(null)
         }
+    }
+
+    override fun ownerAuthenticated() {
+        runtime.setLocked(false)
+        runtime.setOwnerTrustedUntil(SystemClock.elapsedRealtime() + OWNER_TRUST_MS)
     }
 
     override fun stopSharing() {
@@ -104,5 +116,6 @@ class ServicePrivacyController @Inject constructor(
     private companion object {
         const val TAG = "PrivacyController"
         const val SHIELD_TEST_MS = 5_000L
+        const val OWNER_TRUST_MS = 30 * 60_000L
     }
 }

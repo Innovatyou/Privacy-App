@@ -50,8 +50,8 @@ class ViewerStateSmootherTest {
 
     @Test
     fun `facing check uses the head angles`() {
-        assertEquals(true, CameraAnalyzer.isFacing(10f, -5f))
-        assertEquals(false, CameraAnalyzer.isFacing(45f, 0f))
-        assertEquals(false, CameraAnalyzer.isFacing(0f, -40f))
+        assertEquals(true, isFacing(10f, -5f))
+        assertEquals(false, isFacing(45f, 0f))
+        assertEquals(false, isFacing(0f, -40f))
     }
 }

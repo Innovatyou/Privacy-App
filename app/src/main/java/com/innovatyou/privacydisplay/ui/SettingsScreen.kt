@@ -55,6 +55,8 @@ import com.innovatyou.privacydisplay.viewmodel.PrivacyUiState
 fun maskModeTag(mode: MaskMode) = "mask_mode_${mode.name}"
 
 const val BLUR_EXTRA_VIEWER_TAG = "blur_extra_viewer"
+const val OWNER_PROTECTION_TAG = "owner_protection"
+const val SET_UP_FACE_TAG = "set_up_face"
 const val TEST_SHIELD_TAG = "test_shield"
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -177,6 +179,15 @@ fun SettingsScreen(
                 icon = Icons.Filled.Face,
             )
 
+            SectionHeader(stringResource(R.string.section_owner))
+            OwnerProtectionCard(state, actions)
+            Spacer(Modifier.height(12.dp))
+            InfoCard(
+                title = stringResource(R.string.owner_explainer_title),
+                text = stringResource(R.string.owner_explainer),
+                icon = Icons.Filled.Lock,
+            )
+
             SectionHeader(stringResource(R.string.section_automation))
             SettingsCard {
                 SwitchRow(
@@ -270,6 +281,46 @@ fun SettingsScreen(
                 icon = Icons.Filled.Face,
             )
             Spacer(Modifier.height(32.dp))
+        }
+    }
+}
+
+@Composable
+private fun OwnerProtectionCard(state: PrivacyUiState, actions: PrivacyActions) {
+    SettingsCard {
+        SwitchRow(
+            title = stringResource(R.string.owner_protection),
+            subtitle = stringResource(
+                if (state.ownerEnrolled) R.string.owner_protection_hint else R.string.owner_not_set_up
+            ),
+            checked = state.ownerProtectionReady,
+            onCheckedChange = actions.onOwnerProtectionChange,
+            testTag = OWNER_PROTECTION_TAG,
+        )
+        if (!state.permissions.screenLock) {
+            Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
+                Text(
+                    stringResource(R.string.screen_lock_needed),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                )
+                FilledTonalButton(onClick = actions.onOpenSecuritySettings, modifier = Modifier.padding(top = 8.dp)) {
+                    Text(stringResource(R.string.open_security_settings))
+                }
+            }
+        }
+        NavigationRow(
+            title = stringResource(if (state.ownerEnrolled) R.string.owner_setup_again else R.string.owner_setup),
+            subtitle = stringResource(R.string.face_setup_privacy),
+            onClick = actions.onSetUpFace,
+            testTag = SET_UP_FACE_TAG,
+        )
+        if (state.ownerEnrolled) {
+            NavigationRow(
+                title = stringResource(R.string.owner_delete),
+                subtitle = stringResource(R.string.auth_subtitle_settings),
+                onClick = actions.onDeleteFace,
+            )
         }
     }
 }

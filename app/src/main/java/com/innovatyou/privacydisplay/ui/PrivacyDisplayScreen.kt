@@ -251,9 +251,17 @@ private fun SharingCard(state: PrivacyUiState, actions: PrivacyActions) {
                         .testTag(STOP_SHARING_TAG),
                 ) { Text(stringResource(R.string.resume_privacy)) }
             } else {
-                Text(stringResource(R.string.share_screen), style = MaterialTheme.typography.titleMedium)
+                val lend = state.ownerProtectionReady
                 Text(
-                    stringResource(R.string.share_screen_hint, state.settings.shareMinutes),
+                    stringResource(if (lend) R.string.lend_phone else R.string.share_screen),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    if (lend) {
+                        stringResource(R.string.lend_phone_hint)
+                    } else {
+                        stringResource(R.string.share_screen_hint, state.settings.shareMinutes)
+                    },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -262,7 +270,7 @@ private fun SharingCard(state: PrivacyUiState, actions: PrivacyActions) {
                     modifier = Modifier
                         .padding(top = 8.dp)
                         .testTag(START_SHARING_TAG),
-                ) { Text(stringResource(R.string.share_screen)) }
+                ) { Text(stringResource(if (lend) R.string.lend_phone else R.string.share_screen)) }
             }
         }
     }

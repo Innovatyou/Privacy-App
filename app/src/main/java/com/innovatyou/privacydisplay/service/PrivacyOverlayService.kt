@@ -20,6 +20,9 @@ import com.innovatyou.privacydisplay.camera.ViewerState
 import com.innovatyou.privacydisplay.data.PreferencesRepository
 import com.innovatyou.privacydisplay.data.PrivacySettings
 import com.innovatyou.privacydisplay.overlay.PrivacyPolicy
+import com.innovatyou.privacydisplay.owner.OwnerFaceStore
+import com.innovatyou.privacydisplay.owner.OwnerPolicy
+import com.innovatyou.privacydisplay.ui.UnlockActivity
 import com.innovatyou.privacydisplay.util.BlurSupport
 import com.innovatyou.privacydisplay.util.DeviceState
 import com.innovatyou.privacydisplay.util.DeviceStateMonitor
@@ -37,6 +40,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -63,10 +68,14 @@ class PrivacyOverlayService : LifecycleService() {
     @Inject lateinit var permissions: PermissionManager
     @Inject lateinit var blurSupport: BlurSupport
     @Inject lateinit var controller: PrivacyController
+    @Inject lateinit var ownerFaces: OwnerFaceStore
 
     private var overlay: PrivacyOverlayWindow? = null
     private var shieldWindow: BlurShieldWindow? = null
     private var shareButton: ShareButtonWindow? = null
+    private var blockScreen: BlockScreenWindow? = null
+    /** True while owner protection is active; actions that weaken it then need a fingerprint/PIN. */
+    private var ownerProtected = false
     private var status: StatusContent? = null
     private var cameraTypeGranted = false
     private var alertShowing = false
@@ -85,15 +94,22 @@ class PrivacyOverlayService : LifecycleService() {
         // Must be called promptly after every startForegroundService().
         startInForeground(withCamera = cameraTypeGranted)
         when (intent?.action) {
-            ACTION_DISABLE -> lifecycleScope.launch { repository.update { it.copy(enabled = false) } }
+            ACTION_DISABLE ->
+                if (ownerProtected) {
+                    openUnlock(UnlockActivity.Mode.DISABLE)
+                } else {
+                    lifecycleScope.launch { repository.update { it.copy(enabled = false) } }
+                }
             ACTION_ENABLE -> lifecycleScope.launch { repository.update { it.copy(enabled = true) } }
-            ACTION_SHARE -> controller.startSharing()
+            ACTION_SHARE -> share()
             ACTION_STOP_SHARING -> controller.stopSharing()
         }
         return START_STICKY
     }
 
     override fun onDestroy() {
+        blockScreen?.hide()
+        blockScreen = null
         hideShield()
         shareButton?.hide()
         shareButton = null
@@ -129,6 +145,7 @@ class PrivacyOverlayService : LifecycleService() {
         scope.launch {
             orientation.displayChanges().collect {
                 overlay?.onDisplayChanged()
+                blockScreen?.onDisplayChanged()
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) shieldWindow?.onDisplayChanged()
             }
         }
@@ -149,20 +166,40 @@ class PrivacyOverlayService : LifecycleService() {
         }.distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, null)
 
         val sharing: Flow<Boolean> = runtime.sharingUntil.map { it != null }.distinctUntilChanged()
+        val ownerActive: StateFlow<Boolean> = combine(settingsFlow, ownerFaces.enrolled) { s, enrolled ->
+            OwnerPolicy.isActive(s, enrolled)
+        }.distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, false)
 
+        // Forget a fingerprint/PIN unlock once the screen turns off; leave owner mode cleanly.
+        scope.launch {
+            device.collect { if (!it.screenOn) runtime.setOwnerTrustedUntil(null) }
+        }
+        scope.launch {
+            ownerActive.collect { active ->
+                ownerProtected = active
+                if (!active) runtime.setLocked(false)
+            }
+        }
+
+        val cameraGates = combine(sharing, runtime.cameraBusy, ownerActive) { isSharing, busy, owner ->
+            Triple(isSharing, busy, owner)
+        }
         val cameraDecision: Flow<CameraDecision> =
             combine(
-                settingsFlow, device, pausedForPackage, runtime.appForegroundCount, sharing,
-            ) { s, d, paused, appVisits, isSharing ->
+                settingsFlow, device, pausedForPackage, runtime.appForegroundCount, cameraGates,
+            ) { s, d, paused, appVisits, (isSharing, busy, owner) ->
                 when {
-                    !s.enabled || !s.faceDetectionEnabled || paused != null || !d.screenOn || isSharing ->
-                        CameraDecision.Off
-                    s.batterySaver && d.powerSaveMode -> CameraDecision.PausedForBattery
+                    !s.enabled || !d.screenOn || isSharing || busy -> CameraDecision.Off
+                    // Owner protection keeps checking even in ignored apps and in Battery Saver.
+                    !s.faceDetectionEnabled && !owner -> CameraDecision.Off
+                    paused != null && !owner -> CameraDecision.Off
+                    s.batterySaver && d.powerSaveMode && !owner -> CameraDecision.PausedForBattery
                     !permissions.hasCameraPermission() -> CameraDecision.Unavailable
                     // Retry after the user opens the app, when Android allows camera use again.
                     else -> CameraDecision.Run(
                         intervalMs = if (s.batterySaver) SLOW_ANALYSIS_MS else FAST_ANALYSIS_MS,
                         retryKey = if (cameraTypeGranted) 0 else appVisits,
+                        recognizeOwner = owner,
                     )
                 }
             }.distinctUntilChanged()
@@ -174,26 +211,71 @@ class PrivacyOverlayService : LifecycleService() {
                 CameraDecision.Unavailable -> flowOf(ViewerReport(ViewerState.UNAVAILABLE))
                 is CameraDecision.Run ->
                     if (ensureCameraForegroundType()) {
-                        faceDetection.viewerReports(decision.intervalMs)
+                        flow {
+                            val facePrint = if (decision.recognizeOwner) ownerFaces.load() else null
+                            emitAll(faceDetection.viewerReports(decision.intervalMs, facePrint))
+                        }
                     } else {
                         flowOf(ViewerReport(ViewerState.BLOCKED_IN_BACKGROUND))
                     }
             }
         }
 
+        val ownerInputs = combine(ownerActive, runtime.locked, runtime.unlockScreenOpen, runtime.ownerTrustedUntil) {
+                active, locked, unlockOpen, trustedUntil ->
+            OwnerInput(active, locked, unlockOpen, trustedUntil)
+        }
         scope.launch {
             combine(
                 combine(settingsFlow, pausedForPackage, runtime.sharingUntil) { s, p, u -> Triple(s, p, u) },
                 viewerReports,
-                blurSupport.availability(),
-                runtime.shieldTest,
-            ) { (s, paused, sharingUntil), report, blurAvailable, testing ->
-                RenderInput(s, paused, report, blurAvailable, testing, sharingUntil)
+                combine(blurSupport.availability(), runtime.shieldTest) { blur, test -> blur to test },
+                ownerInputs,
+            ) { (s, paused, sharingUntil), report, (blurAvailable, testing), owner ->
+                RenderInput(s, paused, report, blurAvailable, testing, sharingUntil, owner)
             }.collect { render(it) }
         }
     }
 
+    /** Locks the phone when a stranger is confirmed and shows or hides the block screen. */
+    private fun updateOwnerLock(input: RenderInput) {
+        val owner = input.owner
+        val trusted = owner.trustedUntil != null && SystemClock.elapsedRealtime() < owner.trustedUntil
+        if (owner.active) {
+            val locked = OwnerPolicy.nextLocked(owner.locked, input.report.owner, trusted)
+            if (locked != owner.locked) runtime.setLocked(locked)
+        }
+        val show = permissions.canDrawOverlays() && OwnerPolicy.showBlockScreen(
+            owner.active, owner.locked, input.sharingUntil != null, owner.unlockScreenOpen,
+        )
+        if (show) {
+            try {
+                (blockScreen ?: BlockScreenWindow(this) { openUnlock(UnlockActivity.Mode.UNLOCK) }
+                    .also { blockScreen = it }).show()
+            } catch (e: RuntimeException) {
+                Log.w(TAG, "Could not show the block screen", e)
+                blockScreen = null
+            }
+        } else {
+            blockScreen?.hide()
+        }
+    }
+
+    /** "Share screen": with owner protection, the owner has to confirm first. */
+    private fun share() {
+        if (ownerProtected) openUnlock(UnlockActivity.Mode.SHARE) else controller.startSharing()
+    }
+
+    private fun openUnlock(mode: UnlockActivity.Mode) {
+        try {
+            startActivity(UnlockActivity.intent(this, mode))
+        } catch (e: RuntimeException) {
+            Log.w(TAG, "Could not open the unlock screen", e)
+        }
+    }
+
     private fun render(input: RenderInput) {
+        updateOwnerLock(input)
         val settings = input.settings
         val pausedForPackage = input.pausedForPackage
         val viewer = input.report.state
@@ -254,7 +336,7 @@ class PrivacyOverlayService : LifecycleService() {
             return
         }
         try {
-            (shareButton ?: ShareButtonWindow(this) { controller.startSharing() }.also { shareButton = it }).show()
+            (shareButton ?: ShareButtonWindow(this) { share() }.also { shareButton = it }).show()
         } catch (e: RuntimeException) {
             Log.w(TAG, "Could not show the share button", e)
             shareButton = null
@@ -396,13 +478,21 @@ class PrivacyOverlayService : LifecycleService() {
         val blurAvailable: Boolean,
         val shieldTest: Boolean,
         val sharingUntil: Long?,
+        val owner: OwnerInput,
+    )
+
+    private data class OwnerInput(
+        val active: Boolean,
+        val locked: Boolean,
+        val unlockScreenOpen: Boolean,
+        val trustedUntil: Long?,
     )
 
     private sealed interface CameraDecision {
         data object Off : CameraDecision
         data object PausedForBattery : CameraDecision
         data object Unavailable : CameraDecision
-        data class Run(val intervalMs: Long, val retryKey: Int) : CameraDecision
+        data class Run(val intervalMs: Long, val retryKey: Int, val recognizeOwner: Boolean) : CameraDecision
     }
 
     companion object {

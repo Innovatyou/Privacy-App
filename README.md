@@ -38,6 +38,13 @@ https://github.com/Innovatyou/Privacy-App/releases/download/latest/PrivacyDispla
   adjustable (the shield previews live while you drag the slider, with a frosted veil that scales
   with the strength), and *Test viewer shield* previews it for 5 seconds. On phones without system blur,
   the screen is fully darkened instead.
+- **Owner protection (optional)**: set up your face once in the app. While Privacy Mode is on,
+  the front camera checks whether the person using the phone is you. If someone else is using it,
+  the screen goes black and taps are blocked until you tap **Unlock** and confirm with your
+  fingerprint or PIN. After confirming you can **lend the phone** for 5, 10, 15, 30 or 60 minutes.
+  Turning Privacy Mode off (app, tile or notification), turning face detection or owner
+  protection off, setting up a new face and deleting the face data all need your fingerprint or
+  PIN while owner protection is on.
 - **Share screen**: when you want someone to look with you, tap **Share screen** (a button that
   appears over the blur when a second face is detected, the alert notification, or the main
   screen). Privacy, blur and face detection turn off for 5, 10 or 30 minutes, and **Resume
@@ -99,16 +106,52 @@ These limits apply to every third-party app. The app handles them as follows:
 | `POST_NOTIFICATIONS` | "Privacy Mode is active" notification, *Turn off* button, viewer alerts | Recommended |
 | `CAMERA`, `FOREGROUND_SERVICE_CAMERA` | Optional face detection | Only for face detection |
 | `PACKAGE_USAGE_STATS` (Usage access) | *Apps to ignore*: know which app is open | Only for apps to ignore |
+| `USE_BIOMETRIC` (added by AndroidX Biometric) | Fingerprint/PIN confirmation for owner protection | Install-time only |
 | `RECEIVE_BOOT_COMPLETED` | Restore standby after a reboot when auto-enable is on | Install-time only |
 
 The app has no internet permission.
+
+## Owner protection: how it works and its limits
+
+- Recognition uses **SFace** (a MobileFaceNet model, Apache-2.0, from the OpenCV model zoo) running
+  on the device with ONNX Runtime. ML Kit finds the face and its landmarks, the face is aligned to
+  112x112, and the model turns it into a 128-number face print that is compared with yours (cosine
+  similarity of at least 0.40). A stranger must be seen in two checks in a row before the phone is
+  blocked; seeing you unblocks it.
+- **Setup** records 7 samples: 3 looking straight and 2 turned slightly to each side.
+- **Your face print** is a list of numbers, not a photo. It is encrypted with AES-GCM using a key in
+  the Android Keystore, stored in a no-backup folder, never uploaded, and deleted by
+  *Delete my face data*.
+- **Unlocking** uses Android's own BiometricPrompt (fingerprint, a biometric face unlock, or the
+  screen-lock PIN, pattern or password), so a screen lock is required. The app never sees your
+  fingerprint or PIN. After you unlock, other faces are ignored until the screen turns off (at
+  most 30 minutes).
+
+**What it cannot do.** This is a deterrent, not a replacement for your lock screen:
+
+1. Android does not give apps access to the phone's own Face Unlock data, so the app keeps its own
+   face print.
+2. It uses a normal 2D camera image with no depth sensing or liveness check, so a good photo or
+   video of you can fool it. It can also fail to recognise you in the dark, with sunglasses or a
+   mask, or at steep angles; you then unlock with your fingerprint or PIN.
+3. The block screen cannot cover the notification shade, Quick Settings, Android Settings or the
+   lock screen. Someone can still force-stop the app, revoke "Display over other apps" or restart
+   the phone. No normal app can prevent this.
+4. It needs the camera whenever the screen is on (also in ignored apps and in Battery Saver), which
+   uses more battery.
+5. If you publish the app, Google Play requires you to declare the face data, and some places
+   (for example the EU and Illinois) regulate face data.
+
+For lending the phone safely, Android also has **App pinning**, **Guest users** and, on Android 15,
+**Private space**.
 
 ## Privacy and security
 
 - Camera frames are analysed in memory, one at a time, and closed right away. No photos or videos
   are saved, and nothing is uploaded.
-- Only face *detection* runs (a count and head angle). The app does no facial recognition, identity
-  matching or biometric storage.
+- Without owner protection, only face *detection* runs (a count and head angle). With owner
+  protection on, the app also recognises whether the main face is yours, using an encrypted face
+  print stored only on this phone (see above). No photos or videos are ever saved.
 - The app never reads contacts, messages, passwords or screen contents.
 - Only the app's own settings are stored, on the device (DataStore). Backup is turned off.
 
@@ -176,3 +219,9 @@ debug APK to the `latest` release.
 4. Optional: add the **Privacy Display** tile to Quick Settings.
 
 If you installed the earlier "Privacy Screen" test app, uninstall it. This app replaces it.
+
+## Third-party licences
+
+- SFace face recognition model: Apache License 2.0
+  (`app/src/main/assets/licenses/SFACE_LICENSE.txt`, see `SFACE_NOTICE.txt` for the modification).
+- ONNX Runtime: MIT License. ML Kit, CameraX, Jetpack and Hilt: their respective licences.

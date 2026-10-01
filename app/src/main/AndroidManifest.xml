@@ -65,6 +65,15 @@
             android:taskAffinity=""
             android:theme="@style/Theme.PrivacyDisplay.Translucent" />
 
+        <!-- Fingerprint/PIN confirmation for unblocking, lending the phone or turning privacy off. -->
+        <activity
+            android:name=".ui.UnlockActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:taskAffinity="com.innovatyou.privacydisplay.unlock"
+            android:theme="@style/Theme.PrivacyDisplay" />
+
         <service
             android:name=".service.PrivacyOverlayService"
             android:exported="false"

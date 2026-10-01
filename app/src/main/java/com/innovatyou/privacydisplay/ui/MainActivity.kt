@@ -3,7 +3,11 @@ package com.innovatyou.privacydisplay.ui
 import android.Manifest
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import android.content.Intent
+import android.provider.Settings
+import androidx.fragment.app.FragmentActivity
+import com.innovatyou.privacydisplay.owner.OwnerAuthenticator
+import com.innovatyou.privacydisplay.viewmodel.GatedAction
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -31,7 +35,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     @Inject lateinit var controller: PrivacyController
 
@@ -58,6 +62,7 @@ private object Routes {
     const val HOME = "home"
     const val SETTINGS = "settings"
     const val EXCLUSIONS = "exclusions"
+    const val FACE_SETUP = "face_setup"
 }
 
 @Composable
@@ -79,6 +84,7 @@ private fun PrivacyApp(viewModel: PrivacyViewModel) {
 
     val startFailed = context.getString(R.string.service_start_failed)
     val cameraDenied = context.getString(R.string.camera_denied)
+    val screenLockNeeded = context.getString(R.string.screen_lock_needed)
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
@@ -92,6 +98,25 @@ private fun PrivacyApp(viewModel: PrivacyViewModel) {
                     }
                 PrivacyEvent.ServiceStartFailed -> snackbarHostState.showSnackbar(startFailed)
                 PrivacyEvent.CameraPermissionDenied -> snackbarHostState.showSnackbar(cameraDenied)
+                PrivacyEvent.OpenFaceSetup -> navController.navigate(Routes.FACE_SETUP)
+                PrivacyEvent.ScreenLockNeeded -> {
+                    snackbarHostState.showSnackbar(screenLockNeeded)
+                }
+                is PrivacyEvent.Authenticate ->
+                    if (event.action == GatedAction.START_SHARING) {
+                        // The unlock screen confirms and then lets the owner pick how long to lend.
+                        context.startActivity(UnlockActivity.intent(context, UnlockActivity.Mode.SHARE))
+                    } else {
+                        (context as? FragmentActivity)?.let { activity ->
+                            OwnerAuthenticator.authenticate(
+                                activity = activity,
+                                title = activity.getString(R.string.auth_title),
+                                subtitle = activity.getString(R.string.auth_subtitle_settings),
+                                onSuccess = { viewModel.onAuthenticated(event.action) },
+                                onFailure = {},
+                            )
+                        }
+                    }
             }
         }
     }
@@ -118,6 +143,12 @@ private fun PrivacyApp(viewModel: PrivacyViewModel) {
             onStartSharing = viewModel::startSharing,
             onStopSharing = viewModel::stopSharing,
             onShareMinutesChange = viewModel::setShareMinutes,
+            onOwnerProtectionChange = viewModel::setOwnerProtection,
+            onSetUpFace = viewModel::setUpFace,
+            onDeleteFace = viewModel::deleteFace,
+            onOpenSecuritySettings = {
+                context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            },
             onGrantOverlay = { context.startActivity(PermissionIntents.overlaySettings(context)) },
             onGrantCamera = { cameraPermission.launch(Manifest.permission.CAMERA) },
             onGrantNotifications = {
@@ -147,6 +178,15 @@ private fun PrivacyApp(viewModel: PrivacyViewModel) {
                 actions = actions,
                 onBack = { navController.popBackStack() },
                 onOpenExclusions = { navController.navigate(Routes.EXCLUSIONS) },
+            )
+        }
+        composable(Routes.FACE_SETUP) {
+            FaceSetupRoute(
+                onDone = {
+                    viewModel.onFaceSetUp()
+                    navController.popBackStack()
+                },
+                onBack = { navController.popBackStack() },
             )
         }
         composable(Routes.EXCLUSIONS) {

@@ -1,5 +1,7 @@
 package com.innovatyou.privacydisplay.camera
 
+import com.innovatyou.privacydisplay.owner.OwnerDecision
+
 /** What face detection currently believes about the people looking at the screen. */
 enum class ViewerState {
     /** Face detection is off or not needed right now. */
@@ -44,6 +46,8 @@ data class ViewerReport(
     val state: ViewerState,
     /** Side of the additional viewer while [state] is [ViewerState.MULTIPLE_VIEWERS]. */
     val extraViewerSide: ViewerSide? = null,
+    /** Whether the main face is the owner (only when owner protection is on). */
+    val owner: OwnerDecision = OwnerDecision.UNKNOWN,
 )
 
 object ViewerGeometry {
