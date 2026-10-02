@@ -40,8 +40,8 @@ class ShareButtonWindow(serviceContext: Context, private val onShare: () -> Unit
     fun show() {
         if (view != null) return
         val button = TextView(windowContext).apply {
-            text = context.getString(R.string.share_screen)
-            contentDescription = context.getString(R.string.share_screen_description)
+            text = context.getString(R.string.clear_screen)
+            contentDescription = context.getString(R.string.clear_screen_description)
             setTextColor(BUTTON_TEXT)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
             minHeight = dp(52)

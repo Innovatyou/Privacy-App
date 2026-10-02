@@ -265,7 +265,11 @@ class PrivacyViewModelTest {
     fun `low light settings are saved`() = runTest(dispatcher) {
         viewModel.setBlockWhenTooDark(true)
         viewModel.setLowLightAssist(true)
+        viewModel.setDarkenWhenNobodyLooking(false)
+        viewModel.setPauseEffectsInDark(false)
         advanceUntilIdle()
+        assertFalse(repository.state.value.darkenWhenNobodyLooking)
+        assertFalse(repository.state.value.pauseEffectsInDark)
         assertTrue(repository.state.value.blockWhenTooDark)
         assertTrue(repository.state.value.lowLightAssist)
     }

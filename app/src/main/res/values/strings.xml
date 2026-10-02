@@ -223,4 +223,11 @@ It is a deterrent, not a replacement for your lock screen: a photo of you could 
     <string name="owner_status_dark">Too dark to check your face. Not blocking.</string>
     <string name="owner_status_dark_blocking">Too dark to check your face. The phone will be blocked.</string>
     <string name="owner_status_stranger">Someone else is using the phone</string>
+    <string name="darken_when_nobody_looking">Darken when no one is looking</string>
+    <string name="darken_when_nobody_looking_hint">Makes the mask darker while the camera sees no face or you look away.</string>
+    <string name="pause_effects_in_dark">Pause automatic effects in the dark</string>
+    <string name="pause_effects_in_dark_hint">When it is too dark for the camera to see you, do not darken or blur the screen automatically.</string>
+    <string name="status_too_dark_for_camera">Too dark for the camera. Automatic darkening and blur are paused.</string>
+    <string name="clear_screen">Clear screen</string>
+    <string name="clear_screen_description">Clear screen: turn privacy off for a while</string>
 </resources>

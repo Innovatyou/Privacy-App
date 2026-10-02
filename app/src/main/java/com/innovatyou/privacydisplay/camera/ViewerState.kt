@@ -17,6 +17,9 @@ enum class ViewerState {
     /** No face has been visible for a while. */
     NO_FACE,
 
+    /** No face visible, but it is too dim for the camera to tell whether anyone is there. */
+    TOO_DARK,
+
     /** Two or more faces are visible. */
     MULTIPLE_VIEWERS,
 

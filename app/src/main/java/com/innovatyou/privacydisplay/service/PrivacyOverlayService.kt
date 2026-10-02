@@ -440,6 +440,7 @@ class PrivacyOverlayService : LifecycleService() {
                 null -> R.string.status_additional_viewer
             }
             ViewerState.NO_FACE, ViewerState.LOOKING_AWAY -> R.string.status_no_viewer
+            ViewerState.TOO_DARK -> R.string.status_too_dark_for_camera
             ViewerState.BLOCKED_IN_BACKGROUND -> R.string.face_paused_background
             ViewerState.PAUSED_BATTERY -> R.string.face_paused_battery
             ViewerState.UNAVAILABLE -> R.string.face_unavailable

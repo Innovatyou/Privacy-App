@@ -65,6 +65,8 @@ internal object PreferenceKeys {
     val OWNER_PROTECTION = booleanPreferencesKey("owner_protection")
     val BLOCK_WHEN_TOO_DARK = booleanPreferencesKey("block_when_too_dark")
     val LOW_LIGHT_ASSIST = booleanPreferencesKey("low_light_assist")
+    val DARKEN_WHEN_NOBODY_LOOKING = booleanPreferencesKey("darken_when_nobody_looking")
+    val PAUSE_EFFECTS_IN_DARK = booleanPreferencesKey("pause_effects_in_dark")
 }
 
 internal fun Preferences.toPrivacySettings(): PrivacySettings {
@@ -91,6 +93,8 @@ internal fun Preferences.toPrivacySettings(): PrivacySettings {
         ownerProtection = this[PreferenceKeys.OWNER_PROTECTION] ?: d.ownerProtection,
         blockWhenTooDark = this[PreferenceKeys.BLOCK_WHEN_TOO_DARK] ?: d.blockWhenTooDark,
         lowLightAssist = this[PreferenceKeys.LOW_LIGHT_ASSIST] ?: d.lowLightAssist,
+        darkenWhenNobodyLooking = this[PreferenceKeys.DARKEN_WHEN_NOBODY_LOOKING] ?: d.darkenWhenNobodyLooking,
+        pauseEffectsInDark = this[PreferenceKeys.PAUSE_EFFECTS_IN_DARK] ?: d.pauseEffectsInDark,
     ).sanitized()
 }
 
@@ -116,6 +120,8 @@ internal fun MutablePreferences.writePrivacySettings(s: PrivacySettings) {
     this[PreferenceKeys.OWNER_PROTECTION] = s.ownerProtection
     this[PreferenceKeys.BLOCK_WHEN_TOO_DARK] = s.blockWhenTooDark
     this[PreferenceKeys.LOW_LIGHT_ASSIST] = s.lowLightAssist
+    this[PreferenceKeys.DARKEN_WHEN_NOBODY_LOOKING] = s.darkenWhenNobodyLooking
+    this[PreferenceKeys.PAUSE_EFFECTS_IN_DARK] = s.pauseEffectsInDark
 }
 
 private inline fun <reified T : Enum<T>> enumOrDefault(name: String?, default: T): T =

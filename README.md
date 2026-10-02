@@ -32,6 +32,11 @@ https://github.com/Innovatyou/Privacy-App/releases/download/latest/PrivacyDispla
 - **Multiple-viewer protection (optional)**: when a second face is seen, the mask goes to full
   strength, optionally switches to the narrow window, and a notification says
   *"Privacy Mode: Additional viewer detected."*
+- **Darken when no one is looking** (switch): with face detection on, the mask gets darker while
+  the camera sees no face or you look away. **Pause automatic effects in the dark** (on by
+  default): when it is too dim for the camera, "no face" is not treated as "nobody looking", so the
+  screen is not darkened or blurred in a dark room. Any automatic blur also shows a **Clear screen**
+  button.
 - **Viewer shield (blur)**: while face detection sees someone else looking (to your left, right,
   above or below), the whole screen is blurred with Android 12+ system blur, and the alert says
   which side they are on. It can also blur the screen while nobody is looking. Blur strength is

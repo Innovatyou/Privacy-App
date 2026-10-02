@@ -49,14 +49,26 @@ object PrivacyPolicy {
                         boosted = true,
                     )
                 }
-            ViewerState.NO_FACE, ViewerState.LOOKING_AWAY ->
-                if (base.strength >= NO_VIEWER_STRENGTH) {
+            ViewerState.NO_FACE, ViewerState.LOOKING_AWAY, ViewerState.TOO_DARK ->
+                if (!nobodyLooking(settings, viewer) || !settings.darkenWhenNobodyLooking ||
+                    base.strength >= NO_VIEWER_STRENGTH
+                ) {
                     base
                 } else {
                     base.copy(strength = NO_VIEWER_STRENGTH, boosted = true)
                 }
             else -> base
         }
+    }
+
+    /**
+     * Whether face detection concluded that nobody is looking. "Too dark" only counts when the
+     * user turned off "Pause automatic effects in the dark".
+     */
+    fun nobodyLooking(settings: PrivacySettings, viewer: ViewerState): Boolean = when (viewer) {
+        ViewerState.NO_FACE, ViewerState.LOOKING_AWAY -> true
+        ViewerState.TOO_DARK -> !settings.pauseEffectsInDark
+        else -> false
     }
 
     /**
@@ -70,8 +82,7 @@ object PrivacyPolicy {
         return when {
             viewer == ViewerState.MULTIPLE_VIEWERS &&
                 settings.multipleViewerProtection && settings.blurOnExtraViewer -> ShieldReason.EXTRA_VIEWER
-            (viewer == ViewerState.NO_FACE || viewer == ViewerState.LOOKING_AWAY) &&
-                settings.blurWhenAway -> ShieldReason.NOBODY_LOOKING
+            nobodyLooking(settings, viewer) && settings.blurWhenAway -> ShieldReason.NOBODY_LOOKING
             else -> null
         }
     }
@@ -93,9 +104,12 @@ object PrivacyPolicy {
     fun shieldVeilAlpha(strength: Float): Float =
         MIN_VEIL + (MAX_VEIL - MIN_VEIL) * strength.coerceIn(0f, 1f)
 
-    /** Whether to offer the "Share screen" button: someone else is looking (or the user is testing). */
+    /**
+     * Whether to offer the floating "Clear screen" button: whenever the screen is blurred or
+     * darkened automatically, so the user can always dismiss it.
+     */
     fun offerSharing(settings: PrivacySettings, viewer: ViewerState, shield: ShieldReason?): Boolean =
-        shield == ShieldReason.TEST || shield == ShieldReason.EXTRA_VIEWER ||
+        shield != null ||
             (settings.faceDetectionEnabled && settings.multipleViewerProtection && viewer == ViewerState.MULTIPLE_VIEWERS)
 
     private const val MIN_BLUR_DP = 2f

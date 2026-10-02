@@ -36,6 +36,8 @@ class PreferencesMappingTest {
             ownerProtection = true,
             blockWhenTooDark = true,
             lowLightAssist = true,
+            darkenWhenNobodyLooking = false,
+            pauseEffectsInDark = false,
         )
         val prefs = mutablePreferencesOf()
         prefs.writePrivacySettings(settings)

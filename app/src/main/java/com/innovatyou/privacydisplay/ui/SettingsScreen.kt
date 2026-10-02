@@ -164,6 +164,21 @@ fun SettingsScreen(
                     enabled = settings.faceDetectionEnabled,
                 )
                 SwitchRow(
+                    title = stringResource(R.string.darken_when_nobody_looking),
+                    subtitle = stringResource(R.string.darken_when_nobody_looking_hint),
+                    checked = settings.darkenWhenNobodyLooking,
+                    onCheckedChange = actions.onDarkenWhenNobodyLookingChange,
+                    enabled = settings.faceDetectionEnabled,
+                )
+                SwitchRow(
+                    title = stringResource(R.string.pause_effects_in_dark),
+                    subtitle = stringResource(R.string.pause_effects_in_dark_hint),
+                    checked = settings.pauseEffectsInDark,
+                    onCheckedChange = actions.onPauseEffectsInDarkChange,
+                    enabled = settings.faceDetectionEnabled,
+                    testTag = PAUSE_IN_DARK_TAG,
+                )
+                SwitchRow(
                     title = stringResource(R.string.strongest_mask),
                     subtitle = stringResource(R.string.strongest_mask_hint),
                     checked = settings.strongestMaskOnMultipleViewers,

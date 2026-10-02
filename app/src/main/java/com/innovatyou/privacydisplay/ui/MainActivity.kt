@@ -154,6 +154,8 @@ private fun PrivacyApp(viewModel: PrivacyViewModel) {
             onAddFaceSamples = viewModel::addFaceSamples,
             onBlockWhenTooDarkChange = viewModel::setBlockWhenTooDark,
             onLowLightAssistChange = viewModel::setLowLightAssist,
+            onDarkenWhenNobodyLookingChange = viewModel::setDarkenWhenNobodyLooking,
+            onPauseEffectsInDarkChange = viewModel::setPauseEffectsInDark,
             onOpenSecuritySettings = {
                 context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             },

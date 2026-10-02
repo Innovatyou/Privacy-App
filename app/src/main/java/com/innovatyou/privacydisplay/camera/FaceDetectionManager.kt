@@ -118,7 +118,13 @@ class FaceDetectionManager @Inject constructor(
                 observation.extraViewerSide?.let { lastSide = it }
                 stats.faceLuma?.let { lastFaceLuma = it }
                 if (observation.faceCount == 0) lastFaceLuma = null
-                val state = smoother.update(observation, now)
+                val smoothed = smoother.update(observation, now)
+                // "No face" in a dim scene only means the camera cannot see, not that nobody looks.
+                val state = if (smoothed == ViewerState.NO_FACE && stats.frameLuma < LowLight.DIM_FRAME_LUMA) {
+                    ViewerState.TOO_DARK
+                } else {
+                    smoothed
+                }
                 val decision = if (owner != null) verifier.update(owner) else verifier.decision
                 blinks.update(stats.eyesOpen, now)
 

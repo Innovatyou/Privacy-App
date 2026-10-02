@@ -57,6 +57,8 @@ const val VIEWING_AREA_SLIDER_TAG = "viewing_area_slider"
 const val EXCLUSIONS_ROW_TAG = "exclusions_row"
 const val START_SHARING_TAG = "start_sharing"
 const val OWNER_STATUS_TAG = "owner_status"
+const val DARKEN_NOBODY_TAG = "darken_nobody"
+const val PAUSE_IN_DARK_TAG = "pause_in_dark"
 const val STOP_SHARING_TAG = "stop_sharing"
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -171,6 +173,14 @@ fun PrivacyDisplayScreen(
                     checked = settings.faceDetectionEnabled,
                     onCheckedChange = actions.onFaceDetectionChange,
                     enabled = state.permissions.frontCamera,
+                )
+                SwitchRow(
+                    title = stringResource(R.string.darken_when_nobody_looking),
+                    subtitle = stringResource(R.string.darken_when_nobody_looking_hint),
+                    checked = settings.darkenWhenNobodyLooking,
+                    onCheckedChange = actions.onDarkenWhenNobodyLookingChange,
+                    enabled = settings.faceDetectionEnabled,
+                    testTag = DARKEN_NOBODY_TAG,
                 )
                 SwitchRow(
                     title = stringResource(R.string.blur_on_extra_viewer),
@@ -320,6 +330,7 @@ internal fun statusText(state: PrivacyUiState): Int {
             ViewerState.BLOCKED_IN_BACKGROUND -> R.string.face_paused_background
             ViewerState.PAUSED_BATTERY -> R.string.face_paused_battery
             ViewerState.UNAVAILABLE -> R.string.face_unavailable
+            ViewerState.TOO_DARK -> R.string.status_too_dark_for_camera
             else -> R.string.status_active
         }
         else -> R.string.status_active

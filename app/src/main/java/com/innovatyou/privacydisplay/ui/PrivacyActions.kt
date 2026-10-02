@@ -34,6 +34,8 @@ data class PrivacyActions(
     val onAddFaceSamples: () -> Unit = {},
     val onBlockWhenTooDarkChange: (Boolean) -> Unit = {},
     val onLowLightAssistChange: (Boolean) -> Unit = {},
+    val onDarkenWhenNobodyLookingChange: (Boolean) -> Unit = {},
+    val onPauseEffectsInDarkChange: (Boolean) -> Unit = {},
     val onGrantOverlay: () -> Unit = {},
     val onGrantCamera: () -> Unit = {},
     val onGrantNotifications: () -> Unit = {},

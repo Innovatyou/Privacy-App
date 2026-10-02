@@ -62,6 +62,10 @@ data class PrivacySettings(
     val blockWhenTooDark: Boolean = false,
     /** Light the owner's face with a soft glow around the screen edges in dim rooms. */
     val lowLightAssist: Boolean = false,
+    /** Darken the mask when face detection sees nobody (or the user looking away). */
+    val darkenWhenNobodyLooking: Boolean = true,
+    /** When it is too dark for the camera, do not darken or blur automatically. */
+    val pauseEffectsInDark: Boolean = true,
 ) {
     /** Returns a copy with every numeric value clamped to its valid range. */
     fun sanitized(): PrivacySettings = copy(

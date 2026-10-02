@@ -214,6 +214,10 @@ class PrivacyViewModel @Inject constructor(
 
     fun setLowLightAssist(enabled: Boolean) = update { it.copy(lowLightAssist = enabled) }
 
+    fun setDarkenWhenNobodyLooking(enabled: Boolean) = update { it.copy(darkenWhenNobodyLooking = enabled) }
+
+    fun setPauseEffectsInDark(enabled: Boolean) = update { it.copy(pauseEffectsInDark = enabled) }
+
     /** Called when face set-up finished: protection is switched on. */
     fun onFaceSetUp() = update { it.copy(ownerProtection = true, faceDetectionEnabled = true) }
 

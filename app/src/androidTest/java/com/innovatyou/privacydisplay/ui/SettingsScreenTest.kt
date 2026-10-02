@@ -2,6 +2,7 @@ package com.innovatyou.privacydisplay.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -94,6 +95,23 @@ class SettingsScreenTest {
         composeRule.onNodeWithTag(BLUR_EXTRA_VIEWER_TAG).performScrollTo().assertIsNotEnabled()
         composeRule.onNodeWithTag(TEST_SHIELD_TAG).performScrollTo().performClick()
         assertEquals(true, tested)
+    }
+
+    @Test
+    fun automaticDarkeningInTheDarkCanBeSwitchedOff() {
+        var paused: Boolean? = null
+        composeRule.setContent {
+            PrivacyDisplayTheme {
+                SettingsScreen(
+                    state = state.copy(settings = state.settings.copy(faceDetectionEnabled = true)),
+                    actions = PrivacyActions(onPauseEffectsInDarkChange = { paused = it }),
+                    onBack = {},
+                    onOpenExclusions = {},
+                )
+            }
+        }
+        composeRule.onNodeWithTag(PAUSE_IN_DARK_TAG).performScrollTo().assertIsOn().performClick()
+        assertEquals(false, paused)
     }
 
     @Test

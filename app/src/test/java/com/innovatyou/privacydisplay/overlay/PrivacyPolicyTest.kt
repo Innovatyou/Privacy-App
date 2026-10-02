@@ -124,13 +124,44 @@ class PrivacyPolicyTest {
         assertTrue(PrivacyPolicy.offerSharing(on, ViewerState.OFF, ShieldReason.TEST))
         assertTrue(PrivacyPolicy.offerSharing(on.copy(blurOnExtraViewer = false), ViewerState.MULTIPLE_VIEWERS, null))
         assertFalse(PrivacyPolicy.offerSharing(on, ViewerState.USER_PRESENT, null))
-        assertFalse(PrivacyPolicy.offerSharing(on, ViewerState.NO_FACE, ShieldReason.NOBODY_LOOKING))
+        // Any automatic blur can be dismissed with the floating button.
+        assertTrue(PrivacyPolicy.offerSharing(on, ViewerState.NO_FACE, ShieldReason.NOBODY_LOOKING))
+        assertFalse(PrivacyPolicy.offerSharing(on, ViewerState.NO_FACE, null))
     }
 
     @Test
     fun `blur radius grows with strength`() {
         assertTrue(PrivacyPolicy.blurRadiusDp(1f) > PrivacyPolicy.blurRadiusDp(0f))
         assertEquals(PrivacyPolicy.blurRadiusDp(1f), PrivacyPolicy.blurRadiusDp(5f), 0f)
+    }
+
+    @Test
+    fun `darkness is not treated as nobody looking`() {
+        val dark = PrivacyPolicy.maskParams(settings, ViewerState.TOO_DARK)
+        assertEquals(0.5f, dark.strength, 0f)
+        assertFalse(dark.boosted)
+        val on = settings.copy(enabled = true, blurWhenAway = true)
+        assertEquals(null, PrivacyPolicy.shieldReason(on, ViewerState.TOO_DARK, testing = false))
+    }
+
+    @Test
+    fun `darkness counts as nobody looking only when pausing in the dark is off`() {
+        val strict = settings.copy(pauseEffectsInDark = false)
+        assertEquals(PrivacyPolicy.NO_VIEWER_STRENGTH, PrivacyPolicy.maskParams(strict, ViewerState.TOO_DARK).strength, 0f)
+        assertEquals(
+            ShieldReason.NOBODY_LOOKING,
+            PrivacyPolicy.shieldReason(strict.copy(enabled = true, blurWhenAway = true), ViewerState.TOO_DARK, false),
+        )
+    }
+
+    @Test
+    fun `darkening when nobody looks can be switched off`() {
+        val off = settings.copy(darkenWhenNobodyLooking = false)
+        for (viewer in listOf(ViewerState.NO_FACE, ViewerState.LOOKING_AWAY)) {
+            val mask = PrivacyPolicy.maskParams(off, viewer)
+            assertEquals(0.5f, mask.strength, 0f)
+            assertFalse(mask.boosted)
+        }
     }
 
     @Test
