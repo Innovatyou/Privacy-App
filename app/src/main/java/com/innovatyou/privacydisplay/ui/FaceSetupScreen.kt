@@ -179,7 +179,8 @@ private fun FrontCameraPreview(viewModel: FaceSetupViewModel, modifier: Modifier
         future.addListener({
             provider = future.get().also {
                 runCatching {
-                    it.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_FRONT_CAMERA, preview, analysis)
+                    val camera = it.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_FRONT_CAMERA, preview, analysis)
+                    viewModel.onCameraBound(camera, analysis)
                 }
             }
         }, ContextCompat.getMainExecutor(context))

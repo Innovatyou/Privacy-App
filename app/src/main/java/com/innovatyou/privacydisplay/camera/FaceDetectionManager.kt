@@ -19,6 +19,7 @@ import com.google.mlkit.vision.face.FaceDetectorOptions
 import androidx.camera.core.Camera
 import com.innovatyou.privacydisplay.owner.BlinkDetector
 import com.innovatyou.privacydisplay.owner.FaceEmbedder
+import com.innovatyou.privacydisplay.owner.FaceLight
 import com.innovatyou.privacydisplay.owner.LowLight
 import com.innovatyou.privacydisplay.owner.OwnerCheck
 import com.innovatyou.privacydisplay.owner.OwnerMatching
@@ -87,19 +88,19 @@ class FaceDetectionManager @Inject constructor(
         val verifier = OwnerVerifier()
         val blinks = BlinkDetector()
         var lastSide: ViewerSide? = null
-        var lastFaceLuma: Float? = null
+        var lastFaceLight: FaceLight? = null
+        var lastMeteringAt = 0L
+        var analysisUseCase: ImageAnalysis? = null
         var camera: Camera? = null
         var exposureIndex = 0
         val ownerCheck = if (recognize) {
             CameraAnalyzer.OwnerCheckFn { image, landmarks ->
                 val frame = image.toBitmap()
                 try {
-                    val sample = embedder.embedIfBright(
-                        frame, image.imageInfo.rotationDegrees, landmarks, LowLight.MIN_FACE_LUMA,
-                    )
+                    val sample = embedder.embedIfVisible(frame, image.imageInfo.rotationDegrees, landmarks)
                     val check = sample.embedding?.let { OwnerMatching.check(it, ownerFacePrint.orEmpty()) }
                         ?: OwnerCheck.TOO_DARK
-                    CameraAnalyzer.OwnerResult(check, sample.luma)
+                    CameraAnalyzer.OwnerResult(check, sample.light)
                 } finally {
                     frame.recycle()
                 }
@@ -116,8 +117,8 @@ class FaceDetectionManager @Inject constructor(
             onResult = { observation, owner, stats ->
                 val now = SystemClock.elapsedRealtime()
                 observation.extraViewerSide?.let { lastSide = it }
-                stats.faceLuma?.let { lastFaceLuma = it }
-                if (observation.faceCount == 0) lastFaceLuma = null
+                stats.faceLight?.let { lastFaceLight = it }
+                if (observation.faceCount == 0) lastFaceLight = null
                 val smoothed = smoother.update(observation, now)
                 // "No face" in a dim scene only means the camera cannot see, not that nobody looks.
                 val state = if (smoothed == ViewerState.NO_FACE && stats.frameLuma < LowLight.DIM_FRAME_LUMA) {
@@ -127,6 +128,13 @@ class FaceDetectionManager @Inject constructor(
                 }
                 val decision = if (owner != null) verifier.update(owner) else verifier.decision
                 blinks.update(stats.eyesOpen, now)
+
+                // Expose for the face, so a bright window or lamp behind it does not darken it.
+                val center = stats.faceCenterRaw
+                if (center != null && now - lastMeteringAt > FaceMetering.INTERVAL_MS) {
+                    lastMeteringAt = now
+                    camera?.let { FaceMetering.meterOn(it, center, stats.rawWidth, stats.rawHeight, analysisUseCase) }
+                }
 
                 // Low light: ask the camera for more exposure, and back to normal when bright.
                 camera?.let { cam ->
@@ -146,7 +154,7 @@ class FaceDetectionManager @Inject constructor(
                         extraViewerSide = lastSide.takeIf { state == ViewerState.MULTIPLE_VIEWERS },
                         owner = decision,
                         recentBlink = blinks.blinkedWithin(BlinkDetector.WINDOW_MS, now),
-                        lowLight = LowLight.isDim(stats.frameLuma, lastFaceLuma),
+                        lowLight = LowLight.isDim(stats.frameLuma, lastFaceLight),
                     )
                 )
             },
@@ -157,6 +165,7 @@ class FaceDetectionManager @Inject constructor(
             .setTargetRotation(orientationManager.current().rotation)
             .build()
         analysis.setAnalyzer(executor, analyzer)
+        analysisUseCase = analysis
 
         val owner = CameraLifecycleOwner()
         try {

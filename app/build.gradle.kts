@@ -19,8 +19,8 @@ android {
         applicationId = "com.innovatyou.privacydisplay"
         minSdk = 26
         targetSdk = 35
-        versionCode = 8
-        versionName = "2.5.1"
+        versionCode = 9
+        versionName = "2.5.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             // Phones (arm) and the x86_64 emulator used for UI tests; 32-bit x86 is dropped to

@@ -13,6 +13,8 @@ import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
+import androidx.camera.core.Camera
+import com.innovatyou.privacydisplay.camera.FaceMetering
 import com.innovatyou.privacydisplay.camera.alignmentLandmarks
 import com.innovatyou.privacydisplay.owner.EnrollmentCollector
 import com.innovatyou.privacydisplay.owner.FaceEmbedder
@@ -71,6 +73,15 @@ class FaceSetupViewModel @Inject constructor(
     /** Thread the camera frames are analysed on. */
     val executor: ExecutorService = Executors.newSingleThreadExecutor()
     private var lastSampleAt = 0L
+    private var lastMeteringAt = 0L
+    @Volatile private var camera: Camera? = null
+    @Volatile private var analysisUseCase: ImageAnalysis? = null
+
+    /** Called by the screen once the front camera is running. */
+    fun onCameraBound(camera: Camera, analysis: ImageAnalysis) {
+        this.camera = camera
+        this.analysisUseCase = analysis
+    }
 
     val analyzer = ImageAnalysis.Analyzer { image -> analyze(image) }
 
@@ -94,6 +105,17 @@ class FaceSetupViewModel @Inject constructor(
             }
             val face = faces.singleOrNull()
             val landmarks = face?.alignmentLandmarks()
+
+            // Expose for the face, so a bright background does not leave it too dark.
+            val now = SystemClock.elapsedRealtime()
+            val cam = camera
+            if (face != null && cam != null && now - lastMeteringAt > FaceMetering.INTERVAL_MS) {
+                lastMeteringAt = now
+                val center = LowLight.uprightToRaw(
+                    face.boundingBox.exactCenterX(), face.boundingBox.exactCenterY(), rotation, image.width, image.height,
+                )
+                FaceMetering.meterOn(cam, center, image.width, image.height, analysisUseCase)
+            }
             val hint = when {
                 faces.isEmpty() -> FaceSetupHint.NO_FACE
                 face == null -> FaceSetupHint.ONE_FACE_ONLY
@@ -106,13 +128,12 @@ class FaceSetupViewModel @Inject constructor(
                 _state.update { it.copy(hint = hint ?: FaceSetupHint.HOLD_STILL) }
                 return
             }
-            val now = SystemClock.elapsedRealtime()
             if (now - lastSampleAt < SAMPLE_GAP_MS) return
             lastSampleAt = now
 
             val frame = image.toBitmap()
             val sample = try {
-                embedder.embedIfBright(frame, rotation, landmarks, LowLight.MIN_FACE_LUMA)
+                embedder.embedIfVisible(frame, rotation, landmarks)
             } finally {
                 frame.recycle()
             }

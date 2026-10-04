@@ -10,6 +10,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetector
 import com.google.mlkit.vision.face.FaceLandmark
+import com.innovatyou.privacydisplay.owner.FaceLight
 import com.innovatyou.privacydisplay.owner.LowLight
 import com.innovatyou.privacydisplay.owner.OwnerCheck
 import com.innovatyou.privacydisplay.owner.OwnerMatching
@@ -36,8 +37,8 @@ class CameraAnalyzer(
         fun check(image: ImageProxy, landmarks: FloatArray): OwnerResult
     }
 
-    /** Owner check result plus the brightness of the face (null when no face was checked). */
-    data class OwnerResult(val check: OwnerCheck, val faceLuma: Float? = null)
+    /** Owner check result plus the light on the face (null when no face was checked). */
+    data class OwnerResult(val check: OwnerCheck, val faceLight: FaceLight? = null)
 
     private var lastRunAt = Long.MIN_VALUE / 2
     private var lastOwnerCheckAt = Long.MIN_VALUE / 2
@@ -72,7 +73,16 @@ class CameraAnalyzer(
                 lastOwnerCheckAt = now
                 owner = ownerCheckFor(primary, frameLuma, uprightWidth, image, check)
             }
-            onResult(observation, owner?.check, FrameStats(frameLuma, owner?.faceLuma, primary?.eyesOpen()))
+            val faceCenter = primary?.let {
+                LowLight.uprightToRaw(
+                    it.boundingBox.exactCenterX(), it.boundingBox.exactCenterY(), rotation, image.width, image.height,
+                )
+            }
+            onResult(
+                observation,
+                owner?.check,
+                FrameStats(frameLuma, owner?.faceLight, primary?.eyesOpen(), faceCenter, image.width, image.height),
+            )
         }
     }
 
@@ -104,8 +114,18 @@ class CameraAnalyzer(
     }
 }
 
-/** Per-frame measurements: brightness of the frame and the face, and how open the eyes are. */
-data class FrameStats(val frameLuma: Float, val faceLuma: Float? = null, val eyesOpen: Float? = null)
+/**
+ * Per-frame measurements: brightness of the frame and the face, how open the eyes are, and the
+ * main face's centre in camera-buffer coordinates (for face-based exposure metering).
+ */
+data class FrameStats(
+    val frameLuma: Float,
+    val faceLight: FaceLight? = null,
+    val eyesOpen: Float? = null,
+    val faceCenterRaw: Pair<Float, Float>? = null,
+    val rawWidth: Int = 0,
+    val rawHeight: Int = 0,
+)
 
 /** Average eye-open probability (0–1), when ML Kit classification is enabled. */
 fun Face.eyesOpen(): Float? {

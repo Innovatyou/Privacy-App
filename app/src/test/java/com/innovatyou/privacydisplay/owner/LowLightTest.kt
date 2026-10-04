@@ -42,10 +42,52 @@ class LowLightTest {
     }
 
     @Test
-    fun `dim scene or dim face counts as low light`() {
-        assertTrue(LowLight.isDim(frameLuma = 40f, faceLuma = null))
-        assertTrue(LowLight.isDim(frameLuma = 120f, faceLuma = 60f))
-        assertFalse(LowLight.isDim(frameLuma = 120f, faceLuma = 120f))
+    fun `dim scene or unreadable face counts as low light`() {
+        assertTrue(LowLight.isDim(frameLuma = 40f, face = null))
+        assertTrue(LowLight.isDim(frameLuma = 120f, face = FaceLight(mean = 15f, contrast = 3f)))
+        assertFalse(LowLight.isDim(frameLuma = 120f, face = FaceLight(mean = 120f, contrast = 30f)))
+    }
+
+    @Test
+    fun `a darker face in good light is not too dark`() {
+        // Darker skin or a bright background: low average brightness, but plenty of detail.
+        assertFalse(LowLight.isFaceTooDark(mean = 40f, contrast = 25f))
+        assertFalse(LowLight.isFaceTooDark(mean = 30f, contrast = 14f))
+        assertFalse(FaceLight(mean = 55f, contrast = 6f).tooDark)
+    }
+
+    @Test
+    fun `nearly black or dim and flat faces are too dark`() {
+        assertTrue(LowLight.isFaceTooDark(mean = 15f, contrast = 20f))
+        assertTrue(LowLight.isFaceTooDark(mean = 35f, contrast = 5f))
+    }
+
+    @Test
+    fun `face light measures brightness and contrast`() {
+        val half = IntArray(100) { if (it < 50) 0xFF000000.toInt() else 0xFFFFFFFF.toInt() }
+        val light = LowLight.faceLight(half)
+        assertEquals(127.5f, light.mean, 0.01f)
+        assertEquals(127.5f, light.contrast, 0.01f)
+        assertEquals(0f, LowLight.faceLight(IntArray(10) { 0xFF808080.toInt() }).contrast, 0.01f)
+    }
+
+    @Test
+    fun `upright points map back to the camera buffer for every rotation`() {
+        val w = 640
+        val h = 480
+        // Forward rotation used by the camera: raw (x, y) -> upright.
+        fun toUpright(x: Float, y: Float, rotation: Int): Pair<Float, Float> = when (rotation) {
+            90 -> h - y to x
+            180 -> w - x to h - y
+            270 -> y to w - x
+            else -> x to y
+        }
+        for (rotation in listOf(0, 90, 180, 270)) {
+            val (ux, uy) = toUpright(100f, 50f, rotation)
+            val (rx, ry) = LowLight.uprightToRaw(ux, uy, rotation, w, h)
+            assertEquals("x at $rotation", 100f, rx, 0.001f)
+            assertEquals("y at $rotation", 50f, ry, 0.001f)
+        }
     }
 
     @Test

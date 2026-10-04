@@ -11,12 +11,17 @@ object LowLight {
     /** Below this, a frame without a detectable face counts as too dark. */
     const val DARK_FRAME_LUMA = 30f
 
-    /** Below this, the aligned face is too dark for a reliable owner check. */
-    const val MIN_FACE_LUMA = 50f
+    /**
+     * A face is only "too dark" when the image of it holds almost no information: nearly black,
+     * or dim and flat (no contrast). Average brightness alone is not used, because it depends on
+     * skin tone and on a bright background as much as on the light in the room.
+     */
+    const val BLACK_FACE_LUMA = 22f
+    const val DIM_FLAT_FACE_LUMA = 45f
+    const val MIN_FACE_CONTRAST = 10f
 
-    /** Below these, the scene counts as dim (raise exposure, offer the screen glow). */
+    /** Below this, the scene counts as dim (raise exposure, offer the screen glow). */
     const val DIM_FRAME_LUMA = 70f
-    const val DIM_FACE_LUMA = 80f
 
     /** Above this, the scene is bright enough to go back to normal exposure. */
     const val BRIGHT_FRAME_LUMA = 140f
@@ -47,20 +52,44 @@ object LowLight {
     }
 
     /** Average luma of ARGB pixels (for example the aligned 112x112 face). */
-    fun meanLuma(argb: IntArray): Float {
-        if (argb.isEmpty()) return 0f
+    fun meanLuma(argb: IntArray): Float = faceLight(argb).mean
+
+    /** Brightness (mean luma) and contrast (standard deviation of luma) of ARGB pixels. */
+    fun faceLight(argb: IntArray): FaceLight {
+        if (argb.isEmpty()) return FaceLight(0f, 0f)
         var sum = 0.0
+        var sumSquares = 0.0
         for (p in argb) {
             val r = (p shr 16) and 0xFF
             val g = (p shr 8) and 0xFF
             val b = p and 0xFF
-            sum += 0.299 * r + 0.587 * g + 0.114 * b
+            val y = 0.299 * r + 0.587 * g + 0.114 * b
+            sum += y
+            sumSquares += y * y
         }
-        return (sum / argb.size).toFloat()
+        val mean = sum / argb.size
+        val variance = (sumSquares / argb.size - mean * mean).coerceAtLeast(0.0)
+        return FaceLight(mean.toFloat(), kotlin.math.sqrt(variance).toFloat())
     }
 
-    fun isDim(frameLuma: Float, faceLuma: Float?): Boolean =
-        frameLuma < DIM_FRAME_LUMA || (faceLuma != null && faceLuma < DIM_FACE_LUMA)
+    fun isFaceTooDark(mean: Float, contrast: Float): Boolean =
+        mean < BLACK_FACE_LUMA || (mean < DIM_FLAT_FACE_LUMA && contrast < MIN_FACE_CONTRAST)
+
+    /** Dim scene, or a face that is too dark to recognise. */
+    fun isDim(frameLuma: Float, face: FaceLight?): Boolean =
+        frameLuma < DIM_FRAME_LUMA || face?.tooDark == true
+
+    /**
+     * Converts a point from upright image coordinates (as ML Kit reports them) back to the camera
+     * buffer, which is [rawWidth] x [rawHeight] and needs [rotationDegrees] clockwise to be upright.
+     */
+    fun uprightToRaw(x: Float, y: Float, rotationDegrees: Int, rawWidth: Int, rawHeight: Int): Pair<Float, Float> =
+        when (rotationDegrees) {
+            90 -> y to rawHeight - x
+            180 -> rawWidth - x to rawHeight - y
+            270 -> rawWidth - y to x
+            else -> x to y
+        }
 
     /**
      * Exposure compensation to request: the maximum when dim, 0 when bright again, or null to keep
@@ -72,6 +101,11 @@ object LowLight {
         frameLuma > BRIGHT_FRAME_LUMA -> 0
         else -> null
     }
+}
+
+/** Brightness and contrast (0–255 scale) of a face crop. */
+data class FaceLight(val mean: Float, val contrast: Float) {
+    val tooDark: Boolean get() = LowLight.isFaceTooDark(mean, contrast)
 }
 
 /**

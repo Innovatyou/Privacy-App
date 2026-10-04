@@ -134,9 +134,14 @@ The app has no internet permission.
 
 **Low light and photos.**
 
-- **Darkness check:** the app measures the brightness of each camera frame and of the aligned face.
-  When the face is too dark (average brightness below 50 of 255), it makes no decision instead of
-  guessing, so you are not blocked by mistake. The main screen shows "Too dark to check your face".
+- **Darkness check:** the app measures the brightness and contrast of each camera frame and of the
+  aligned face. A face only counts as too dark when its image holds almost no detail (nearly black,
+  or dim and flat). Average brightness alone is not used, because it depends on skin tone and on a
+  bright background as much as on the room's light. When it is too dark, the app makes no decision
+  instead of guessing. The main screen shows "Too dark to check your face".
+- **Face-based exposure:** the camera meters its exposure on the face (CameraX focus/metering on the
+  face region), so a bright window or lamp behind you does not leave your face too dark, both
+  during setup and during recognition.
 - **Brighter exposure:** in dim rooms the camera's exposure compensation is raised to the maximum,
   and set back to normal when it is bright again.
 - **Block when too dark** (optional, off by default): if it stays too dark to confirm you for about
