@@ -137,23 +137,26 @@ function kingdom_ytlive_check( $channel ) {
 			}
 			$item = json_decode( wp_remote_retrieve_body( $res ), true )['items'][0] ?? null;
 			if ( $item && ! empty( $item['id']['videoId'] ) ) {
+				$details = wp_remote_get( add_query_arg( array( 'part' => 'liveStreamingDetails', 'id' => $item['id']['videoId'], 'key' => $key ), 'https://www.googleapis.com/youtube/v3/videos' ), array( 'timeout' => 8 ) );
+				$live    = is_wp_error( $details ) ? array() : ( json_decode( wp_remote_retrieve_body( $details ), true )['items'][0]['liveStreamingDetails'] ?? array() );
 				return array(
 					'state'     => $type,
 					'video_id'  => $item['id']['videoId'],
 					'title'     => html_entity_decode( (string) ( $item['snippet']['title'] ?? '' ), ENT_QUOTES ),
-					'starts_at' => 0,
+					'starts_at' => ! empty( $live['scheduledStartTime'] ) ? (int) strtotime( $live['scheduledStartTime'] ) : 0,
+					'viewers'   => (int) ( $live['concurrentViewers'] ?? 0 ),
 					'source'    => 'api',
 				);
 			}
 			if ( 'upcoming' === $type ) {
-				return array( 'state' => 'offline', 'video_id' => '', 'title' => '', 'starts_at' => 0, 'source' => 'api' );
+				return array( 'state' => 'offline', 'video_id' => '', 'title' => '', 'starts_at' => 0, 'viewers' => 0, 'source' => 'api' );
 			}
 		}
 	}
 
 	// No key: the channel's public /live page points at the current (or next scheduled) stream.
 	$html = kingdom_ytlive_fetch( 'https://www.youtube.com/channel/' . rawurlencode( $channel ) . '/live' );
-	$out  = array( 'state' => 'offline', 'video_id' => '', 'title' => '', 'starts_at' => 0, 'source' => 'page' );
+	$out  = array( 'state' => 'offline', 'video_id' => '', 'title' => '', 'starts_at' => 0, 'viewers' => 0, 'source' => 'page' );
 	if ( '' === $html ) {
 		$out['source'] = 'error';
 		return $out;
@@ -167,6 +170,10 @@ function kingdom_ytlive_check( $channel ) {
 	}
 	if ( false !== strpos( $html, '"isLiveNow":true' ) ) {
 		$out['state'] = 'live';
+		// "1,234 watching now" as shown on YouTube.
+		if ( preg_match( '~"originalViewCount":"(\d+)"~', $html, $v ) || preg_match( '~"viewCount":\{"runs":\[\{"text":"([\d,. ]+)"\},\{"text":" watching~', $html, $v ) ) {
+			$out['viewers'] = (int) preg_replace( '/\D/', '', $v[1] );
+		}
 	} elseif ( false !== strpos( $html, '"isUpcoming":true' ) || false !== strpos( $html, '"upcomingEventData"' ) ) {
 		$out['state'] = 'upcoming';
 		if ( preg_match( '~"upcomingEventData":\{"startTime":"(\d+)"~', $html, $s ) || preg_match( '~"scheduledStartTime":"(\d+)"~', $html, $s ) ) {
@@ -204,12 +211,13 @@ function kingdom_youtube_live( $force = false ) {
 			'video_id'   => $video,
 			'title'      => $status['title'],
 			'starts_at'  => (int) $status['starts_at'],
+			'viewers'    => 'live' === $status['state'] && get_theme_mod( 'kingdom_ytlive_viewers', true ) ? (int) ( $status['viewers'] ?? 0 ) : 0,
 			'source'     => $status['source'],
 			'checked_at' => (int) $status['checked_at'],
 			'watch'      => $status['video_id'] ? 'https://www.youtube.com/watch?v=' . $status['video_id'] : 'https://www.youtube.com/channel/' . $channel . '/live',
 		);
 	} elseif ( $replay ) {
-		$out = array( 'mode' => 'video', 'state' => 'video', 'video_id' => $replay, 'title' => '', 'starts_at' => 0, 'source' => 'setting', 'checked_at' => time(), 'watch' => 'https://www.youtube.com/watch?v=' . $replay );
+		$out = array( 'mode' => 'video', 'state' => 'video', 'video_id' => $replay, 'title' => '', 'starts_at' => 0, 'viewers' => 0, 'source' => 'setting', 'checked_at' => time(), 'watch' => 'https://www.youtube.com/watch?v=' . $replay );
 	} else {
 		return null;
 	}
@@ -234,7 +242,10 @@ function kingdom_youtube_live( $force = false ) {
 function kingdom_ytlive_label( $s ) {
 	switch ( $s['state'] ) {
 		case 'live':
-			return __( 'Live now', 'kingdom' );
+			return ! empty( $s['viewers'] )
+				/* translators: %s: number of people watching */
+				? sprintf( _n( 'Live now · %s watching', 'Live now · %s watching', $s['viewers'], 'kingdom' ), number_format_i18n( $s['viewers'] ) )
+				: __( 'Live now', 'kingdom' );
 		case 'upcoming':
 			return $s['starts_at'] ? kingdom_ytlive_when( $s['starts_at'] ) : __( 'Starting soon', 'kingdom' );
 		case 'offline':
@@ -280,7 +291,7 @@ function kingdom_ytlive_rest() {
 			'permission_callback' => '__return_true',
 			'callback'            => function () {
 				$s = kingdom_youtube_live();
-				$r = rest_ensure_response( $s ? array_intersect_key( $s, array_flip( array( 'state', 'video_id', 'title', 'starts_at', 'embed', 'chat', 'watch', 'label' ) ) ) : array( 'state' => 'none' ) );
+				$r = rest_ensure_response( $s ? array_intersect_key( $s, array_flip( array( 'state', 'video_id', 'title', 'starts_at', 'viewers', 'embed', 'chat', 'watch', 'label' ) ) ) : array( 'state' => 'none' ) );
 				$r->header( 'Cache-Control', 'public, max-age=30' );
 				return $r;
 			},

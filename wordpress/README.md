@@ -68,6 +68,7 @@ There are also dedicated templates for single and archive views of sermons (vide
 - **when a stream is scheduled**: shows YouTube's waiting room with "Starts today at 9:00 am" and a ticking countdown;
 - **the rest of the time**: shows your replay video (default `xzoaPmLegBE`) with "Not live right now · Next: Sunday 9:00 am" taken from your service times;
 - **switches open pages automatically** when the stream starts or ends, with no refresh needed (`GET /wp-json/kingdom/v1/live`).
+- **shows how many people are watching** ("Live now · 1,234 watching"), the same number YouTube shows, refreshed every minute. It can be switched off. People watching on your website use YouTube's own player, so they **count in your YouTube live viewer numbers and views** like viewers on YouTube itself. (Muted autoplay views may not count until the viewer taps play, so autoplay is off by default.)
 
 No API key is needed: the theme reads your channel's public live page. For the most reliable detection, add a free YouTube Data API key (or reuse the one in Church Suite settings). Church Admin → Website shows whether the channel is connected and its current status, with a "Check now" link. Without a channel, the section simply shows the one video you enter.
 
