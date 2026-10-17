@@ -60,7 +60,8 @@ function kingdom_customize_register( $wp ) {
 		'kingdom_ux'       => __( '3D Effects & Mobile', 'kingdom' ),
 		'kingdom_header'   => __( 'Header', 'kingdom' ),
 		'kingdom_images'   => __( 'Church Images & Gallery', 'kingdom' ),
-		'kingdom_hero'     => __( 'Homepage Hero', 'kingdom' ),
+		'kingdom_hero'     => __( 'Homepage Banner (image or video)', 'kingdom' ),
+		'kingdom_sections' => __( 'Show / Hide Sections', 'kingdom' ),
 		'kingdom_home'     => __( 'Homepage Sections', 'kingdom' ),
 		'kingdom_welcome'  => __( 'Welcome / Pastor', 'kingdom' ),
 		'kingdom_services' => __( 'Service Times', 'kingdom' ),
@@ -134,6 +135,16 @@ function kingdom_customize_register( $wp ) {
 	$add( 'kingdom_hero', 'kingdom_hero_btn2_text', __( 'Secondary button text', 'kingdom' ), 'text', __( 'Watch online', 'kingdom' ) );
 	$add( 'kingdom_hero', 'kingdom_hero_btn2_url', __( 'Secondary button URL', 'kingdom' ), 'url', '' );
 	$add( 'kingdom_hero', 'kingdom_hero_overlay', __( 'Overlay darkness (0–90)', 'kingdom' ), 'number', 55 );
+	$add( 'kingdom_hero', 'kingdom_hero_bg_video', __( 'Banner video: YouTube, Vimeo or MP4 link', 'kingdom' ), 'url', '', array(), __( 'Plays muted and looping behind the banner on the Classic, Modern Video and Mega Church layouts and the default homepage. Paste a normal YouTube link, e.g. https://youtu.be/abc123. The banner image shows while it loads.', 'kingdom' ) );
+	$add( 'kingdom_hero', 'kingdom_hero_hide_text', __( 'Hide all banner text and buttons', 'kingdom' ), 'checkbox', false, array(), __( 'Shows only the video or image.', 'kingdom' ) );
+	$add( 'kingdom_hero', 'kingdom_hero_sound_button', __( 'Show a "Watch with sound" button (YouTube)', 'kingdom' ), 'checkbox', true );
+	$add( 'kingdom_hero', 'kingdom_hero_height', __( 'Banner height', 'kingdom' ), 'select', 'full', array( 'full' => __( 'Full screen', 'kingdom' ), 'tall' => __( 'Tall (80%)', 'kingdom' ), 'medium' => __( 'Medium (60%)', 'kingdom' ), 'video' => __( 'Fit the video (16:9)', 'kingdom' ) ) );
+
+	// Show / hide sections.
+	$wp->get_section( 'kingdom_sections' )->description = __( 'Untick a section to remove it from every page of the website. Church staff can also change these in Church Admin → Website.', 'kingdom' );
+	foreach ( kingdom_available_sections() as $slug => $label ) {
+		$add( 'kingdom_sections', 'kingdom_show_' . $slug, $label, 'checkbox', true );
+	}
 
 	// Homepage sections.
 	$add( 'kingdom_home', 'kingdom_home_sections', __( 'Section order', 'kingdom' ), 'textarea', 'hero, service-times, welcome, live, sermons, ministries, events, stats, partnership, gallery, testimonies, prayer, visit, give, social, newsletter', array(), __( 'Used when the front page is your latest posts or a page without a template. Available: ', 'kingdom' ) . implode( ', ', array_keys( kingdom_available_sections() ) ) );

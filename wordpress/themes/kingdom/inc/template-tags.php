@@ -23,8 +23,102 @@ function kingdom_plugin_active() {
  * @param array  $args Arguments.
  */
 function kingdom_section( $name, $args = array() ) {
+	if ( ! kingdom_section_enabled( $name ) ) {
+		return;
+	}
 	get_template_part( 'template-parts/sections/' . sanitize_key( $name ), null, $args );
 }
+
+/**
+ * Is a website section switched on? (Customize → Show / Hide Sections, or Church Admin → Website.)
+ *
+ * The page's own editor content can't be switched off here.
+ *
+ * @param string $name Section slug.
+ * @return bool
+ */
+function kingdom_section_enabled( $name ) {
+	if ( 'page-content' === $name ) {
+		return true;
+	}
+	return (bool) get_theme_mod( 'kingdom_show_' . sanitize_key( $name ), true );
+}
+
+/**
+ * Parse a banner video URL.
+ *
+ * @param string $url YouTube, Vimeo or direct video file URL.
+ * @return array|null type (youtube|vimeo|file) and id/src.
+ */
+function kingdom_video_source( $url ) {
+	$url = trim( (string) $url );
+	if ( ! $url ) {
+		return null;
+	}
+	$yt = kingdom_youtube_id( $url );
+	if ( $yt ) {
+		return array( 'type' => 'youtube', 'id' => $yt );
+	}
+	if ( preg_match( '~vimeo\.com/(?:video/)?(\d+)~', $url, $m ) ) {
+		return array( 'type' => 'vimeo', 'id' => $m[1] );
+	}
+	if ( preg_match( '~\.(mp4|webm|ogv|mov)(\?.*)?$~i', $url ) ) {
+		return array( 'type' => 'file', 'src' => $url );
+	}
+	return null;
+}
+
+/**
+ * Background video markup for the homepage banner (muted, looping, no controls).
+ *
+ * @param array  $src    From kingdom_video_source().
+ * @param string $poster Poster image shown while loading or if autoplay is blocked.
+ * @return string
+ */
+function kingdom_background_video( $src, $poster = '' ) {
+	if ( ! $src ) {
+		return '';
+	}
+	$title = esc_attr__( 'Banner video', 'kingdom' );
+	if ( 'youtube' === $src['type'] ) {
+		$q = 'autoplay=1&mute=1&loop=1&playlist=' . rawurlencode( $src['id'] ) . '&controls=0&rel=0&playsinline=1&modestbranding=1&disablekb=1&iv_load_policy=3&fs=0';
+		return '<iframe class="k-hero__bgvideo" src="' . esc_url( 'https://www.youtube-nocookie.com/embed/' . rawurlencode( $src['id'] ) . '?' . $q ) . '" title="' . $title . '" allow="autoplay; encrypted-media; picture-in-picture" tabindex="-1" aria-hidden="true"></iframe>';
+	}
+	if ( 'vimeo' === $src['type'] ) {
+		return '<iframe class="k-hero__bgvideo" src="' . esc_url( 'https://player.vimeo.com/video/' . rawurlencode( $src['id'] ) . '?background=1&autoplay=1&loop=1&muted=1&dnt=1' ) . '" title="' . $title . '" allow="autoplay; fullscreen" tabindex="-1" aria-hidden="true"></iframe>';
+	}
+	return '<video class="k-hero__video" autoplay muted loop playsinline preload="metadata"' . ( $poster ? ' poster="' . esc_url( $poster ) . '"' : '' ) . ' aria-hidden="true"><source src="' . esc_url( $src['src'] ) . '"></video>';
+}
+
+/**
+ * Website settings the Church Admin dashboard can change (sections + banner).
+ *
+ * Exposed to the Kingdom Church Suite plugin through the kcs_website_settings filter.
+ *
+ * @return array key => [label, type, group, default, choices?]
+ */
+function kingdom_website_settings() {
+	$out = array(
+		'kingdom_hero_bg_video'     => array( __( 'Banner video (YouTube, Vimeo or MP4 link)', 'kingdom' ), 'url', 'banner', '' ),
+		'kingdom_hero_hide_text'    => array( __( 'Hide all banner text and buttons (show only the video/image)', 'kingdom' ), 'checkbox', 'banner', false ),
+		'kingdom_hero_sound_button' => array( __( 'Show a "Watch with sound" button on YouTube banners', 'kingdom' ), 'checkbox', 'banner', true ),
+		'kingdom_hero_height'       => array( __( 'Banner height', 'kingdom' ), 'select', 'banner', 'full', array( 'full' => __( 'Full screen', 'kingdom' ), 'tall' => __( 'Tall (80%)', 'kingdom' ), 'medium' => __( 'Medium (60%)', 'kingdom' ), 'video' => __( 'Fit the video (16:9)', 'kingdom' ) ) ),
+		'kingdom_hero_overlay'      => array( __( 'Banner darkness over the video/image (0–90)', 'kingdom' ), 'number', 'banner', 55 ),
+	);
+	foreach ( kingdom_available_sections() as $slug => $label ) {
+		$out[ 'kingdom_show_' . $slug ] = array( $label, 'checkbox', 'sections', true );
+	}
+	$out['kingdom_topbar']            = array( __( 'Top bar (service time, phone, partner login)', 'kingdom' ), 'checkbox', 'sections', true );
+	$out['kingdom_footer_newsletter'] = array( __( 'Footer newsletter band', 'kingdom' ), 'checkbox', 'sections', true );
+	$out['kingdom_mobile_nav']        = array( __( 'Bottom tab bar on phones', 'kingdom' ), 'checkbox', 'sections', true );
+	return $out;
+}
+add_filter(
+	'kcs_website_settings',
+	function () {
+		return kingdom_website_settings();
+	}
+);
 
 /**
  * Available homepage sections (slug => label).

@@ -20,6 +20,12 @@ if ( ! $kingdom_image ) {
 	$kingdom_image = kingdom_image( 'kingdom_hero_image' );
 }
 $kingdom_video   = get_theme_mod( 'kingdom_hero_video' );
+$kingdom_bg      = kingdom_video_source( get_theme_mod( 'kingdom_hero_bg_video' ) );
+if ( ! $kingdom_bg && 'video' === $kingdom_variant && $kingdom_video ) {
+	$kingdom_bg = kingdom_video_source( $kingdom_video );
+}
+$kingdom_notext  = (bool) get_theme_mod( 'kingdom_hero_hide_text', false );
+$kingdom_height  = sanitize_html_class( get_theme_mod( 'kingdom_hero_height', 'full' ) );
 $kingdom_yt      = kingdom_youtube_id( get_theme_mod( 'kingdom_hero_youtube' ) );
 $kingdom_overlay = min( 90, absint( get_theme_mod( 'kingdom_hero_overlay', 55 ) ) ) / 100;
 $kingdom_b1t     = get_theme_mod( 'kingdom_hero_btn1_text', __( 'Plan your visit', 'kingdom' ) );
@@ -88,16 +94,24 @@ $kingdom_buttons = function () use ( $kingdom_b1t, $kingdom_b1u, $kingdom_b2t, $
 	</section>
 
 <?php else : ?>
-	<section class="k-hero k-hero--<?php echo esc_attr( $kingdom_variant ); ?> k-hero--cover"<?php echo $kingdom_image ? ' style="--k-img:url(' . esc_url( $kingdom_image ) . ')"' : ''; ?>>
-		<?php if ( 'video' === $kingdom_variant && $kingdom_video ) : ?>
-			<video class="k-hero__video" autoplay muted loop playsinline preload="metadata"<?php echo $kingdom_image ? ' poster="' . esc_url( $kingdom_image ) . '"' : ''; ?>><source src="<?php echo esc_url( $kingdom_video ); ?>" type="video/mp4"></video>
+	<section class="k-hero k-hero--<?php echo esc_attr( $kingdom_variant ); ?> k-hero--cover k-hero--h-<?php echo esc_attr( $kingdom_height ); ?><?php echo $kingdom_bg ? ' has-bg-video' : ''; ?><?php echo $kingdom_notext ? ' is-text-hidden' : ''; ?>"<?php echo $kingdom_image ? ' style="--k-img:url(' . esc_url( $kingdom_image ) . ')"' : ''; ?><?php echo $kingdom_notext ? ' aria-label="' . esc_attr( $kingdom_title ) . '"' : ''; ?>>
+		<?php if ( $kingdom_bg ) : ?>
+			<div class="k-hero__media"><?php echo kingdom_background_video( $kingdom_bg, $kingdom_image ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts. ?></div>
 		<?php endif; ?>
-		<div class="k-hero__overlay" style="opacity:<?php echo esc_attr( $kingdom_overlay ); ?>"></div>
+		<div class="k-hero__overlay" style="opacity:<?php echo esc_attr( $kingdom_notext ? min( $kingdom_overlay, 0.15 ) : $kingdom_overlay ); ?>"></div>
+		<?php if ( $kingdom_notext ) : ?>
+			<h1 class="screen-reader-text"><?php echo esc_html( $kingdom_title ); ?></h1>
+			<?php if ( $kingdom_bg && 'youtube' === $kingdom_bg['type'] && get_theme_mod( 'kingdom_hero_sound_button', true ) ) : ?>
+				<button type="button" class="k-hero__sound" data-video="<?php echo esc_attr( $kingdom_bg['id'] ); ?>"><?php echo kingdom_icon( 'play' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> <?php esc_html_e( 'Watch with sound', 'kingdom' ); ?></button>
+			<?php endif; ?>
+		<?php else : ?>
+		<?php if ( ! $kingdom_bg ) : ?>
 		<div class="k-hero__scene" aria-hidden="true" data-parallax>
 			<span class="k-orb k-orb--1"></span><span class="k-orb k-orb--2"></span><span class="k-orb k-orb--3"></span>
 			<span class="k-cross3d"><i></i><i></i></span>
 			<span class="k-ring3d"></span>
 		</div>
+		<?php endif; ?>
 		<div class="k-container k-hero__inner<?php echo 'classic' === $kingdom_variant ? ' k-center' : ''; ?>">
 			<div class="k-hero__content" data-reveal>
 				<?php if ( $kingdom_eyebrow ) : ?><span class="k-eyebrow k-eyebrow--light"><?php echo esc_html( $kingdom_eyebrow ); ?></span><?php endif; ?>
@@ -109,7 +123,8 @@ $kingdom_buttons = function () use ( $kingdom_b1t, $kingdom_b1u, $kingdom_b2t, $
 				<?php endif; ?>
 			</div>
 		</div>
-		<?php if ( 'mega' === $kingdom_variant ) : ?>
+		<?php endif; ?>
+		<?php if ( 'mega' === $kingdom_variant && ! $kingdom_notext ) : ?>
 			<div class="k-hero__strip">
 				<div class="k-container k-hero__strip-inner">
 					<?php foreach ( array_slice( $kingdom_times, 0, 4 ) as $kingdom_s ) : ?>

@@ -20,6 +20,7 @@
 	.kca__nav { flex-direction: column; overflow: visible; padding: 0; }
 	.kca__nav a { border-color: transparent; background: transparent; }
 	.kca__nav a:hover { background: var(--kcs-surface); }
+	.kca__nav a[aria-current="page"], .kca__nav a[aria-current="page"]:hover { background: var(--kcs-primary); color: var(--kcs-primary-contrast); }
 	.kca__nav em { margin-left: auto; }
 }
 .kca-kpis { display: grid; gap: .8rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
@@ -76,3 +77,8 @@
 
 .kca-wa-row { display: grid; gap: .5rem; padding: .6rem 0; border-bottom: 1px dashed var(--kcs-border); }
 @media (min-width: 720px) { .kca-wa-row { grid-template-columns: 1fr 1fr 2fr; } }
+
+.kca-switches { display: grid; gap: .35rem; }
+@media (min-width: 640px) { .kca-switches { grid-template-columns: 1fr 1fr; } }
+.kca-switch { padding: .55rem .7rem; border-radius: 10px; border: 1px solid var(--kcs-border); }
+.kca-switch:has(input:not(:checked)) { opacity: .6; }

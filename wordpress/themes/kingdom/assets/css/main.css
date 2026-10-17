@@ -688,3 +688,26 @@ body:not(.k-3d) .k-hero__scene { display: none; }
 body:has(.k-wa) .k-to-top { right: auto; left: max(1.25rem, env(safe-area-inset-left)); bottom: 5.25rem; }
 @media (max-width: 860px) { .has-mobile-nav:has(.k-wa) .k-to-top { bottom: calc(150px + env(safe-area-inset-bottom)); } }
 .is-dashboard .k-wa { display: none; }
+
+/* Banner video & heights */
+.k-hero__media { position: absolute; inset: 0; overflow: hidden; z-index: 0; pointer-events: none; }
+.k-hero__bgvideo { position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-width: 177.78vh; min-height: 100%; transform: translate(-50%, -50%); border: 0; }
+.k-hero--h-full { min-height: min(100svh, 1000px); }
+.k-hero--h-tall { min-height: 80svh; }
+.k-hero--h-medium { min-height: 60svh; }
+.k-hero--h-video { min-height: 0; aspect-ratio: 16 / 9; max-height: 100svh; padding-block: 0; }
+.k-hero--h-video .k-hero__inner { padding-block: calc(var(--k-header-h) + 2rem) 3rem; }
+.k-hero--h-video .k-hero__bgvideo { width: 100%; height: 100%; min-width: 0; min-height: 0; }
+@media (max-width: 860px) { .k-hero--h-full.has-bg-video { min-height: 70svh; } .k-hero--h-video { aspect-ratio: 16 / 9; min-height: 0; } }
+.k-hero.is-text-hidden { padding-block: 0; }
+.k-hero.is-text-hidden .k-scroll-cue { bottom: 1.25rem; }
+.k-hero__sound { position: absolute; z-index: 3; right: max(1rem, env(safe-area-inset-right)); bottom: 1.25rem; display: inline-flex; align-items: center; gap: .45rem; min-height: 44px; padding: .55rem 1rem; border-radius: 999px; border: 1px solid rgba(255,255,255,.5); background: rgba(0,0,0,.45); color: #fff; font: 600 .9rem var(--k-font-body); cursor: pointer; backdrop-filter: blur(6px); }
+.k-hero__sound .k-icon { width: 16px; height: 16px; }
+.has-mobile-nav .k-hero__sound { bottom: 1.25rem; }
+@media (max-width: 860px) {
+	/* Keep the whole 16:9 video visible below the transparent header on phones */
+	.has-transparent-header .k-hero--h-video { aspect-ratio: auto; height: calc(56.25vw + var(--k-header-h)); background-color: var(--k-dark); }
+	.has-transparent-header .k-hero--h-video .k-hero__media { top: var(--k-header-h); }
+	.has-transparent-header .k-hero--h-video .k-scroll-cue { display: none; }
+	.k-hero__sound { padding: .45rem .8rem; font-size: .82rem; bottom: .75rem; }
+}

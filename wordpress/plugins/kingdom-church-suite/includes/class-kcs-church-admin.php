@@ -49,6 +49,7 @@ class KCS_Church_Admin {
 			'testimonies' => array( __( 'Testimonies', 'kingdom-church-suite' ), '❝' ),
 			'notify'      => array( __( 'Notify partners', 'kingdom-church-suite' ), '✉' ),
 			'pastors'     => array( __( 'Pastors & WhatsApp', 'kingdom-church-suite' ), '☎' ),
+			'website'     => array( __( 'Website', 'kingdom-church-suite' ), '▣' ),
 		);
 	}
 
@@ -272,6 +273,31 @@ class KCS_Church_Admin {
 				KCS_WhatsApp_Chat::save( $d );
 				$msg  = __( 'Website WhatsApp chat saved.', 'kingdom-church-suite' );
 				$view = 'pastors';
+				break;
+
+			case 'website_save':
+				foreach ( (array) apply_filters( 'kcs_website_settings', array() ) as $key => $f ) {
+					$raw = $d[ $key ] ?? '';
+					switch ( $f[1] ) {
+						case 'checkbox':
+							$value = ! empty( $raw );
+							break;
+						case 'url':
+							$value = esc_url_raw( $raw );
+							break;
+						case 'number':
+							$value = min( 90, absint( $raw ) );
+							break;
+						case 'select':
+							$value = array_key_exists( $raw, (array) ( $f[4] ?? array() ) ) ? $raw : $f[3];
+							break;
+						default:
+							$value = sanitize_text_field( $raw );
+					}
+					set_theme_mod( $key, $value );
+				}
+				$msg  = __( 'Website updated.', 'kingdom-church-suite' );
+				$view = 'website';
 				break;
 
 			case 'pastor_delete':
@@ -756,6 +782,55 @@ class KCS_Church_Admin {
 				<button class="kcs-btn"><?php esc_html_e( 'Save pastor', 'kingdom-church-suite' ); ?></button>
 			</form>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Website: show/hide sections and the homepage banner (settings provided by the active theme).
+	 */
+	private static function view_website() {
+		$fields = (array) apply_filters( 'kcs_website_settings', array() );
+		if ( ! $fields ) {
+			echo '<p class="kcs-muted">' . esc_html__( 'The active theme does not offer website settings here. Use Appearance → Customize instead.', 'kingdom-church-suite' ) . '</p>';
+			return;
+		}
+		$groups = array(
+			'banner'   => __( 'Homepage banner', 'kingdom-church-suite' ),
+			'sections' => __( 'Show or hide sections', 'kingdom-church-suite' ),
+		);
+		?>
+		<form method="post" class="kca-cols">
+			<?php echo self::fields( 'website_save', 'website' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			<?php foreach ( $groups as $group => $title ) : ?>
+				<section class="kca-card kcs-form">
+					<h3><?php echo esc_html( $title ); ?></h3>
+					<?php if ( 'banner' === $group ) : ?>
+						<p class="kcs-muted"><?php esc_html_e( 'Paste a YouTube, Vimeo or MP4 link to play it, muted and looping, behind the homepage banner. Leave it empty to use the banner image.', 'kingdom-church-suite' ); ?></p>
+					<?php else : ?>
+						<p class="kcs-muted"><?php esc_html_e( 'Untick a section to remove it from every page of the website.', 'kingdom-church-suite' ); ?></p>
+						<div class="kca-switches">
+					<?php endif; ?>
+					<?php
+					foreach ( $fields as $key => $f ) :
+						if ( $f[2] !== $group ) {
+							continue;
+						}
+						$value = get_theme_mod( $key, $f[3] );
+						if ( 'checkbox' === $f[1] ) :
+							?>
+							<label class="kcs-check kca-switch"><input type="checkbox" name="<?php echo esc_attr( $key ); ?>" value="1" <?php checked( (bool) $value ); ?>> <?php echo esc_html( $f[0] ); ?></label>
+						<?php elseif ( 'select' === $f[1] ) : ?>
+							<label><?php echo esc_html( $f[0] ); ?><select name="<?php echo esc_attr( $key ); ?>"><?php foreach ( (array) $f[4] as $k => $l ) : ?><option value="<?php echo esc_attr( $k ); ?>" <?php selected( $value, $k ); ?>><?php echo esc_html( $l ); ?></option><?php endforeach; ?></select></label>
+						<?php else : ?>
+							<label><?php echo esc_html( $f[0] ); ?><input type="<?php echo 'url' === $f[1] ? 'url' : ( 'number' === $f[1] ? 'number' : 'text' ); ?>" name="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( $value ); ?>"<?php echo 'number' === $f[1] ? ' min="0" max="90"' : ''; ?><?php echo 'url' === $f[1] ? ' placeholder="https://youtu.be/…"' : ''; ?>></label>
+						<?php endif; ?>
+					<?php endforeach; ?>
+					<?php if ( 'sections' === $group ) : ?></div><?php endif; ?>
+					<button class="kcs-btn"><?php esc_html_e( 'Save website', 'kingdom-church-suite' ); ?></button>
+				</section>
+			<?php endforeach; ?>
+		</form>
+		<p><a class="kcs-btn kcs-btn--ghost" href="<?php echo esc_url( home_url( '/' ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View website', 'kingdom-church-suite' ); ?></a></p>
 		<?php
 	}
 

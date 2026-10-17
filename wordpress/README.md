@@ -56,6 +56,14 @@ There are also dedicated templates for single and archive views of sermons (vide
 
 **Social connect**: branded cards for Facebook, Instagram, YouTube, X, TikTok, WhatsApp and Telegram, with a church hashtag, plus share buttons on every sermon, event and post.
 
+**Show / hide sections**: every homepage section (announcement strip, welcome, stats, gallery, sermons, events, partnership, testimonies, visit us, social, newsletter, and so on), plus the top bar, footer newsletter and mobile tab bar, can be switched off under *Appearance → Customize → Show / Hide Sections* or in *Church Admin → Website*. No code needed.
+
+**Video homepage banner**: under *Customize → Homepage Banner (image or video)* or *Church Admin → Website*, paste a YouTube, Vimeo or MP4/WebM link to use a video as the banner background. It plays muted and on a loop, and the banner image shows while it loads. Options:
+- **Hide all banner text**: show the video on its own. A hidden heading is kept for screen readers and SEO.
+- **"Watch with sound" button**: opens the YouTube video with sound in a pop-up.
+- **Banner height**: full screen, tall, medium, or the video's own 16:9 shape.
+- **Overlay darkness**: 0–90%.
+
 Other theme features: three header styles (classic, centered, transparent over hero), sticky header, top bar, live "LIVE NOW" badge, dark mode toggle (remembers the visitor's choice), video-modal hero, animated counters, scroll reveal, floating WhatsApp button, back-to-top, breadcrumbs and accessible markup (skip link, focus styles, ARIA, reduced-motion support).
 
 ---
@@ -79,6 +87,7 @@ A full church-management dashboard on the **Church Admin** page (`[kcs_church_ad
 - **Prayer requests**, **Visits** ("Plan your visit" bookings with WhatsApp follow-up) and **Testimonies** (publish or remove)
 - **Notify partners**: by plan and status, by email and/or as an update on their dashboard (announcement, event or resource with a link)
 - **Website WhatsApp chat**: turn the floating "Chat with us" button on or off, and set the greeting, office hours and contacts (e.g. General enquiries, Prayer line, First-time visitors), each with its own number and pre-filled message (`{church}` and `{page}` are filled in automatically)
+- **Website**: banner video link, hide banner text, sound button, banner height and overlay, and an on/off switch for every website section
 - **Pastors & WhatsApp**: add pastors with WhatsApp numbers and choose which plans can reach them; the highest plan always reaches every pastor
 
 ### Partner access by plan & payment lockout
