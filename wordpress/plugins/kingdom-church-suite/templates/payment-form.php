@@ -22,6 +22,12 @@ $gateways   = KCS_Payments::enabled_gateways();
 $currencies = KCS_Payments::allowed_currencies();
 $purposes   = kcs_giving_purposes();
 $uid        = 'kcs-pay-' . wp_rand( 1000, 99999 );
+$regions    = kcs_regions();
+$split      = count( $regions ) > 1 && 'partnership' !== $context;
+$region     = kcs_currency_region( $currency );
+if ( $split && empty( $amounts ) ) {
+	$amounts = array();
+}
 
 if ( ! $gateways ) {
 	echo '<div class="kcs-alert kcs-alert--info">' . esc_html__( 'Online giving is not available yet. Please check back soon.', 'kingdom-church-suite' ) . '</div>';
@@ -31,8 +37,12 @@ if ( ! $gateways ) {
 	return;
 }
 ?>
-<form class="kcs-form kcs-pay-form" data-kcs-payment-form id="<?php echo esc_attr( $uid ); ?>">
+<form class="kcs-form kcs-pay-form" data-kcs-payment-form id="<?php echo esc_attr( $uid ); ?>"<?php echo $split ? ' data-kcs-region-scope data-region="' . esc_attr( $region ) . '"' : ''; ?>>
 	<?php if ( $title ) : ?><h3 class="kcs-form__title"><?php echo esc_html( $title ); ?></h3><?php endif; ?>
+
+	<?php if ( $split ) : ?>
+		<?php echo kcs_region_toggle( $region ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+	<?php endif; ?>
 
 	<?php if ( 'partnership' === $context ) : ?>
 		<input type="hidden" name="purpose" value="partnership">
@@ -50,6 +60,10 @@ if ( ! $gateways ) {
 	<?php endif; ?>
 
 	<div class="kcs-amount-row">
+		<?php if ( $split ) : ?>
+			<input type="hidden" name="currency" value="<?php echo esc_attr( $currency ); ?>" data-kcs-currency>
+			<span class="kcs-currency kcs-currency--fixed" aria-hidden="true"><?php foreach ( $regions as $rk => $r ) : ?><b class="kcs-in-<?php echo esc_attr( $rk ); ?>"><?php echo esc_html( kcs_currency_symbol( $r['currency'] ) . ' ' . $r['currency'] ); ?></b><?php endforeach; ?></span>
+		<?php else : ?>
 		<label class="kcs-currency"><?php esc_html_e( 'Currency', 'kingdom-church-suite' ); ?>
 			<select name="currency" data-kcs-currency>
 				<?php foreach ( $currencies as $code => $label ) : ?>
@@ -57,12 +71,21 @@ if ( ! $gateways ) {
 				<?php endforeach; ?>
 			</select>
 		</label>
+		<?php endif; ?>
 		<label class="kcs-amount"><?php esc_html_e( 'Amount', 'kingdom-church-suite' ); ?>
 			<input type="number" name="amount" min="<?php echo esc_attr( kcs_get_option( 'min_amount', 1 ) ); ?>" step="0.01" required value="<?php echo esc_attr( $amount ); ?>" inputmode="decimal">
 		</label>
 	</div>
 
-	<?php if ( ! empty( $amounts ) ) : ?>
+	<?php if ( $split ) : ?>
+		<?php foreach ( array_keys( $regions ) as $rk ) : ?>
+			<div class="kcs-presets kcs-in-<?php echo esc_attr( $rk ); ?>" role="group" aria-label="<?php esc_attr_e( 'Quick amounts', 'kingdom-church-suite' ); ?>">
+				<?php foreach ( ( 'international' === $rk && ! empty( $amounts ) ) ? $amounts : kcs_region_amounts( $rk ) as $preset ) : ?>
+					<button type="button" class="kcs-preset" data-amount="<?php echo esc_attr( $preset ); ?>"><?php echo esc_html( kcs_currency_symbol( $regions[ $rk ]['currency'] ) . number_format_i18n( $preset ) ); ?></button>
+				<?php endforeach; ?>
+			</div>
+		<?php endforeach; ?>
+	<?php elseif ( ! empty( $amounts ) ) : ?>
 		<div class="kcs-presets" role="group" aria-label="<?php esc_attr_e( 'Quick amounts', 'kingdom-church-suite' ); ?>">
 			<?php foreach ( $amounts as $preset ) : ?>
 				<button type="button" class="kcs-preset" data-amount="<?php echo esc_attr( $preset ); ?>"><?php echo esc_html( number_format_i18n( $preset ) ); ?></button>

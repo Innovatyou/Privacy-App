@@ -10,8 +10,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$freqs      = kcs_frequencies();
-$currencies = KCS_Payments::allowed_currencies();
+$freqs   = kcs_frequencies();
+$regions = kcs_regions();
 // phpcs:ignore WordPress.Security.NonceVerification.Missing -- repopulating the form after a failed, nonce-checked submit.
 $old = function ( $key, $default = '' ) {
 	return isset( $_POST[ $key ] ) ? sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) : $default; // phpcs:ignore WordPress.Security.NonceVerification.Missing
@@ -24,9 +24,20 @@ if ( ! $selected && $plans ) {
 	}
 }
 $selected = (int) $old( 'plan_id', $selected );
+// International (USD by default) is preselected; partners can switch to the local currency.
+$region = kcs_sanitize_region( $old( 'region', isset( $_GET['region'] ) ? sanitize_key( $_GET['region'] ) : 'international' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 ?>
-<form method="post" class="kcs-form kcs-register" data-kcs-register>
+<form method="post" class="kcs-form kcs-register" data-kcs-register data-kcs-region-scope data-region="<?php echo esc_attr( $region ); ?>">
 	<h3 class="kcs-form__title"><?php esc_html_e( 'Become a Partner', 'kingdom-church-suite' ); ?></h3>
+
+	<?php if ( count( $regions ) > 1 ) : ?>
+		<fieldset class="kcs-region-field">
+			<legend><?php esc_html_e( 'I am partnering as', 'kingdom-church-suite' ); ?></legend>
+			<?php echo kcs_region_toggle( $region, 'region' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+		</fieldset>
+	<?php else : ?>
+		<input type="hidden" name="region" value="international">
+	<?php endif; ?>
 
 	<fieldset class="kcs-plan-picker">
 		<legend><?php esc_html_e( '1. Choose your partnership', 'kingdom-church-suite' ); ?></legend>
@@ -35,7 +46,7 @@ $selected = (int) $old( 'plan_id', $selected );
 				<input type="radio" name="plan_id" value="<?php echo (int) $plan->id; ?>" <?php checked( $selected, (int) $plan->id ); ?> required>
 				<span>
 					<strong><?php echo esc_html( $plan->name ); ?></strong>
-					<em><?php echo $plan->amount > 0 ? esc_html( kcs_format_money( $plan->amount, $plan->currency ) . ' / ' . strtolower( $freqs[ $plan->frequency ] ?? '' ) ) : esc_html__( 'Choose amount', 'kingdom-church-suite' ); ?></em>
+					<em><?php echo KCS_Plans::is_custom( $plan ) ? esc_html__( 'Choose amount', 'kingdom-church-suite' ) : KCS_Plans::price_html( $plan ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></em>
 				</span>
 			</label>
 		<?php endforeach; ?>
@@ -43,14 +54,7 @@ $selected = (int) $old( 'plan_id', $selected );
 
 	<div class="kcs-custom-amount" data-kcs-custom-amount>
 		<div class="kcs-grid-3">
-			<label><?php esc_html_e( 'Currency', 'kingdom-church-suite' ); ?>
-				<select name="currency">
-					<?php foreach ( $currencies as $code => $label ) : ?>
-						<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $old( 'currency', kcs_get_option( 'currency', 'USD' ) ), $code ); ?>><?php echo esc_html( $code ); ?></option>
-					<?php endforeach; ?>
-				</select>
-			</label>
-			<label><?php esc_html_e( 'Amount', 'kingdom-church-suite' ); ?><input type="number" step="0.01" min="1" name="amount" value="<?php echo esc_attr( $old( 'amount' ) ); ?>"></label>
+			<label><?php esc_html_e( 'Amount', 'kingdom-church-suite' ); ?> <?php foreach ( $regions as $rk => $r ) : ?><span class="kcs-in-<?php echo esc_attr( $rk ); ?>">(<?php echo esc_html( $r['currency'] ); ?>)</span><?php endforeach; ?><input type="number" step="0.01" min="1" name="amount" value="<?php echo esc_attr( $old( 'amount' ) ); ?>"></label>
 			<label><?php esc_html_e( 'Frequency', 'kingdom-church-suite' ); ?>
 				<select name="frequency">
 					<?php foreach ( $freqs as $k => $label ) : ?>

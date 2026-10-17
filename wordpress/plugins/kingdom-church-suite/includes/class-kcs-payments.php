@@ -108,8 +108,14 @@ class KCS_Payments {
 				$out[ $c ] = $all[ $c ];
 			}
 		}
+		// The international (default) and local currencies are always available.
+		$local = kcs_local_currency();
+		if ( $local && ! isset( $out[ $local ] ) ) {
+			$out = array( $local => $all[ $local ] ) + $out;
+		}
 		$default = kcs_get_option( 'currency', 'USD' );
-		if ( ! isset( $out[ $default ] ) && isset( $all[ $default ] ) ) {
+		if ( isset( $all[ $default ] ) ) {
+			unset( $out[ $default ] );
 			$out = array( $default => $all[ $default ] ) + $out;
 		}
 		return $out;
@@ -315,7 +321,7 @@ class KCS_Payments {
 	 * @return array
 	 */
 	public static function email_vars( $payment ) {
-		$purposes = kcs_giving_purposes();
+		$purposes = kcs_all_purposes();
 		$gateway  = self::gateway( $payment->gateway );
 		return array(
 			'name'      => $payment->name ? $payment->name : $payment->email,

@@ -88,6 +88,7 @@ class KCS_Installer {
 			benefits text NULL,
 			amount decimal(15,2) NOT NULL DEFAULT 0,
 			currency varchar(10) NOT NULL DEFAULT 'USD',
+			local_amount decimal(15,2) NOT NULL DEFAULT 0,
 			frequency varchar(20) NOT NULL DEFAULT 'monthly',
 			allow_custom_amount tinyint(1) NOT NULL DEFAULT 0,
 			is_active tinyint(1) NOT NULL DEFAULT 1,
@@ -283,6 +284,7 @@ class KCS_Installer {
 			'partner_register'  => array( __( 'Become a Partner', 'kingdom-church-suite' ), '[kcs_partner_register]' ),
 			'partner_dashboard' => array( __( 'Partner Dashboard', 'kingdom-church-suite' ), '[kcs_partner_dashboard]' ),
 			'give'              => array( __( 'Give Online', 'kingdom-church-suite' ), '[kcs_give]' ),
+			'tithe'             => array( __( 'Tithe & Offering', 'kingdom-church-suite' ), '[kcs_tithe]' ),
 			'thank_you'         => array( __( 'Thank You', 'kingdom-church-suite' ), '[kcs_payment_status]' ),
 			'watch_live'        => array( __( 'Watch Live', 'kingdom-church-suite' ), '[kcs_livestream chat="yes"]' ),
 			'prayer'            => array( __( 'Prayer Request', 'kingdom-church-suite' ), '[kcs_prayer_form][kcs_prayer_wall]' ),
@@ -336,10 +338,10 @@ class KCS_Installer {
 		}
 		$currency = 'USD';
 		$plans    = array(
-			array( 'Seed Partner', 'Sow a monthly seed into the vision.', "Monthly partner newsletter\nPrayer covering\nPartner-only updates", 25, 0, 0 ),
-			array( 'Kingdom Builder', 'Help us reach more souls every month.', "Everything in Seed\nQuarterly partner meeting\nExclusive teaching resources", 100, 1, 1 ),
-			array( 'Covenant Partner', 'Stand with us at the highest level.', "Everything in Kingdom Builder\nAnnual partners' banquet\nDirect line to the pastoral team", 500, 0, 2 ),
-			array( 'Custom Partnership', 'Choose your own amount and frequency.', 'Give as the Lord leads you', 0, 0, 3 ),
+			array( 'Seed Partner', 'Sow a monthly seed into the vision.', "Monthly partner newsletter\nPrayer covering\nPartner-only updates", 25, 0, 0, 10000 ),
+			array( 'Kingdom Builder', 'Help us reach more souls every month.', "Everything in Seed\nQuarterly partner meeting\nExclusive teaching resources", 100, 1, 1, 50000 ),
+			array( 'Covenant Partner', 'Stand with us at the highest level.', "Everything in Kingdom Builder\nAnnual partners' banquet\nDirect line to the pastoral team", 500, 0, 2, 250000 ),
+			array( 'Custom Partnership', 'Choose your own amount and frequency.', 'Give as the Lord leads you', 0, 0, 3, 0 ),
 		);
 		foreach ( $plans as $p ) {
 			$wpdb->insert(
@@ -350,6 +352,7 @@ class KCS_Installer {
 					'benefits'            => $p[2],
 					'amount'              => $p[3],
 					'currency'            => $currency,
+					'local_amount'        => $p[6],
 					'frequency'           => 'monthly',
 					'allow_custom_amount' => 0 === $p[3] ? 1 : 0,
 					'is_featured'         => $p[4],

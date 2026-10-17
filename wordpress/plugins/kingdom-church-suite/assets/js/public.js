@@ -43,6 +43,38 @@
 		else { btn.textContent = btn.dataset.label || btn.textContent; btn.disabled = false; }
 	}
 
+	/* International / Local switch --------------------------------------- */
+	document.querySelectorAll('[data-kcs-region-scope]').forEach(function (scope) {
+		scope.addEventListener('change', function (e) {
+			var radio = e.target;
+			if (!radio.matches || !radio.matches('[data-kcs-region]') || radio.closest('[data-kcs-region-scope]') !== scope) { return; }
+			scope.dataset.region = radio.value;
+			scope.querySelectorAll('input[type="hidden"][name="region"]').forEach(function (i) { i.value = radio.value; });
+			var cur = scope.querySelector('input[type="hidden"][data-kcs-currency]');
+			if (cur && radio.dataset.currency && cur.value !== radio.dataset.currency) {
+				cur.value = radio.dataset.currency;
+				cur.dispatchEvent(new Event('change'));
+				var amt = scope.querySelector('[name="amount"]');
+				if (amt) { amt.value = ''; }
+				scope.querySelectorAll('.kcs-preset.is-active').forEach(function (b) { b.classList.remove('is-active'); });
+			}
+		});
+	});
+
+	/* Tithe calculator --------------------------------------------------- */
+	document.querySelectorAll('[data-kcs-tithe-calc]').forEach(function (box) {
+		var form = box.closest('form'), income = box.querySelector('[data-kcs-income]'), out = box.querySelector('[data-kcs-tenth]');
+		function tenth() { return Math.round((parseFloat(income.value) || 0) * 10) / 100; }
+		income.addEventListener('input', function () { out.textContent = tenth().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); });
+		box.querySelector('[data-kcs-use-tenth]').addEventListener('click', function () {
+			var v = tenth();
+			if (!v) { income.focus(); return; }
+			form.querySelector('[name="amount"]').value = v;
+			var tithe = form.querySelector('[name="purpose"][value="tithe"]');
+			if (tithe) { tithe.checked = true; }
+		});
+	});
+
 	/* Payment forms ------------------------------------------------------ */
 	document.querySelectorAll('[data-kcs-payment-form]').forEach(function (form) {
 		var amount = form.querySelector('[name="amount"]');

@@ -79,6 +79,20 @@ Other theme features: three header styles (classic, centered, transparent over h
 - Partners are kept out of wp-admin and the toolbar is hidden for them
 - Daily cron emails reminders N days before the due date and flags partners **overdue** after 7 days' grace
 
+### Local and international partners (USD by default)
+- Every plan has an **international price** (USD by default) and a **local price** (e.g. NGN), set under *Church Admin → Plans & currency* or *Church Suite → Plans*
+- The partnership page, registration form, partner dashboard, Give page and Tithe & Offering page show an **International / Local** switch. International (USD) is selected by default and visitors can tap Local
+- A partner's choice decides the currency of their commitment, renewals and receipts. Partners can switch later from **Upgrade plan → Pay in …**, and church admins can change it on the partner's record ("Partner type")
+- Payment methods follow the currency automatically: for example PayPal and Stripe for USD; Paystack, Flutterwave and bank transfer for NGN
+- Settings: international currency, local currency (or "no local option"), labels for both (e.g. "Nigeria"), and quick-pick amounts for each. If a plan has no local price, local partners pay the international price
+- REST: `GET /kcs/v1/plans` returns `prices` for each region; `PUT /kcs/v1/me/plan` and registration accept `region` (`international` or `local`)
+
+### Tithe & Offering page
+- `[kcs_tithe]` (page created automatically; the theme's **Tithe & Offering** page template adds the scripture, giving explanations and an FAQ around it)
+- Giving types as cards: Tithe, Offering, Thanksgiving, First Fruit and Seed (editable under *Settings → Giving & partnership → Tithe & Offering page options*). Link to a type with `?type=offering` or `[kcs_tithe type="offering"]`
+- International (USD) / Local switch with quick amounts for each currency, a 10% **tithe calculator**, an optional prayer note, and an emailed receipt
+- *Church Admin → Payments* shows this month's totals per purpose (tithe, offering, partnership…) and filters payments by purpose
+
 ### Church Admin dashboard (front end, no wp-admin)
 A full church-management dashboard on the **Church Admin** page (`[kcs_church_admin]`), built for church staff with the **Church Admin** role. That role never sees WordPress: logging in goes straight to the dashboard, and wp-admin redirects back to it.
 - **Overview**: active vs overdue (locked) partners, money received, payments due this week, partners by plan
@@ -88,6 +102,7 @@ A full church-management dashboard on the **Church Admin** page (`[kcs_church_ad
 - **Notify partners**: by plan and status, by email and/or as an update on their dashboard (announcement, event or resource with a link)
 - **Website WhatsApp chat**: turn the floating "Chat with us" button on or off, and set the greeting, office hours and contacts (e.g. General enquiries, Prayer line, First-time visitors), each with its own number and pre-filled message (`{church}` and `{page}` are filled in automatically)
 - **Website**: banner video link, hide banner text, sound button, banner height and overlay, and an on/off switch for every website section
+- **Plans & currency**: international and local currency settings, and each plan's USD and local price, benefits, level and status
 - **Pastors & WhatsApp**: add pastors with WhatsApp numbers and choose which plans can reach them; the highest plan always reaches every pastor
 
 ### Partner access by plan & payment lockout

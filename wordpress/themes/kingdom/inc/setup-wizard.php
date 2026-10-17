@@ -23,6 +23,7 @@ function kingdom_starter_pages() {
 		'events'      => array( __( 'Events', 'kingdom' ), 'template-events.php', '', '' ),
 		'watch'       => array( __( 'Watch Live', 'kingdom' ), 'template-watch-live.php', '', 'watch_live' ),
 		'give'        => array( __( 'Give Online', 'kingdom' ), 'template-give.php', '', 'give' ),
+		'tithe'       => array( __( 'Tithe & Offering', 'kingdom' ), 'template-tithe-offering.php', '', 'tithe' ),
 		'partnership' => array( __( 'Partnership', 'kingdom' ), 'template-partnership.php', '', 'partnership' ),
 		'portal'      => array( __( 'Partner Dashboard', 'kingdom' ), 'template-partner-portal.php', '[kcs_partner_dashboard]', 'partner_dashboard' ),
 		'visit'       => array( __( 'Plan Your Visit', 'kingdom' ), 'template-plan-visit.php', '', 'visit' ),
@@ -148,7 +149,7 @@ function kingdom_setup_run() {
 	$primary = array( 'home', 'about' => array( 'leadership', 'beliefs', 'testimonies' ), 'ministries', 'sermons', 'events', 'watch', 'partnership', 'contact' );
 	$menus   = array(
 		'primary' => array( __( 'Main Menu', 'kingdom' ), $primary ),
-		'footer'  => array( __( 'Footer Menu', 'kingdom' ), array( 'new', 'visit', 'prayer', 'give', 'portal', 'blog' ) ),
+		'footer'  => array( __( 'Footer Menu', 'kingdom' ), array( 'new', 'visit', 'prayer', 'give', 'tithe', 'portal', 'blog' ) ),
 	);
 	$locations = get_theme_mod( 'nav_menu_locations', array() );
 	foreach ( $menus as $location => $menu ) {

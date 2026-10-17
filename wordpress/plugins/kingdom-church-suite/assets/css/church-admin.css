@@ -82,3 +82,11 @@
 @media (min-width: 640px) { .kca-switches { grid-template-columns: 1fr 1fr; } }
 .kca-switch { padding: .55rem .7rem; border-radius: 10px; border: 1px solid var(--kcs-border); }
 .kca-switch:has(input:not(:checked)) { opacity: .6; }
+
+/* Plans & currency */
+.kca-plans { display: grid; gap: .75rem; margin-top: 1rem; }
+.kca-plan > summary { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .8rem; cursor: pointer; list-style: none; }
+.kca-plan > summary::-webkit-details-marker { display: none; }
+.kca-plan > summary .kcs-muted { flex: 1 1 200px; font-size: .9rem; }
+.kca-plan[open] > summary { margin-bottom: 1rem; padding-bottom: .8rem; border-bottom: 1px solid var(--kcs-border); }
+.kca-kpis + .kca-filters { margin-top: 1rem; }

@@ -22,6 +22,7 @@ class KCS_Shortcodes {
 			'kcs_partner_login'     => 'login',
 			'kcs_partner_dashboard' => 'dashboard',
 			'kcs_give'              => 'give',
+			'kcs_tithe'             => 'tithe',
 			'kcs_payment_status'    => 'payment_status',
 			'kcs_newsletter'        => 'newsletter',
 			'kcs_livestream'        => 'livestream',
@@ -124,7 +125,7 @@ class KCS_Shortcodes {
 		$atts = shortcode_atts(
 			array(
 				'purpose' => '',
-				'amounts' => '10,25,50,100,250',
+				'amounts' => '',
 				'title'   => '',
 			),
 			$atts,
@@ -136,13 +137,44 @@ class KCS_Shortcodes {
 			array(
 				'context'  => 'donation',
 				'purpose'  => sanitize_key( $atts['purpose'] ),
-				'amounts'  => array_filter( array_map( 'floatval', explode( ',', $atts['amounts'] ) ) ),
+				'amounts'  => $atts['amounts'] ? array_filter( array_map( 'floatval', explode( ',', $atts['amounts'] ) ) ) : kcs_region_amounts( 'international' ),
 				'title'    => $atts['title'],
 				'amount'   => '',
 				'currency' => kcs_get_option( 'currency', 'USD' ),
 				'name'     => $user->exists() ? $user->display_name : '',
 				'email'    => $user->exists() ? $user->user_email : '',
 				'partner'  => null,
+			)
+		);
+	}
+
+	/**
+	 * Tithe & Offering form.
+	 *
+	 * @param array $atts type (preselected giving type), title.
+	 * @return string
+	 */
+	public static function tithe( $atts ) {
+		$atts = shortcode_atts(
+			array(
+				'type'  => isset( $_GET['type'] ) ? sanitize_key( $_GET['type'] ) : 'tithe', // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				'title' => __( 'Give your tithe & offering', 'kingdom-church-suite' ),
+			),
+			$atts,
+			'kcs_tithe'
+		);
+		$user    = wp_get_current_user();
+		$partner = $user->exists() ? KCS_Partners::get_by_user( $user->ID ) : null;
+		return kcs_get_template(
+			'tithe-offering',
+			array(
+				'types'  => kcs_tithe_types(),
+				'type'   => sanitize_key( $atts['type'] ),
+				'title'  => $atts['title'],
+				'region' => $partner ? kcs_currency_region( $partner->currency ) : 'international',
+				'name'   => $user->exists() ? $user->display_name : '',
+				'email'  => $user->exists() ? $user->user_email : '',
+				'phone'  => $partner ? $partner->phone : '',
 			)
 		);
 	}

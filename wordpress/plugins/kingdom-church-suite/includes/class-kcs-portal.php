@@ -213,7 +213,7 @@ class KCS_Portal {
 			'city'         => $data['city'] ?? '',
 			'plan_id'      => $plan ? $plan->id : 0,
 			'amount'       => $data['amount'] ?? '',
-			'currency'     => $data['currency'] ?? '',
+			'region'       => kcs_sanitize_region( $data['region'] ?? 'international' ),
 			'frequency'    => ( ! $plan || $plan->allow_custom_amount ) ? ( $data['frequency'] ?? '' ) : '',
 			'password'     => $data['password'] ?? '',
 			'email_opt_in' => ! empty( $data['email_opt_in'] ),
@@ -256,9 +256,10 @@ class KCS_Portal {
 			$plan = KCS_Plans::get( (int) $data['plan_id'] );
 			if ( $plan && $plan->is_active ) {
 				$update['plan_id'] = $plan->id;
-				if ( ! $plan->allow_custom_amount && $plan->amount > 0 ) {
-					$update['amount']    = $plan->amount;
-					$update['currency']  = $plan->currency;
+				if ( ! KCS_Plans::is_custom( $plan ) ) {
+					$price               = KCS_Plans::price( $plan, kcs_currency_region( $partner->currency ) );
+					$update['amount']    = $price['amount'];
+					$update['currency']  = $price['currency'];
 					$update['frequency'] = $plan->frequency;
 				}
 			}
@@ -271,8 +272,8 @@ class KCS_Portal {
 			if ( ! empty( $data['frequency'] ) ) {
 				$update['frequency'] = $data['frequency'];
 			}
-			if ( ! empty( $data['currency'] ) ) {
-				$update['currency'] = $data['currency'];
+			if ( ! empty( $data['region'] ) ) {
+				$update['currency'] = kcs_region_currency( $data['region'] );
 			}
 		}
 		if ( 'paused' === $partner->status && ! empty( $data['resume'] ) ) {
@@ -309,7 +310,7 @@ class KCS_Portal {
 		if ( ! $partner ) {
 			return;
 		}
-		$result = KCS_Partners::change_plan( $partner, absint( $data['plan_id'] ?? 0 ), (float) ( $data['amount'] ?? 0 ), sanitize_key( $data['frequency'] ?? '' ) );
+		$result = KCS_Partners::change_plan( $partner, absint( $data['plan_id'] ?? 0 ), (float) ( $data['amount'] ?? 0 ), sanitize_key( $data['frequency'] ?? '' ), sanitize_key( $data['region'] ?? '' ) );
 		if ( is_wp_error( $result ) ) {
 			self::add_message( $result->get_error_message() );
 			return;

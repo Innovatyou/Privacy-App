@@ -252,8 +252,8 @@ class KCS_REST_API {
 			// Guests can sow a partnership seed, but it is not tied to a partner record.
 			$args['purpose'] = 'partnership';
 		}
-		$purposes = kcs_giving_purposes();
-		if ( ! isset( $purposes[ $args['purpose'] ] ) && ! in_array( $args['purpose'], array( 'partnership', 'donation' ), true ) ) {
+		$purposes = kcs_all_purposes();
+		if ( ! isset( $purposes[ $args['purpose'] ] ) ) {
 			$args['purpose'] = 'donation';
 		}
 
@@ -501,7 +501,7 @@ class KCS_REST_API {
 	 */
 	public static function change_my_plan( $req ) {
 		$partner = KCS_Partners::get_by_user( get_current_user_id() );
-		$result  = KCS_Partners::change_plan( $partner, (int) $req['plan_id'], (float) $req['amount'], sanitize_key( (string) $req['frequency'] ) );
+		$result  = KCS_Partners::change_plan( $partner, (int) $req['plan_id'], (float) $req['amount'], sanitize_key( (string) $req['frequency'] ), sanitize_key( (string) $req['region'] ) );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}

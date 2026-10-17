@@ -248,6 +248,7 @@ class KCS_Admin {
 					'[kcs_partner_login]'                         => __( 'Partner login form', 'kingdom-church-suite' ),
 					'[kcs_partner_dashboard]'                     => __( 'Partner dashboard (give, history, profile)', 'kingdom-church-suite' ),
 					'[kcs_give purpose="" amounts="10,25,50,100"]' => __( 'Online giving form', 'kingdom-church-suite' ),
+					'[kcs_tithe type="tithe"]'                    => __( 'Tithe & Offering form (International / Local, tithe calculator)', 'kingdom-church-suite' ),
 					'[kcs_payment_status]'                        => __( 'Payment result page', 'kingdom-church-suite' ),
 					'[kcs_livestream chat="yes" platform="youtube|facebook|custom"]' => __( 'Live stream player with chat', 'kingdom-church-suite' ),
 					'[kcs_live_badge]'                            => __( '"Live now" badge', 'kingdom-church-suite' ),
@@ -567,7 +568,7 @@ class KCS_Admin {
 				<?php foreach ( $gateways as $g ) : ?><option value="<?php echo esc_attr( $g->id ); ?>" <?php selected( $filters['gateway'], $g->id ); ?>><?php echo esc_html( $g->title ); ?></option><?php endforeach; ?>
 			</select>
 			<select name="purpose"><option value=""><?php esc_html_e( 'All purposes', 'kingdom-church-suite' ); ?></option>
-				<?php foreach ( array_merge( array( 'partnership' => __( 'Partnership', 'kingdom-church-suite' ), 'donation' => __( 'Donation', 'kingdom-church-suite' ) ), kcs_giving_purposes() ) as $k => $l ) : ?><option value="<?php echo esc_attr( $k ); ?>" <?php selected( $filters['purpose'], $k ); ?>><?php echo esc_html( $l ); ?></option><?php endforeach; ?>
+				<?php foreach ( kcs_all_purposes() as $k => $l ) : ?><option value="<?php echo esc_attr( $k ); ?>" <?php selected( $filters['purpose'], $k ); ?>><?php echo esc_html( $l ); ?></option><?php endforeach; ?>
 			</select>
 			<input type="date" name="date_from" value="<?php echo esc_attr( $filters['date_from'] ); ?>"> – <input type="date" name="date_to" value="<?php echo esc_attr( $filters['date_to'] ); ?>">
 			<?php if ( $filters['partner_id'] ) : ?><input type="hidden" name="partner_id" value="<?php echo (int) $filters['partner_id']; ?>"><?php endif; ?>
@@ -637,7 +638,7 @@ class KCS_Admin {
 					<?php foreach ( KCS_Plans::all() as $plan ) : ?>
 						<tr>
 							<td><strong><?php echo esc_html( $plan->name ); ?></strong><?php echo $plan->is_featured ? ' ⭐' : ''; ?><br><small><?php echo esc_html( $plan->description ); ?></small></td>
-							<td><?php echo $plan->amount > 0 ? esc_html( kcs_format_money( $plan->amount, $plan->currency ) ) : esc_html__( 'Custom', 'kingdom-church-suite' ); ?></td>
+							<td><?php echo $plan->amount > 0 ? esc_html( kcs_format_money( $plan->amount, $plan->currency ) ) : esc_html__( 'Custom', 'kingdom-church-suite' ); ?><?php echo kcs_local_currency() && (float) $plan->local_amount > 0 ? '<br><small>' . esc_html( KCS_Plans::price_label( $plan, 'local', false ) ) . '</small>' : ''; ?></td>
 							<td><?php echo esc_html( $freqs[ $plan->frequency ] ?? '' ); ?></td>
 							<td><?php echo kcs_status_badge( $plan->is_active ? 'active' : 'inactive' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
 							<td>
@@ -661,7 +662,12 @@ class KCS_Admin {
 					<select name="currency"><?php foreach ( kcs_currencies() as $c => $l ) : ?><option value="<?php echo esc_attr( $c ); ?>" <?php selected( $v( 'currency', kcs_get_option( 'currency', 'USD' ) ), $c ); ?>><?php echo esc_html( $c ); ?></option><?php endforeach; ?></select>
 					<input type="number" step="0.01" min="0" name="amount" value="<?php echo esc_attr( $v( 'amount', 0 ) ); ?>" style="width:120px">
 					<select name="frequency"><?php foreach ( $freqs as $k => $l ) : ?><option value="<?php echo esc_attr( $k ); ?>" <?php selected( $v( 'frequency', 'monthly' ), $k ); ?>><?php echo esc_html( $l ); ?></option><?php endforeach; ?></select>
+					<br><small><?php esc_html_e( 'International price — selected by default for partners.', 'kingdom-church-suite' ); ?></small>
 				</p>
+				<?php if ( kcs_local_currency() ) : ?>
+					<?php /* translators: %s: currency code */ ?>
+					<p><label><?php printf( esc_html__( 'Local price (%s)', 'kingdom-church-suite' ), esc_html( kcs_local_currency() ) ); ?> <input type="number" step="0.01" min="0" name="local_amount" value="<?php echo esc_attr( $v( 'local_amount', 0 ) ); ?>" style="width:140px"></label><br><small><?php esc_html_e( 'Paid by local partners. Leave 0 to use the international price.', 'kingdom-church-suite' ); ?></small></p>
+				<?php endif; ?>
 				<p><label><input type="checkbox" name="allow_custom_amount" value="1" <?php checked( (int) $v( 'allow_custom_amount', 0 ), 1 ); ?>> <?php esc_html_e( 'Partner chooses amount & frequency', 'kingdom-church-suite' ); ?></label></p>
 				<p><label><input type="checkbox" name="is_featured" value="1" <?php checked( (int) $v( 'is_featured', 0 ), 1 ); ?>> <?php esc_html_e( 'Featured ("Most popular")', 'kingdom-church-suite' ); ?></label></p>
 				<p><label><input type="checkbox" name="is_active" value="1" <?php checked( (int) $v( 'is_active', 1 ), 1 ); ?>> <?php esc_html_e( 'Active', 'kingdom-church-suite' ); ?></label></p>

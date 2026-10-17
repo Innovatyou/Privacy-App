@@ -160,13 +160,140 @@ function kcs_next_due_date( $frequency, $from = null ) {
  * @return array
  */
 function kcs_giving_purposes() {
-	$raw  = kcs_get_option( 'giving_purposes', "Tithe\nOffering\nPartnership\nBuilding Project\nMissions\nWelfare" );
+	$raw  = kcs_get_option( 'giving_purposes', "Tithe\nOffering\nThanksgiving\nFirst Fruit\nSeed\nPartnership\nBuilding Project\nMissions\nWelfare" );
 	$list = array_filter( array_map( 'trim', explode( "\n", $raw ) ) );
 	$out  = array();
 	foreach ( $list as $item ) {
 		$out[ sanitize_title( $item ) ] = $item;
 	}
 	return apply_filters( 'kcs_giving_purposes', $out );
+}
+
+/**
+ * Giving types shown on the Tithe & Offering page.
+ *
+ * @return array slug => label.
+ */
+function kcs_tithe_types() {
+	$raw = kcs_get_option( 'tithe_types', "Tithe\nOffering\nThanksgiving\nFirst Fruit\nSeed" );
+	$out = array();
+	foreach ( array_filter( array_map( 'trim', explode( "\n", $raw ) ) ) as $item ) {
+		$out[ sanitize_title( $item ) ] = $item;
+	}
+	return apply_filters( 'kcs_tithe_types', $out );
+}
+
+/**
+ * Every purpose a payment may be recorded against.
+ *
+ * @return array slug => label.
+ */
+function kcs_all_purposes() {
+	return array_merge(
+		array(
+			'donation'    => __( 'Donation', 'kingdom-church-suite' ),
+			'partnership' => __( 'Partnership', 'kingdom-church-suite' ),
+		),
+		kcs_giving_purposes(),
+		kcs_tithe_types()
+	);
+}
+
+/**
+ * Local currency, or '' when the church only uses its international currency.
+ *
+ * @return string
+ */
+function kcs_local_currency() {
+	$intl  = kcs_get_option( 'currency', 'USD' );
+	$local = strtoupper( (string) kcs_get_option( 'local_currency', 'NGN' ) );
+	return ( $local !== $intl && array_key_exists( $local, kcs_currencies() ) ) ? $local : '';
+}
+
+/**
+ * Partner/giver regions. International (the default currency) always comes first.
+ *
+ * @return array region => array( label, currency ).
+ */
+function kcs_regions() {
+	$out = array(
+		'international' => array(
+			'label'    => kcs_get_option( 'international_label', __( 'International', 'kingdom-church-suite' ) ),
+			'currency' => kcs_get_option( 'currency', 'USD' ),
+		),
+	);
+	$local = kcs_local_currency();
+	if ( $local ) {
+		$out['local'] = array(
+			'label'    => kcs_get_option( 'local_label', __( 'Local', 'kingdom-church-suite' ) ),
+			'currency' => $local,
+		);
+	}
+	return $out;
+}
+
+/**
+ * Clean a region value, falling back to international.
+ *
+ * @param string $region Region.
+ * @return string
+ */
+function kcs_sanitize_region( $region ) {
+	return array_key_exists( (string) $region, kcs_regions() ) ? (string) $region : 'international';
+}
+
+/**
+ * Currency for a region.
+ *
+ * @param string $region Region.
+ * @return string
+ */
+function kcs_region_currency( $region ) {
+	$regions = kcs_regions();
+	return $regions[ kcs_sanitize_region( $region ) ]['currency'];
+}
+
+/**
+ * Region a currency belongs to.
+ *
+ * @param string $currency Currency.
+ * @return string
+ */
+function kcs_currency_region( $currency ) {
+	$local = kcs_local_currency();
+	return $local && strtoupper( (string) $currency ) === $local ? 'local' : 'international';
+}
+
+/**
+ * Quick-pick amounts for a region.
+ *
+ * @param string $region Region.
+ * @return float[]
+ */
+function kcs_region_amounts( $region ) {
+	$raw = 'local' === $region ? kcs_get_option( 'amounts_local', '5000,10000,20000,50000,100000,250000' ) : kcs_get_option( 'amounts_international', '10,25,50,100,250,500' );
+	return array_values( array_filter( array_map( 'floatval', explode( ',', (string) $raw ) ) ) );
+}
+
+/**
+ * International / Local switch. With $name it is a real form field; otherwise it only changes the view.
+ *
+ * @param string $selected Selected region.
+ * @param string $name     Field name ('' for a view-only switch).
+ * @return string
+ */
+function kcs_region_toggle( $selected = 'international', $name = '' ) {
+	$regions = kcs_regions();
+	if ( count( $regions ) < 2 ) {
+		return '';
+	}
+	$group = $name ? $name : 'kcs_region_view_' . wp_rand( 1000, 99999 );
+	$html  = '<div class="kcs-region" role="radiogroup" aria-label="' . esc_attr__( 'Where are you giving from?', 'kingdom-church-suite' ) . '">';
+	foreach ( $regions as $key => $r ) {
+		$icon  = 'local' === $key ? '📍' : '🌍';
+		$html .= '<label class="kcs-region__opt"><input type="radio" data-kcs-region data-currency="' . esc_attr( $r['currency'] ) . '" name="' . esc_attr( $group ) . '" value="' . esc_attr( $key ) . '"' . checked( $selected, $key, false ) . '><span>' . $icon . ' ' . esc_html( $r['label'] ) . ' <b>' . esc_html( $r['currency'] ) . '</b></span></label>';
+	}
+	return $html . '</div>';
 }
 
 /**
@@ -267,8 +394,11 @@ function kcs_get_template( $name, $vars = array() ) {
 		return '';
 	}
 	ob_start();
-	extract( $vars, EXTR_SKIP ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
-	include $file;
+	// Include from a clean scope so template variables such as $name are not shadowed by this function's own.
+	( static function ( $kcs_file, $kcs_vars ) {
+		extract( $kcs_vars, EXTR_SKIP ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
+		include $kcs_file;
+	} )( $file, $vars );
 	return ob_get_clean();
 }
 

@@ -711,3 +711,21 @@ body:has(.k-wa) .k-to-top { right: auto; left: max(1.25rem, env(safe-area-inset-
 	.has-transparent-header .k-hero--h-video .k-scroll-cue { display: none; }
 	.k-hero__sound { padding: .45rem .8rem; font-size: .82rem; bottom: .75rem; }
 }
+
+/* Tithe & Offering page ----------------------------------------------------- */
+.k-tithe { display: grid; gap: clamp(1.5rem, 4vw, 3rem); align-items: start; }
+@media (min-width: 960px) { .k-tithe { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); } .k-tithe__intro { position: sticky; top: calc(var(--k-header-h, 80px) + 1.5rem); } }
+.k-tithe__intro h2 { margin: .4rem 0 .8rem; }
+.k-tithe__verse { margin: 1.5rem 0; padding: 1.2rem 1.4rem; border-radius: var(--k-radius); border-left: 4px solid var(--k-primary); background: var(--k-surface-2); font-size: 1.05rem; }
+.k-tithe__verse p { margin: 0 0 .5rem; font-style: italic; }
+.k-tithe__verse cite { font-style: normal; font-weight: 700; color: var(--k-primary); }
+.k-tithe__points { list-style: none; padding: 0; margin: 0; display: grid; gap: .9rem; }
+.k-tithe__points li { display: flex; gap: .75rem; align-items: flex-start; }
+.k-tithe__points svg { flex: none; width: 22px; height: 22px; margin-top: .15rem; color: var(--k-primary); }
+.k-tithe__form { padding: clamp(1.1rem, 3vw, 2rem); overflow: visible; }
+.k-tithe__form:hover { transform: none; }
+.k-faq { display: grid; gap: .6rem; }
+.k-faq details { padding: 1rem 1.2rem; border-radius: var(--k-radius); border: 1px solid var(--k-border); background: var(--k-surface); }
+.k-faq summary { cursor: pointer; font-weight: 700; }
+.k-faq details[open] summary { margin-bottom: .5rem; color: var(--k-primary); }
+.k-faq p { margin: 0; color: var(--k-muted); }

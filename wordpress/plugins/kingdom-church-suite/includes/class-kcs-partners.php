@@ -164,9 +164,14 @@ class KCS_Partners {
 		$currency  = ! empty( $data['currency'] ) ? $data['currency'] : ( $plan ? $plan->currency : kcs_get_option( 'currency', 'USD' ) );
 		$frequency = ! empty( $data['frequency'] ) ? $data['frequency'] : ( $plan ? $plan->frequency : 'monthly' );
 
-		if ( $plan && ! $plan->allow_custom_amount && $plan->amount > 0 ) {
-			$amount   = (float) $plan->amount;
-			$currency = $plan->currency;
+		// International (default) or local partner: the region decides the currency.
+		if ( ! empty( $data['region'] ) ) {
+			$currency = kcs_region_currency( $data['region'] );
+		}
+		if ( $plan && ! KCS_Plans::is_custom( $plan ) ) {
+			$price    = KCS_Plans::price( $plan, ! empty( $data['region'] ) ? kcs_sanitize_region( $data['region'] ) : kcs_currency_region( $currency ) );
+			$amount   = $price['amount'];
+			$currency = $price['currency'];
 		}
 		if ( $amount <= 0 ) {
 			return new WP_Error( 'kcs_invalid_amount', __( 'Please enter a valid partnership amount.', 'kingdom-church-suite' ) );
@@ -352,21 +357,24 @@ class KCS_Partners {
 	 * @param int    $plan_id   New plan.
 	 * @param float  $amount    Amount for custom-amount plans.
 	 * @param string $frequency Frequency for custom-amount plans.
+	 * @param string $region    international|local; empty keeps the partner's current one.
 	 * @return string|WP_Error  upgraded|downgraded|switched.
 	 */
-	public static function change_plan( $partner, $plan_id, $amount = 0, $frequency = '' ) {
+	public static function change_plan( $partner, $plan_id, $amount = 0, $frequency = '', $region = '' ) {
 		$plan = KCS_Plans::get( (int) $plan_id );
 		if ( ! $plan || ! $plan->is_active ) {
 			return new WP_Error( 'kcs_plan', __( 'Please choose an available plan.', 'kingdom-church-suite' ), array( 'status' => 400 ) );
 		}
-		$custom   = $plan->allow_custom_amount || $plan->amount <= 0;
-		$amount   = $custom ? (float) $amount : (float) $plan->amount;
-		$currency = $custom ? $partner->currency : $plan->currency;
+		$region   = $region ? kcs_sanitize_region( $region ) : kcs_currency_region( $partner->currency );
+		$custom   = KCS_Plans::is_custom( $plan );
+		$price    = KCS_Plans::price( $plan, $region );
+		$amount   = $custom ? (float) $amount : $price['amount'];
+		$currency = $custom ? kcs_region_currency( $region ) : $price['currency'];
 		$freq     = $custom && array_key_exists( $frequency, kcs_frequencies() ) ? $frequency : ( $custom ? $partner->frequency : $plan->frequency );
 		if ( $amount <= 0 ) {
 			return new WP_Error( 'kcs_amount', __( 'Please enter your partnership amount.', 'kingdom-church-suite' ), array( 'status' => 400 ) );
 		}
-		if ( (int) $partner->plan_id === (int) $plan->id && abs( $amount - (float) $partner->amount ) < 0.01 && $freq === $partner->frequency ) {
+		if ( (int) $partner->plan_id === (int) $plan->id && abs( $amount - (float) $partner->amount ) < 0.01 && $freq === $partner->frequency && $currency === $partner->currency ) {
 			return new WP_Error( 'kcs_same_plan', __( 'You are already on this plan.', 'kingdom-church-suite' ), array( 'status' => 400 ) );
 		}
 

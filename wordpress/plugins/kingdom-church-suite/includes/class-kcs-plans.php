@@ -52,6 +52,7 @@ class KCS_Plans {
 			'benefits'            => sanitize_textarea_field( $data['benefits'] ?? '' ),
 			'amount'              => max( 0, (float) ( $data['amount'] ?? 0 ) ),
 			'currency'            => array_key_exists( $data['currency'] ?? '', kcs_currencies() ) ? $data['currency'] : kcs_get_option( 'currency', 'USD' ),
+			'local_amount'        => max( 0, (float) ( $data['local_amount'] ?? 0 ) ),
 			'frequency'           => array_key_exists( $data['frequency'] ?? '', kcs_frequencies() ) ? $data['frequency'] : 'monthly',
 			'allow_custom_amount' => empty( $data['allow_custom_amount'] ) ? 0 : 1,
 			'is_active'           => empty( $data['is_active'] ) ? 0 : 1,
@@ -65,6 +66,66 @@ class KCS_Plans {
 		$row['created_at'] = current_time( 'mysql' );
 		$wpdb->insert( kcs_table( 'plans' ), $row );
 		return (int) $wpdb->insert_id;
+	}
+
+	/**
+	 * Whether partners choose their own amount on this plan.
+	 *
+	 * @param object $plan Plan.
+	 * @return bool
+	 */
+	public static function is_custom( $plan ) {
+		return $plan->allow_custom_amount || $plan->amount <= 0;
+	}
+
+	/**
+	 * Price of a plan for a region.
+	 *
+	 * International partners pay the plan's main price (USD by default). Local partners pay the
+	 * plan's local price in the local currency; if the church has not set one, the main price applies.
+	 *
+	 * @param object $plan   Plan.
+	 * @param string $region international|local.
+	 * @return array{amount: float, currency: string}
+	 */
+	public static function price( $plan, $region = 'international' ) {
+		$local = kcs_local_currency();
+		if ( 'local' === $region && $local && (float) ( $plan->local_amount ?? 0 ) > 0 ) {
+			return array( 'amount' => (float) $plan->local_amount, 'currency' => $local );
+		}
+		return array( 'amount' => (float) $plan->amount, 'currency' => $plan->currency );
+	}
+
+	/**
+	 * Price label for a region, e.g. "₦10,000.00 / monthly".
+	 *
+	 * @param object $plan   Plan.
+	 * @param string $region Region.
+	 * @param bool   $freq   Append the frequency.
+	 * @return string
+	 */
+	public static function price_label( $plan, $region = 'international', $freq = true ) {
+		if ( self::is_custom( $plan ) ) {
+			return __( 'Any amount', 'kingdom-church-suite' );
+		}
+		$p     = self::price( $plan, $region );
+		$freqs = kcs_frequencies();
+		return kcs_format_money( $p['amount'], $p['currency'] ) . ( $freq ? ' / ' . strtolower( $freqs[ $plan->frequency ] ?? $plan->frequency ) : '' );
+	}
+
+	/**
+	 * Prices for every region, wrapped so the International / Local switch can show one at a time.
+	 *
+	 * @param object $plan Plan.
+	 * @param bool   $freq Append the frequency.
+	 * @return string HTML.
+	 */
+	public static function price_html( $plan, $freq = true ) {
+		$html = '';
+		foreach ( array_keys( kcs_regions() ) as $region ) {
+			$html .= '<span class="kcs-in-' . esc_attr( $region ) . '">' . esc_html( self::price_label( $plan, $region, $freq ) ) . '</span>';
+		}
+		return $html;
 	}
 
 	/**
@@ -91,6 +152,12 @@ class KCS_Plans {
 			'benefits'            => array_values( array_filter( array_map( 'trim', explode( "\n", (string) $plan->benefits ) ) ) ),
 			'amount'              => (float) $plan->amount,
 			'currency'            => $plan->currency,
+			'prices'              => array_map(
+				function ( $region ) use ( $plan ) {
+					return array_merge( array( 'region' => $region ), self::price( $plan, $region ) );
+				},
+				array_keys( kcs_regions() )
+			),
 			'frequency'           => $plan->frequency,
 			'allow_custom_amount' => (bool) $plan->allow_custom_amount,
 			'is_featured'         => (bool) $plan->is_featured,

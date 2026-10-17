@@ -157,22 +157,30 @@ $completed = array_filter(
 	<section class="kcs-tab-panel" data-panel="plan">
 		<h3><?php esc_html_e( 'Choose your partnership level', 'kingdom-church-suite' ); ?></h3>
 		<p class="kcs-muted"><?php esc_html_e( 'Upgrade, downgrade or switch at any time. Your next due date stays the same.', 'kingdom-church-suite' ); ?></p>
+		<?php $my_region = kcs_currency_region( $partner->currency ); ?>
+		<div class="kcs-region-scope" data-kcs-region-scope data-region="<?php echo esc_attr( $my_region ); ?>">
+		<?php if ( count( kcs_regions() ) > 1 ) : ?>
+			<p class="kcs-muted"><?php esc_html_e( 'Pay in:', 'kingdom-church-suite' ); ?></p>
+			<?php echo kcs_region_toggle( $my_region ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+		<?php endif; ?>
 		<div class="kcs-plans kcs-plans--compare">
 			<?php
 			$per_month = array( 'weekly' => 52 / 12, 'monthly' => 1, 'quarterly' => 1 / 3, 'yearly' => 1 / 12, 'one_time' => 1 / 12 );
 			$current_v = (float) $partner->amount * ( $per_month[ $partner->frequency ] ?? 1 );
 			foreach ( $plans as $pl ) :
 				$is_current = (int) $pl->id === (int) $partner->plan_id;
-				$custom     = $pl->allow_custom_amount || $pl->amount <= 0;
-				$value      = (float) $pl->amount * ( $per_month[ $pl->frequency ] ?? 1 );
-				$label      = $custom ? __( 'Choose amount', 'kingdom-church-suite' ) : ( $value > $current_v ? __( 'Upgrade', 'kingdom-church-suite' ) : ( $value < $current_v ? __( 'Downgrade', 'kingdom-church-suite' ) : __( 'Switch', 'kingdom-church-suite' ) ) );
+				$custom     = KCS_Plans::is_custom( $pl );
+				$my_price   = KCS_Plans::price( $pl, $my_region );
+				$value      = $my_price['amount'] * ( $per_month[ $pl->frequency ] ?? 1 );
+				// Compare in the same currency only; otherwise it is a switch.
+				$label = $custom ? __( 'Choose amount', 'kingdom-church-suite' ) : ( $my_price['currency'] !== $partner->currency ? __( 'Switch', 'kingdom-church-suite' ) : ( $value > $current_v ? __( 'Upgrade', 'kingdom-church-suite' ) : ( $value < $current_v ? __( 'Downgrade', 'kingdom-church-suite' ) : __( 'Switch', 'kingdom-church-suite' ) ) ) );
 				?>
 				<form method="post" class="kcs-plan<?php echo $is_current ? ' is-current' : ''; ?><?php echo $pl->is_featured ? ' is-featured' : ''; ?><?php echo $focus === (int) $pl->id ? ' is-focus' : ''; ?>">
 					<?php if ( $is_current ) : ?><span class="kcs-plan__ribbon"><?php esc_html_e( 'Your plan', 'kingdom-church-suite' ); ?></span><?php elseif ( $pl->is_featured ) : ?><span class="kcs-plan__ribbon"><?php esc_html_e( 'Most popular', 'kingdom-church-suite' ); ?></span><?php endif; ?>
 					<h4 class="kcs-plan__name"><?php echo esc_html( $pl->name ); ?></h4>
 					<div class="kcs-plan__price">
 						<?php if ( ! $custom ) : ?>
-							<strong><?php echo esc_html( kcs_format_money( $pl->amount, $pl->currency ) ); ?></strong> <span>/ <?php echo esc_html( strtolower( $freqs[ $pl->frequency ] ?? '' ) ); ?></span>
+							<strong><?php echo KCS_Plans::price_html( $pl, false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></strong> <span>/ <?php echo esc_html( strtolower( $freqs[ $pl->frequency ] ?? '' ) ); ?></span>
 						<?php else : ?>
 							<strong><?php esc_html_e( 'Your amount', 'kingdom-church-suite' ); ?></strong>
 						<?php endif; ?>
@@ -180,22 +188,32 @@ $completed = array_filter(
 					<ul class="kcs-plan__benefits"><?php foreach ( array_filter( array_map( 'trim', explode( "\n", (string) $pl->benefits ) ) ) as $b ) : ?><li><?php echo esc_html( $b ); ?></li><?php endforeach; ?></ul>
 					<?php if ( $custom ) : ?>
 						<div class="kcs-grid-2">
-							<label for="kcs-amt-<?php echo (int) $pl->id; ?>"><?php esc_html_e( 'Amount', 'kingdom-church-suite' ); ?> (<?php echo esc_html( $partner->currency ); ?>)<input id="kcs-amt-<?php echo (int) $pl->id; ?>" type="number" step="0.01" min="1" name="amount" value="<?php echo esc_attr( $is_current ? $partner->amount : '' ); ?>" required></label>
+							<label for="kcs-amt-<?php echo (int) $pl->id; ?>"><?php esc_html_e( 'Amount', 'kingdom-church-suite' ); ?> <?php foreach ( kcs_regions() as $rk => $r ) : ?><span class="kcs-in-<?php echo esc_attr( $rk ); ?>">(<?php echo esc_html( $r['currency'] ); ?>)</span><?php endforeach; ?><input id="kcs-amt-<?php echo (int) $pl->id; ?>" type="number" step="0.01" min="1" name="amount" value="<?php echo esc_attr( $is_current ? $partner->amount : '' ); ?>" required></label>
 							<label for="kcs-frq-<?php echo (int) $pl->id; ?>"><?php esc_html_e( 'Frequency', 'kingdom-church-suite' ); ?>
 								<select id="kcs-frq-<?php echo (int) $pl->id; ?>" name="frequency"><?php foreach ( $freqs as $k => $l ) : ?><option value="<?php echo esc_attr( $k ); ?>" <?php selected( $partner->frequency, $k ); ?>><?php echo esc_html( $l ); ?></option><?php endforeach; ?></select>
 							</label>
 						</div>
 					<?php endif; ?>
 					<input type="hidden" name="plan_id" value="<?php echo (int) $pl->id; ?>">
+					<input type="hidden" name="region" value="<?php echo esc_attr( $my_region ); ?>">
 					<input type="hidden" name="kcs_form" value="change_plan">
 					<?php wp_nonce_field( 'kcs_change_plan', '_kcs_nonce' ); ?>
 					<?php if ( $is_current && ! $custom ) : ?>
-						<button type="button" class="kcs-btn kcs-btn--block kcs-btn--ghost" disabled><?php esc_html_e( 'Current plan', 'kingdom-church-suite' ); ?></button>
+						<button type="button" class="kcs-btn kcs-btn--block kcs-btn--ghost kcs-in-<?php echo esc_attr( $my_region ); ?>" disabled><?php esc_html_e( 'Current plan', 'kingdom-church-suite' ); ?></button>
+						<?php foreach ( array_diff( array_keys( kcs_regions() ), array( $my_region ) ) as $rk ) : ?>
+							<button type="submit" class="kcs-btn kcs-btn--block kcs-in-<?php echo esc_attr( $rk ); ?>"><?php /* translators: %s: currency */ printf( esc_html__( 'Pay in %s instead', 'kingdom-church-suite' ), esc_html( kcs_region_currency( $rk ) ) ); ?></button>
+						<?php endforeach; ?>
 					<?php else : ?>
-						<button type="submit" class="kcs-btn kcs-btn--block"><?php echo esc_html( $is_current ? __( 'Update amount', 'kingdom-church-suite' ) : $label ); ?></button>
+						<button type="submit" class="kcs-btn kcs-btn--block">
+							<?php foreach ( array_keys( kcs_regions() ) as $rk ) : ?>
+								<?php // In the other currency every move is a switch: amounts in different currencies can't be ranked. ?>
+								<span class="kcs-in-<?php echo esc_attr( $rk ); ?>"><?php echo esc_html( $is_current ? __( 'Update amount', 'kingdom-church-suite' ) : ( $rk === $my_region || $custom ? $label : __( 'Switch', 'kingdom-church-suite' ) ) ); ?></span>
+							<?php endforeach; ?>
+						</button>
 					<?php endif; ?>
 				</form>
 			<?php endforeach; ?>
+		</div>
 		</div>
 	</section>
 
