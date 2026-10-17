@@ -17,7 +17,7 @@ $kingdom_steps = array(
 		<?php kingdom_section_heading( __( 'Plan your visit', 'kingdom' ), __( 'What to expect', 'kingdom' ), __( 'Visiting a church for the first time can feel unfamiliar. Here is everything you need to know.', 'kingdom' ) ); ?>
 		<div class="k-grid k-grid--4">
 			<?php foreach ( $kingdom_steps as $kingdom_i => $kingdom_s ) : ?>
-				<div class="k-feature" data-reveal>
+				<div class="k-feature" data-reveal data-tilt>
 					<span class="k-feature__icon"><?php echo kingdom_icon( $kingdom_s[0] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
 					<h3><?php echo esc_html( $kingdom_s[1] ); ?></h3>
 					<p><?php echo esc_html( $kingdom_s[2] ); ?></p>

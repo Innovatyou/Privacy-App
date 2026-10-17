@@ -126,9 +126,7 @@ add_filter( 'wp_resource_hints', 'kingdom_resource_hints', 10, 2 );
  * @return string
  */
 function kingdom_dynamic_css() {
-	$primary = sanitize_hex_color( get_theme_mod( 'kingdom_color_primary', '#5b2a86' ) );
-	$accent  = sanitize_hex_color( get_theme_mod( 'kingdom_color_accent', '#f4a62a' ) );
-	$dark    = sanitize_hex_color( get_theme_mod( 'kingdom_color_dark', '#16121c' ) );
+	list( $primary, $accent, $dark ) = kingdom_brand_colors();
 	$heading = get_theme_mod( 'kingdom_font_heading', 'Playfair Display' );
 	$body    = get_theme_mod( 'kingdom_font_body', 'Inter' );
 	$radius  = array(
@@ -142,7 +140,14 @@ function kingdom_dynamic_css() {
 	$hfont   = 'System' === $heading ? $stack : '"' . $heading . '", ' . ( in_array( $heading, array( 'Playfair Display', 'Cormorant Garamond', 'Lora' ), true ) ? 'Georgia, serif' : $stack );
 	$bfont   = 'System' === $body ? $stack : '"' . $body . '", ' . $stack;
 
-	return ':root{--k-primary:' . $primary . ';--k-accent:' . $accent . ';--k-dark:' . $dark . ';--k-radius:' . $r . ';--k-container:' . $width . 'px;--k-font-heading:' . $hfont . ';--k-font-body:' . $bfont . ';}';
+	$css = ':root{--k-primary:' . $primary . ';--k-accent:' . $accent . ';--k-dark:' . $dark . ';--k-radius:' . $r . ';--k-container:' . $width . 'px;--k-font-heading:' . $hfont . ';--k-font-body:' . $bfont . ';}';
+	// Visitor colour switcher: each palette can be applied with <html data-palette="slug">.
+	if ( get_theme_mod( 'kingdom_palette_switcher', true ) ) {
+		foreach ( kingdom_palettes() as $slug => $p ) {
+			$css .= ':root[data-palette="' . esc_attr( $slug ) . '"]{--k-primary:' . $p[1] . ';--k-accent:' . $p[2] . ';--k-dark:' . $p[3] . ';}';
+		}
+	}
+	return $css;
 }
 
 /**
@@ -162,6 +167,13 @@ function kingdom_body_classes( $classes ) {
 	if ( ! is_active_sidebar( 'sidebar-1' ) ) {
 		$classes[] = 'no-sidebar';
 	}
+	if ( get_theme_mod( 'kingdom_3d', true ) ) {
+		$classes[] = 'k-3d';
+	}
+	if ( get_theme_mod( 'kingdom_mobile_nav', true ) ) {
+		$classes[] = 'has-mobile-nav';
+	}
+	$classes[] = 'btn-' . sanitize_html_class( get_theme_mod( 'kingdom_button_style', 'pill' ) );
 	return $classes;
 }
 add_filter( 'body_class', 'kingdom_body_classes' );
@@ -185,7 +197,7 @@ function kingdom_has_transparent_header() {
 function kingdom_scheme_script() {
 	$default = get_theme_mod( 'kingdom_color_scheme', 'light' );
 	?>
-	<script>(function(){try{var s=localStorage.getItem('kingdom-scheme')||'<?php echo esc_js( $default ); ?>';if(s==='auto'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
+	<script>(function(){try{var s=localStorage.getItem('kingdom-scheme')||'<?php echo esc_js( $default ); ?>';if(s==='auto'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',s);<?php if ( get_theme_mod( 'kingdom_palette_switcher', true ) ) : ?>var p=localStorage.getItem('kingdom-palette');if(p){document.documentElement.setAttribute('data-palette',p);}<?php endif; ?>}catch(e){}})();</script>
 	<?php
 }
 add_action( 'wp_head', 'kingdom_scheme_script', 0 );

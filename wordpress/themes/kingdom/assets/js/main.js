@@ -19,21 +19,81 @@
 	onScroll();
 	if (toTop) { toTop.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); }); }
 
-	/* Mobile navigation */
-	var navToggle = document.querySelector('[data-nav-toggle]');
-	if (navToggle) {
-		var closeNav = function () {
-			document.body.classList.remove('is-nav-open');
-			navToggle.setAttribute('aria-expanded', 'false');
+	/* Mobile navigation (header button and bottom tab bar) */
+	var navToggles = document.querySelectorAll('[data-nav-toggle]');
+	if (navToggles.length) {
+		var setNav = function (open) {
+			document.body.classList.toggle('is-nav-open', open);
+			navToggles.forEach(function (t) { t.setAttribute('aria-expanded', open ? 'true' : 'false'); });
 		};
-		navToggle.addEventListener('click', function () {
-			var open = document.body.classList.toggle('is-nav-open');
-			navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+		var closeNav = function () { setNav(false); };
+		navToggles.forEach(function (t) {
+			t.addEventListener('click', function () { setNav(!document.body.classList.contains('is-nav-open')); });
 		});
 		document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeNav(); } });
 		document.addEventListener('click', function (e) {
 			if (document.body.classList.contains('is-nav-open') && !e.target.closest('[data-nav]') && !e.target.closest('[data-nav-toggle]')) { closeNav(); }
 		});
+	}
+
+	var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	var finePointer = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+	/* 3D tilt cards */
+	if (document.body.classList.contains('k-3d') && !reduceMotion && finePointer) {
+		document.querySelectorAll('[data-tilt]').forEach(function (card) {
+			card.addEventListener('pointermove', function (e) {
+				var r = card.getBoundingClientRect();
+				var x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+				card.classList.add('is-tilting');
+				card.style.transform = 'rotateX(' + ((0.5 - y) * 10).toFixed(2) + 'deg) rotateY(' + ((x - 0.5) * 12).toFixed(2) + 'deg) translateZ(10px)';
+				card.style.setProperty('--mx', (x * 100) + '%');
+				card.style.setProperty('--my', (y * 100) + '%');
+			});
+			card.addEventListener('pointerleave', function () { card.classList.remove('is-tilting'); card.style.transform = ''; });
+		});
+	}
+
+	/* Hero parallax depth */
+	var scene = document.querySelector('[data-parallax]');
+	if (scene && document.body.classList.contains('k-3d') && !reduceMotion) {
+		var layers = scene.children;
+		var move = function (px, py) {
+			for (var i = 0; i < layers.length; i++) {
+				var depth = (i + 1) * 6;
+				layers[i].style.translate = (px * depth).toFixed(1) + 'px ' + (py * depth).toFixed(1) + 'px';
+			}
+		};
+		if (finePointer) {
+			scene.parentElement.addEventListener('pointermove', function (e) {
+				move(e.clientX / window.innerWidth - 0.5, e.clientY / window.innerHeight - 0.5);
+			});
+		}
+		window.addEventListener('scroll', function () { scene.style.transform = 'translateY(' + (window.scrollY * 0.25).toFixed(1) + 'px)'; }, { passive: true });
+	}
+
+	/* Visitor colour palette */
+	var picker = document.querySelector('[data-palette-picker]');
+	if (picker) {
+		var toggle = picker.querySelector('.k-palette__toggle');
+		var panel = picker.querySelector('.k-palette__panel');
+		var mark = function () {
+			var cur = root.getAttribute('data-palette') || '';
+			picker.querySelectorAll('[data-palette]').forEach(function (b) { b.classList.toggle('is-active', b.dataset.palette === cur && cur !== ''); });
+		};
+		toggle.addEventListener('click', function () {
+			panel.hidden = !panel.hidden;
+			toggle.setAttribute('aria-expanded', panel.hidden ? 'false' : 'true');
+		});
+		picker.addEventListener('click', function (e) {
+			var b = e.target.closest('[data-palette]');
+			if (!b) { return; }
+			if (b.dataset.palette) { root.setAttribute('data-palette', b.dataset.palette); } else { root.removeAttribute('data-palette'); }
+			try { b.dataset.palette ? localStorage.setItem('kingdom-palette', b.dataset.palette) : localStorage.removeItem('kingdom-palette'); } catch (err) { /* private mode */ }
+			mark();
+		});
+		document.addEventListener('click', function (e) { if (!panel.hidden && !e.target.closest('[data-palette-picker]')) { panel.hidden = true; toggle.setAttribute('aria-expanded', 'false'); } });
+		mark();
 	}
 
 	/* Search panel */

@@ -201,6 +201,45 @@ class KCS_Features {
 	}
 
 	/**
+	 * Create a pending testimony from the public form.
+	 *
+	 * @param array $data name, location, email, title, story, video_url.
+	 * @return int|WP_Error
+	 */
+	public static function submit_testimony( $data ) {
+		$story = sanitize_textarea_field( $data['story'] ?? '' );
+		$name  = sanitize_text_field( $data['name'] ?? '' );
+		if ( strlen( $story ) < 20 || ! $name ) {
+			return new WP_Error( 'kcs_testimony', __( 'Please add your name and a few sentences about what God has done.', 'kingdom-church-suite' ), array( 'status' => 400 ) );
+		}
+		$title = sanitize_text_field( $data['title'] ?? '' );
+		$id    = wp_insert_post(
+			array(
+				'post_type'    => 'kcs_testimony',
+				'post_status'  => 'pending',
+				'post_title'   => $title ? $title : wp_trim_words( $story, 6, '…' ),
+				'post_content' => wpautop( $story ),
+			),
+			true
+		);
+		if ( is_wp_error( $id ) ) {
+			return $id;
+		}
+		update_post_meta( $id, '_kcs_person', $name );
+		update_post_meta( $id, '_kcs_location', sanitize_text_field( $data['location'] ?? '' ) );
+		update_post_meta( $id, '_kcs_video_url', esc_url_raw( $data['video_url'] ?? '' ) );
+		update_post_meta( $id, '_kcs_submitter_email', sanitize_email( $data['email'] ?? '' ) );
+		KCS_Email::send(
+			KCS_Email::admin_recipients(),
+			/* translators: %s: name */
+			sprintf( __( 'New testimony from %s awaiting review', 'kingdom-church-suite' ), $name ),
+			'<p>' . nl2br( esc_html( $story ) ) . '</p><p><a class="btn" href="' . esc_url( admin_url( 'post.php?action=edit&post=' . $id ) ) . '">' . esc_html__( 'Review & publish', 'kingdom-church-suite' ) . '</a></p>'
+		);
+		do_action( 'kcs_testimony_submitted', $id );
+		return (int) $id;
+	}
+
+	/**
 	 * Verse of the day (rotates daily; filterable).
 	 *
 	 * @return array{text:string,ref:string}

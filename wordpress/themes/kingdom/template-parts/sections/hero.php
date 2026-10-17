@@ -90,6 +90,11 @@ $kingdom_buttons = function () use ( $kingdom_b1t, $kingdom_b1u, $kingdom_b2t, $
 			<video class="k-hero__video" autoplay muted loop playsinline preload="metadata"<?php echo $kingdom_image ? ' poster="' . esc_url( $kingdom_image ) . '"' : ''; ?>><source src="<?php echo esc_url( $kingdom_video ); ?>" type="video/mp4"></video>
 		<?php endif; ?>
 		<div class="k-hero__overlay" style="opacity:<?php echo esc_attr( $kingdom_overlay ); ?>"></div>
+		<div class="k-hero__scene" aria-hidden="true" data-parallax>
+			<span class="k-orb k-orb--1"></span><span class="k-orb k-orb--2"></span><span class="k-orb k-orb--3"></span>
+			<span class="k-cross3d"><i></i><i></i></span>
+			<span class="k-ring3d"></span>
+		</div>
 		<div class="k-container k-hero__inner<?php echo 'classic' === $kingdom_variant ? ' k-center' : ''; ?>">
 			<div class="k-hero__content" data-reveal>
 				<?php if ( $kingdom_eyebrow ) : ?><span class="k-eyebrow k-eyebrow--light"><?php echo esc_html( $kingdom_eyebrow ); ?></span><?php endif; ?>

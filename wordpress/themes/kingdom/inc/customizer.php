@@ -55,7 +55,9 @@ function kingdom_customize_register( $wp ) {
 	};
 
 	$sections = array(
-		'kingdom_colors'   => __( 'Colours & Typography', 'kingdom' ),
+		'kingdom_brand'    => __( 'Church Branding & Colour Palettes', 'kingdom' ),
+		'kingdom_colors'   => __( 'Custom Colours & Typography', 'kingdom' ),
+		'kingdom_ux'       => __( '3D Effects & Mobile', 'kingdom' ),
 		'kingdom_header'   => __( 'Header', 'kingdom' ),
 		'kingdom_hero'     => __( 'Homepage Hero', 'kingdom' ),
 		'kingdom_home'     => __( 'Homepage Sections', 'kingdom' ),
@@ -70,6 +72,23 @@ function kingdom_customize_register( $wp ) {
 	foreach ( $sections as $id => $title ) {
 		$wp->add_section( $id, array( 'title' => $title, 'panel' => 'kingdom', 'priority' => $p += 10 ) );
 	}
+
+	// Branding.
+	$palette_choices = array();
+	foreach ( kingdom_palettes() as $slug => $p ) {
+		$palette_choices[ $slug ] = $p[0];
+	}
+	$palette_choices['custom'] = __( 'Custom (use the colour pickers)', 'kingdom' );
+	$add( 'kingdom_brand', 'kingdom_palette', __( 'Site colour palette', 'kingdom' ), 'select', 'royal', $palette_choices, __( 'Pick a ready-made palette, or choose Custom and set your own brand colours under "Custom Colours & Typography".', 'kingdom' ) );
+	$add( 'kingdom_brand', 'kingdom_palette_switcher', __( 'Let visitors pick a colour palette', 'kingdom' ), 'checkbox', true );
+	$add( 'kingdom_brand', 'kingdom_logo_light', __( 'Light logo (for dark/transparent header and dark mode)', 'kingdom' ), 'image', '', array(), __( 'Your main logo is set under Site Identity. Upload a white version here.', 'kingdom' ) );
+	$add( 'kingdom_brand', 'kingdom_show_tagline', __( 'Show tagline under the church name', 'kingdom' ), 'checkbox', false );
+	$add( 'kingdom_brand', 'kingdom_brand_motto', __( 'Church motto / vision line', 'kingdom' ), 'text', '', array(), __( 'Shown in the footer, e.g. "Raising Kingdom Ambassadors".', 'kingdom' ) );
+	$add( 'kingdom_brand', 'kingdom_button_style', __( 'Button style', 'kingdom' ), 'select', 'pill', array( 'pill' => __( 'Pill', 'kingdom' ), 'rounded' => __( 'Rounded', 'kingdom' ), 'square' => __( 'Square', 'kingdom' ) ) );
+
+	// 3D & mobile.
+	$add( 'kingdom_ux', 'kingdom_3d', __( 'Enable 3D effects (tilt cards, depth, floating hero)', 'kingdom' ), 'checkbox', true, array(), __( 'Automatically reduced for visitors who prefer reduced motion.', 'kingdom' ) );
+	$add( 'kingdom_ux', 'kingdom_mobile_nav', __( 'App-style bottom navigation on phones', 'kingdom' ), 'checkbox', true );
 
 	// Colours & typography.
 	$fonts = array_combine( array_keys( kingdom_fonts() ), array_keys( kingdom_fonts() ) );
@@ -107,7 +126,7 @@ function kingdom_customize_register( $wp ) {
 	$add( 'kingdom_hero', 'kingdom_hero_overlay', __( 'Overlay darkness (0–90)', 'kingdom' ), 'number', 55 );
 
 	// Homepage sections.
-	$add( 'kingdom_home', 'kingdom_home_sections', __( 'Section order', 'kingdom' ), 'textarea', 'hero, service-times, welcome, live, sermons, ministries, events, stats, partnership, testimonies, give, newsletter', array(), __( 'Used when the front page is your latest posts or a page without a template. Available: ', 'kingdom' ) . implode( ', ', array_keys( kingdom_available_sections() ) ) );
+	$add( 'kingdom_home', 'kingdom_home_sections', __( 'Section order', 'kingdom' ), 'textarea', 'hero, service-times, welcome, live, sermons, ministries, events, stats, partnership, testimonies, prayer, visit, give, social, newsletter', array(), __( 'Used when the front page is your latest posts or a page without a template. Available: ', 'kingdom' ) . implode( ', ', array_keys( kingdom_available_sections() ) ) );
 	$add( 'kingdom_home', 'kingdom_sermons_title', __( 'Sermons title', 'kingdom' ), 'text', __( 'Latest messages', 'kingdom' ) );
 	$add( 'kingdom_home', 'kingdom_events_title', __( 'Events title', 'kingdom' ), 'text', __( 'Upcoming events', 'kingdom' ) );
 	$add( 'kingdom_home', 'kingdom_ministries_title', __( 'Ministries title', 'kingdom' ), 'text', __( 'Find your place', 'kingdom' ) );
@@ -148,7 +167,10 @@ function kingdom_customize_register( $wp ) {
 	foreach ( array( 'facebook' => 'Facebook', 'instagram' => 'Instagram', 'youtube' => 'YouTube', 'x' => 'X (Twitter)', 'tiktok' => 'TikTok', 'whatsapp' => 'WhatsApp (https://wa.me/number)' ) as $k => $l ) {
 		$add( 'kingdom_social', 'kingdom_social_' . $k, $l, 'url', '' );
 	}
+	$add( 'kingdom_social', 'kingdom_social_telegram', 'Telegram', 'url', '' );
 	$add( 'kingdom_social', 'kingdom_whatsapp_float', __( 'Show floating WhatsApp button', 'kingdom' ), 'checkbox', false );
+	$add( 'kingdom_social', 'kingdom_social_title', __( 'Social section title', 'kingdom' ), 'text', __( 'Connect with us online', 'kingdom' ) );
+	$add( 'kingdom_social', 'kingdom_social_hashtag', __( 'Church hashtag', 'kingdom' ), 'text', '' );
 
 	// Footer.
 	$add( 'kingdom_footer', 'kingdom_footer_about', __( 'About text', 'kingdom' ), 'textarea', __( 'Raising a generation of believers who love God, love people and transform their world.', 'kingdom' ) );

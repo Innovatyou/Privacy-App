@@ -10,7 +10,7 @@ $kingdom_speakers = get_the_terms( get_the_ID(), 'kcs_speaker' );
 $kingdom_series   = get_the_terms( get_the_ID(), 'kcs_series' );
 $kingdom_date     = get_post_meta( get_the_ID(), '_kcs_sermon_date', true );
 ?>
-<article <?php post_class( 'k-card k-sermon-card' ); ?> data-reveal>
+<article <?php post_class( 'k-card k-sermon-card' ); ?> data-reveal data-tilt>
 	<a class="k-card__media k-card__media--video" href="<?php the_permalink(); ?>" tabindex="-1" aria-hidden="true">
 		<?php if ( $kingdom_thumb ) : ?><img src="<?php echo esc_url( $kingdom_thumb ); ?>" alt="" loading="lazy"><?php endif; ?>
 		<span class="k-play"><?php echo kingdom_icon( 'play' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>

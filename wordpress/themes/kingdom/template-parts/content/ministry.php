@@ -7,7 +7,7 @@
 
 $kingdom_icon = get_post_meta( get_the_ID(), '_kcs_icon', true );
 ?>
-<article <?php post_class( 'k-card k-ministry-card' ); ?> data-reveal>
+<article <?php post_class( 'k-card k-ministry-card' ); ?> data-reveal data-tilt>
 	<?php if ( has_post_thumbnail() ) : ?>
 		<a class="k-card__media" href="<?php the_permalink(); ?>" tabindex="-1" aria-hidden="true"><?php the_post_thumbnail( 'kingdom-card', array( 'loading' => 'lazy' ) ); ?></a>
 	<?php endif; ?>

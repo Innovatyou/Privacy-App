@@ -28,5 +28,6 @@ if ( ! $kingdom_q->have_posts() ) {
 			wp_reset_postdata();
 			?>
 		</div>
+		<p class="k-center k-mt"><a class="k-btn k-btn--outline" href="<?php echo esc_url( kingdom_url( '', 'template-testimonies.php', get_post_type_archive_link( 'kcs_testimony' ) ) . '#share' ); ?>"><?php esc_html_e( 'Share your testimony', 'kingdom' ); ?></a></p>
 	</div>
 </section>

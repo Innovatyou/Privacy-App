@@ -19,4 +19,5 @@ kingdom_section( 'events' );
 kingdom_section( 'partnership' );
 kingdom_section( 'page-content' );
 kingdom_section( 'contact' );
+kingdom_section( 'social' );
 get_footer();

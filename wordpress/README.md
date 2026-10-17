@@ -48,6 +48,12 @@ There are also dedicated templates for single and archive views of sermons (vide
 **Sections** (`template-parts/sections/`) can be reordered on a plain front page via *Customize → Homepage Sections*:
 `hero` (6 variants), `service-times`, `welcome`, `live`, `countdown`, `sermons`, `events`, `ministries`, `stats`, `partnership`, `give`, `leadership`, `testimonies`, `verse`, `prayer`, `blog`, `newsletter`, `visit`, `contact`, `cta`.
 
+**Branding & colours**: 9 ready-made palettes (Royal Purple, Ocean Blue, Emerald Grace, Crimson Fire, Sunrise, Midnight, Rose of Sharon, River Jordan, Heritage Gold) or custom brand colours; an optional visitor colour picker; light logo for dark mode and transparent headers; tagline, motto, button style (pill, rounded, square) and fonts. Set these in *Customize → Church Branding & Colour Palettes*.
+
+**3D UI & mobile-first**: tilt-and-glare cards, layered 3D hero (floating cross, orbs, orbiting ring) with mouse and scroll parallax, pressable 3D buttons, glass panels, and an app-style bottom tab bar on phones (Home, Watch, Give, Prayer, Menu). Both can be toggled in *Customize → 3D Effects & Mobile*, and motion is reduced automatically for visitors who ask for it.
+
+**Social connect**: branded cards for Facebook, Instagram, YouTube, X, TikTok, WhatsApp and Telegram, with a church hashtag, plus share buttons on every sermon, event and post.
+
 Other theme features: three header styles (classic, centered, transparent over hero), sticky header, top bar, live "LIVE NOW" badge, dark mode toggle (remembers the visitor's choice), video-modal hero, animated counters, scroll reveal, floating WhatsApp button, back-to-top, breadcrumbs and accessible markup (skip link, focus styles, ARIA, reduced-motion support).
 
 ---
@@ -57,7 +63,9 @@ Other theme features: three header styles (classic, centered, transparent over h
 ### Partnership & partner portal
 - Plans (fixed or custom amount; weekly, monthly, quarterly, yearly, one-time; featured "Most popular"), managed under **Church Suite → Plans**
 - `[kcs_partner_register]` creates a WordPress account (role *Church Partner*) and a partner record, logs the partner in, and takes them to make their first gift
-- `[kcs_partner_login]` and `[kcs_partner_dashboard]`: overview (plan, commitment, next due date, total given), give, giving history, edit profile and plan, pause or resume, change password
+- `[kcs_partner_login]` and `[kcs_partner_dashboard]`: overview (plan, benefits, commitment, next due date, total given), give, **Upgrade plan** (side-by-side plan comparison with benefits; upgrade, downgrade or switch, with custom amounts), giving history, profile, pause or resume, change password
+- Plan changes are recorded in the partner's notes, emailed to the partner (editable "Partnership plan changed" template) and to admins, and fire `kcs_partner_plan_changed` and the `partner.plan_changed` webhook
+- Logged-in partners see "Your current plan" and "Upgrade/Switch to this plan" on the public plans grid
 - Partners are kept out of wp-admin and the toolbar is hidden for them
 - Daily cron emails reminders N days before the due date and flags partners **overdue** after 7 days' grace
 
@@ -108,7 +116,7 @@ add_filter( 'kcs_payment_gateways', function ( $g ) { $g['mine'] = new My_Gatewa
 - Countdown to the next service and a live badge that refreshes itself
 
 ### Other digital features
-Sermons (series, speakers, topics, video, audio, notes), **podcast RSS feed** for Apple Podcasts and Spotify (`/feed/sermon-podcast/`), events with `.ics` and Google Calendar links, ministries, leadership, testimonies, prayer requests and an "I prayed" prayer wall, verse of the day, an installable web-app manifest (add to home screen), and a signed outgoing webhook to CRMs or Zapier.
+Sermons (series, speakers, topics, video, audio, notes), **podcast RSS feed** for Apple Podcasts and Spotify (`/feed/sermon-podcast/`), events with `.ics` and Google Calendar links, ministries, leadership, testimonies, prayer requests and an "I prayed" prayer wall, a public testimony submission form (`[kcs_testimony_form]`, moderated), social connect buttons (`[kcs_social]`), verse of the day, an installable web-app manifest (add to home screen), and a signed outgoing webhook to CRMs or Zapier.
 
 ### Advanced SEO
 - Per-post SEO title, meta description, focus keyword, canonical URL, social image, noindex/nofollow
@@ -141,6 +149,8 @@ Allowed CORS origins can be set in settings.
 | GET | `/live` · `/services/next` · `/verse` · `/prayer-wall` | public | Live status, schedule, verse, prayer wall |
 | POST | `/prayer-requests` · `/prayer-requests/{id}/pray` | public | Prayer |
 | GET/PUT | `/me` · GET `/me/payments` | partner | Partner self-service |
+| PUT | `/me/plan` | partner | Upgrade, downgrade or switch: `{plan_id, amount?, frequency?}` |
+| POST | `/testimonies` | public | Submit a testimony (held as pending for review) |
 | GET | `/stats` | admin | Dashboard stats |
 | GET/POST | `/partners` | admin | List (search, status, plan_id, page, per_page, orderby, order) or create |
 | GET/PUT/DELETE | `/partners/{id}` · GET `/partners/{id}/payments` | admin | Manage a partner |

@@ -17,4 +17,5 @@ kingdom_section( 'give' );
 kingdom_section( 'events', array( 'layout' => 'list' ) );
 kingdom_section( 'page-content' );
 kingdom_section( 'newsletter' );
+kingdom_section( 'social' );
 get_footer();

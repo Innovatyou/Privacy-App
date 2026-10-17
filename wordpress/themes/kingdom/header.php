@@ -64,11 +64,17 @@ if ( ! $cta_url && kingdom_plugin_active() ) {
 
 <header class="k-header" data-header>
 	<div class="k-container k-header__inner">
-		<div class="k-brand">
+		<div class="k-brand<?php echo get_theme_mod( 'kingdom_logo_light' ) ? ' has-light-logo' : ''; ?>">
 			<?php if ( has_custom_logo() ) : ?>
 				<?php the_custom_logo(); ?>
+				<?php if ( get_theme_mod( 'kingdom_logo_light' ) ) : ?>
+					<a class="k-brand__light" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><img src="<?php echo esc_url( get_theme_mod( 'kingdom_logo_light' ) ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>"></a>
+				<?php endif; ?>
 			<?php else : ?>
-				<a class="k-brand__name" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a>
+				<a class="k-brand__name" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><span class="k-brand__mark" aria-hidden="true"></span><?php bloginfo( 'name' ); ?></a>
+			<?php endif; ?>
+			<?php if ( get_theme_mod( 'kingdom_show_tagline' ) && get_bloginfo( 'description' ) ) : ?>
+				<span class="k-brand__tagline"><?php bloginfo( 'description' ); ?></span>
 			<?php endif; ?>
 		</div>
 

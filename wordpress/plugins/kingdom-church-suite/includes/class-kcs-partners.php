@@ -346,6 +346,67 @@ class KCS_Partners {
 	}
 
 	/**
+	 * Move a partner to another plan (upgrade, downgrade or switch).
+	 *
+	 * @param object $partner   Partner.
+	 * @param int    $plan_id   New plan.
+	 * @param float  $amount    Amount for custom-amount plans.
+	 * @param string $frequency Frequency for custom-amount plans.
+	 * @return string|WP_Error  upgraded|downgraded|switched.
+	 */
+	public static function change_plan( $partner, $plan_id, $amount = 0, $frequency = '' ) {
+		$plan = KCS_Plans::get( (int) $plan_id );
+		if ( ! $plan || ! $plan->is_active ) {
+			return new WP_Error( 'kcs_plan', __( 'Please choose an available plan.', 'kingdom-church-suite' ), array( 'status' => 400 ) );
+		}
+		$custom   = $plan->allow_custom_amount || $plan->amount <= 0;
+		$amount   = $custom ? (float) $amount : (float) $plan->amount;
+		$currency = $custom ? $partner->currency : $plan->currency;
+		$freq     = $custom && array_key_exists( $frequency, kcs_frequencies() ) ? $frequency : ( $custom ? $partner->frequency : $plan->frequency );
+		if ( $amount <= 0 ) {
+			return new WP_Error( 'kcs_amount', __( 'Please enter your partnership amount.', 'kingdom-church-suite' ), array( 'status' => 400 ) );
+		}
+		if ( (int) $partner->plan_id === (int) $plan->id && abs( $amount - (float) $partner->amount ) < 0.01 && $freq === $partner->frequency ) {
+			return new WP_Error( 'kcs_same_plan', __( 'You are already on this plan.', 'kingdom-church-suite' ), array( 'status' => 400 ) );
+		}
+
+		// Compare monthly-equivalent value so a yearly plan is ranked fairly against a monthly one.
+		$per_month = array( 'weekly' => 52 / 12, 'monthly' => 1, 'quarterly' => 1 / 3, 'yearly' => 1 / 12, 'one_time' => 1 / 12 );
+		$old_value = (float) $partner->amount * ( $per_month[ $partner->frequency ] ?? 1 );
+		$new_value = $amount * ( $per_month[ $freq ] ?? 1 );
+		$direction = $partner->currency !== $currency ? 'switched' : ( $new_value > $old_value ? 'upgraded' : ( $new_value < $old_value ? 'downgraded' : 'switched' ) );
+
+		$old_plan = $partner->plan_id ? KCS_Plans::get( $partner->plan_id ) : null;
+		$note     = sprintf( '[%s] %s: %s → %s (%s)', current_time( 'Y-m-d' ), ucfirst( $direction ), $old_plan ? $old_plan->name : __( 'Custom', 'kingdom-church-suite' ), $plan->name, kcs_format_money( $amount, $currency ) );
+		self::update(
+			$partner->id,
+			array(
+				'plan_id'   => $plan->id,
+				'amount'    => $amount,
+				'currency'  => $currency,
+				'frequency' => $freq,
+				'notes'     => trim( $partner->notes . "\n" . $note ),
+				'status'    => 'paused' === $partner->status ? 'active' : $partner->status,
+			)
+		);
+
+		$fresh = self::get( $partner->id );
+		$vars  = array_merge( self::email_vars( $fresh, $plan ), array( 'old_plan' => $old_plan ? $old_plan->name : __( 'Custom', 'kingdom-church-suite' ), 'change' => $direction ) );
+		KCS_Email::send_template( $fresh->email, 'plan_changed', $vars );
+		if ( '1' === kcs_get_option( 'notify_admin_partner', '1' ) ) {
+			KCS_Email::send(
+				KCS_Email::admin_recipients(),
+				/* translators: 1: partner name, 2: change, 3: plan */
+				sprintf( __( '%1$s %2$s to %3$s', 'kingdom-church-suite' ), $vars['name'], $direction, $plan->name ),
+				'<p>' . esc_html( $note ) . '</p><p><a class="btn" href="' . esc_url( $vars['admin_url'] ) . '">' . esc_html__( 'View partner', 'kingdom-church-suite' ) . '</a></p>'
+			);
+		}
+		do_action( 'kcs_partner_plan_changed', $fresh, $plan, $direction );
+		KCS_Email::webhook( 'partner.plan_changed', array_merge( self::to_array( $fresh ), array( 'change' => $direction ) ) );
+		return $direction;
+	}
+
+	/**
 	 * Delete a partner (keeps the WP user and payment history).
 	 *
 	 * @param int $id Partner ID.

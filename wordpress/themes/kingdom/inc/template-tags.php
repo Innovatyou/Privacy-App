@@ -51,6 +51,7 @@ function kingdom_available_sections() {
 		'blog'          => __( 'Latest news', 'kingdom' ),
 		'newsletter'    => __( 'Newsletter sign-up', 'kingdom' ),
 		'visit'         => __( 'Plan your visit', 'kingdom' ),
+		'social'        => __( 'Social media connect', 'kingdom' ),
 		'contact'       => __( 'Contact & map', 'kingdom' ),
 		'cta'           => __( 'Call to action', 'kingdom' ),
 	);
@@ -107,9 +108,9 @@ function kingdom_service_times() {
  */
 function kingdom_social_links() {
 	$out = array();
-	foreach ( array( 'facebook', 'instagram', 'youtube', 'x', 'tiktok', 'whatsapp' ) as $net ) {
+	foreach ( array( 'facebook', 'instagram', 'youtube', 'x', 'tiktok', 'whatsapp', 'telegram' ) as $net ) {
 		$url = get_theme_mod( 'kingdom_social_' . $net );
-		if ( ! $url && kingdom_plugin_active() && 'whatsapp' !== $net ) {
+		if ( ! $url && kingdom_plugin_active() && ! in_array( $net, array( 'whatsapp', 'telegram' ), true ) ) {
 			$url = kcs_get_option( 'social_' . $net );
 		}
 		if ( $url ) {
@@ -133,6 +134,9 @@ function kingdom_icon( $name ) {
 		'x'         => '<path d="M4 4l16 16M20 4 4 20"/>',
 		'tiktok'    => '<path d="M15 3v10.5a3.5 3.5 0 1 1-3.5-3.5M15 3c.5 2.5 2.5 4 5 4"/>',
 		'whatsapp'  => '<path d="M3 21l1.6-4.6A8.5 8.5 0 1 1 8 19.6z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1.2-1.2-1.7-1-1 .7a4 4 0 0 1-2-2l.7-1-1-1.7z"/>',
+		'telegram'  => '<path d="M21 4 3 11l6 2 2 6 3-4 5 4z"/><path d="m9 13 8-6"/>',
+		'home'      => '<path d="M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+		'palette'   => '<path d="M12 3a9 9 0 1 0 0 18c1 0 1.5-.8 1.5-1.5 0-1-.8-1.3-.8-2.2 0-.8.6-1.3 1.4-1.3H16a5 5 0 0 0 5-5C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>',
 		'play'      => '<path d="M8 5v14l11-7z" fill="currentColor"/>',
 		'clock'     => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
 		'pin'       => '<path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>',
@@ -375,4 +379,44 @@ function kingdom_feature( $tag, $shortcode ) {
 	if ( ! kingdom_content_has( $tag ) ) {
 		echo kingdom_shortcode( $shortcode ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
+}
+
+/**
+ * Built-in colour palettes: slug => [label, primary, accent, dark].
+ *
+ * @return array
+ */
+function kingdom_palettes() {
+	return apply_filters(
+		'kingdom_palettes',
+		array(
+			'royal'    => array( __( 'Royal Purple', 'kingdom' ), '#5b2a86', '#f4a62a', '#16121c' ),
+			'ocean'    => array( __( 'Ocean Blue', 'kingdom' ), '#1d4ed8', '#38bdf8', '#0b1220' ),
+			'emerald'  => array( __( 'Emerald Grace', 'kingdom' ), '#047857', '#fbbf24', '#0a1a14' ),
+			'crimson'  => array( __( 'Crimson Fire', 'kingdom' ), '#b91c1c', '#f59e0b', '#1a0b0b' ),
+			'sunrise'  => array( __( 'Sunrise', 'kingdom' ), '#c2410c', '#facc15', '#1c0f08' ),
+			'midnight' => array( __( 'Midnight', 'kingdom' ), '#334155', '#22d3ee', '#020617' ),
+			'rose'     => array( __( 'Rose of Sharon', 'kingdom' ), '#be185d', '#f9a8d4', '#1f0a14' ),
+			'jordan'   => array( __( 'River Jordan', 'kingdom' ), '#0f766e', '#f97316', '#071a18' ),
+			'heritage' => array( __( 'Heritage Gold', 'kingdom' ), '#7c2d12', '#d4a017', '#1a120b' ),
+		)
+	);
+}
+
+/**
+ * Active brand colours (palette or custom pickers).
+ *
+ * @return array [primary, accent, dark]
+ */
+function kingdom_brand_colors() {
+	$palettes = kingdom_palettes();
+	$choice   = get_theme_mod( 'kingdom_palette', 'royal' );
+	if ( 'custom' !== $choice && isset( $palettes[ $choice ] ) ) {
+		return array( $palettes[ $choice ][1], $palettes[ $choice ][2], $palettes[ $choice ][3] );
+	}
+	return array(
+		sanitize_hex_color( get_theme_mod( 'kingdom_color_primary', '#5b2a86' ) ),
+		sanitize_hex_color( get_theme_mod( 'kingdom_color_accent', '#f4a62a' ) ),
+		sanitize_hex_color( get_theme_mod( 'kingdom_color_dark', '#16121c' ) ),
+	);
 }

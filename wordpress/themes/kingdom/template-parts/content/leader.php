@@ -6,7 +6,7 @@
  */
 
 ?>
-<article <?php post_class( 'k-leader' ); ?> data-reveal>
+<article <?php post_class( 'k-leader' ); ?> data-reveal data-tilt>
 	<a class="k-leader__photo" href="<?php the_permalink(); ?>">
 		<?php if ( has_post_thumbnail() ) : ?>
 			<?php the_post_thumbnail( 'kingdom-portrait', array( 'loading' => 'lazy' ) ); ?>

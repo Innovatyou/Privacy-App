@@ -15,4 +15,5 @@ kingdom_section( 'visit' );
 kingdom_section( 'page-content' );
 kingdom_section( 'ministries', array( 'count' => 3 ) );
 kingdom_section( 'newsletter' );
+kingdom_section( 'social' );
 get_footer();

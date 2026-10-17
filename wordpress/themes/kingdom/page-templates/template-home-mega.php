@@ -23,4 +23,5 @@ kingdom_section( 'give' );
 kingdom_section( 'page-content' );
 kingdom_section( 'blog' );
 kingdom_section( 'contact' );
+kingdom_section( 'social' );
 get_footer();

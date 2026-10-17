@@ -510,3 +510,124 @@ p { margin: 0 0 1.1em; }
 .has-primary-background-color { background-color: var(--k-primary) !important; }
 .has-accent-color { color: var(--k-accent) !important; }
 .has-accent-background-color { background-color: var(--k-accent) !important; }
+
+/* ==========================================================================
+   Branding, button styles, light logo
+   ========================================================================== */
+.k-brand { display: flex; flex-direction: column; justify-content: center; }
+.k-brand__name { display: inline-flex; align-items: center; gap: .55rem; }
+.k-brand__mark { width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg, var(--k-primary), var(--k-accent)); position: relative; box-shadow: 0 6px 14px color-mix(in srgb, var(--k-primary) 40%, transparent); }
+.k-brand__mark::before, .k-brand__mark::after { content: ""; position: absolute; background: #fff; border-radius: 2px; left: 50%; top: 50%; }
+.k-brand__mark::before { width: 4px; height: 18px; transform: translate(-50%, -55%); }
+.k-brand__mark::after { width: 13px; height: 4px; transform: translate(-50%, -150%); }
+.k-brand__tagline { font-size: .75rem; color: var(--k-muted); letter-spacing: .02em; }
+.k-brand__light { display: none; }
+.has-light-logo .k-brand__light img { max-height: 56px; width: auto; }
+[data-theme="dark"] .has-light-logo .custom-logo-link,
+.has-transparent-header .k-header:not(.is-scrolled) .has-light-logo .custom-logo-link { display: none; }
+[data-theme="dark"] .has-light-logo .k-brand__light,
+.has-transparent-header .k-header:not(.is-scrolled) .has-light-logo .k-brand__light { display: block; }
+.has-transparent-header .k-header:not(.is-scrolled) .k-brand__tagline { color: rgba(255,255,255,.75); }
+.k-footer__motto { font-family: var(--k-font-heading); font-style: italic; color: var(--k-accent); font-size: 1.1rem; }
+.btn-rounded .k-btn, .btn-rounded .kcs-btn { border-radius: 12px; }
+.btn-square .k-btn, .btn-square .kcs-btn { border-radius: 3px; }
+
+/* ==========================================================================
+   Mobile-first: app-style bottom tab bar & touch sizing
+   ========================================================================== */
+.k-tabbar { display: none; }
+@media (max-width: 860px) {
+	.has-mobile-nav .k-tabbar { position: fixed; z-index: 95; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(5, 1fr); padding: .35rem max(.5rem, env(safe-area-inset-right)) calc(.35rem + env(safe-area-inset-bottom)) max(.5rem, env(safe-area-inset-left)); background: color-mix(in srgb, var(--k-surface) 88%, transparent); backdrop-filter: blur(16px) saturate(1.4); -webkit-backdrop-filter: blur(16px) saturate(1.4); border-top: 1px solid var(--k-border); box-shadow: 0 -8px 30px rgba(0,0,0,.08); }
+	.k-tabbar a, .k-tabbar button { display: grid; justify-items: center; gap: 2px; min-height: 52px; padding: .35rem 0; border: 0; background: none; color: var(--k-muted); font: 600 .7rem/1.1 var(--k-font-body); text-decoration: none; border-radius: 14px; cursor: pointer; }
+	.k-tabbar a[aria-current="page"], .k-tabbar a:active { color: var(--k-primary); background: color-mix(in srgb, var(--k-primary) 10%, transparent); }
+	.k-tabbar .k-icon { width: 22px; height: 22px; }
+	.k-tabbar a:nth-child(3) .k-icon { width: 46px; height: 46px; padding: 12px; margin-top: -22px; border-radius: 50%; color: #1f1b24; background: var(--k-accent); box-shadow: 0 8px 20px color-mix(in srgb, var(--k-accent) 55%, transparent); }
+	.has-mobile-nav { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
+	.has-mobile-nav .k-to-top, .has-mobile-nav .k-palette { bottom: calc(80px + env(safe-area-inset-bottom)); }
+	.has-mobile-nav .k-whatsapp { bottom: calc(80px + env(safe-area-inset-bottom)); }
+	.has-mobile-nav .k-header__actions .k-nav-toggle { display: none; }
+	.k-hero--cover { min-height: 88svh; }
+	.k-btns .k-btn { flex: 1 1 100%; }
+	.k-section { padding-block: 3.5rem; }
+	.kcs-form input, .kcs-form select, .kcs-form textarea, .kcs-newsletter input { font-size: 16px; } /* no iOS zoom */
+}
+
+/* ==========================================================================
+   Visitor colour palette picker
+   ========================================================================== */
+.k-palette { position: fixed; z-index: 92; left: max(1.25rem, env(safe-area-inset-left)); bottom: 1.25rem; }
+.k-palette__toggle { width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--k-border); background: var(--k-surface); color: var(--k-primary); display: grid; place-items: center; cursor: pointer; box-shadow: var(--k-shadow); }
+.k-palette__panel { position: absolute; bottom: 56px; left: 0; width: 236px; padding: 1rem; border-radius: var(--k-radius); background: var(--k-surface); border: 1px solid var(--k-border); box-shadow: var(--k-shadow-lg); }
+.k-palette__panel p { margin: 0 0 .6rem; font-weight: 700; font-size: .9rem; }
+.k-palette__swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: .5rem; }
+.k-palette__swatches button { aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--k-surface); background: conic-gradient(var(--sw-a) 0 60%, var(--sw-b) 60% 100%); box-shadow: 0 0 0 1px var(--k-border); cursor: pointer; transition: transform .15s; }
+.k-palette__swatches button:hover, .k-palette__swatches button.is-active { transform: scale(1.12); box-shadow: 0 0 0 2px var(--k-text); }
+.k-palette__reset { margin-top: .75rem; width: 100%; padding: .5rem; border-radius: 10px; border: 1px dashed var(--k-border); background: none; color: var(--k-muted); cursor: pointer; font: inherit; font-size: .82rem; }
+.k-whatsapp ~ .k-palette, body:has(.k-whatsapp) .k-palette { left: auto; right: max(1.25rem, env(safe-area-inset-right)); bottom: 5rem; }
+
+/* ==========================================================================
+   Social connect
+   ========================================================================== */
+.k-social-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
+.k-social-card { --brand: var(--k-primary); position: relative; display: grid; gap: .3rem; padding: 1.5rem; border-radius: calc(var(--k-radius) * 1.2); background: var(--k-surface); border: 1px solid var(--k-border); color: var(--k-text) !important; text-decoration: none !important; overflow: hidden; }
+.k-social-card::before { content: ""; position: absolute; inset: auto -30% -60% auto; width: 160px; height: 160px; border-radius: 50%; background: var(--brand); opacity: .12; transition: transform .4s; }
+.k-social-card:hover::before { transform: scale(1.6); }
+.k-social-card__icon { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; background: var(--brand); color: #fff; margin-bottom: .5rem; box-shadow: 0 10px 22px color-mix(in srgb, var(--brand) 40%, transparent); }
+.k-social-card__icon .k-icon { width: 26px; height: 26px; }
+.k-social-card small { color: var(--k-muted); }
+.k-social-card__cta { margin-top: .5rem; display: inline-flex; align-items: center; gap: .35rem; font-weight: 700; color: var(--brand); }
+[data-theme="dark"] .k-social-card__cta { color: var(--k-text); }
+.k-social-card--facebook { --brand: #1877f2; }
+.k-social-card--instagram { --brand: #d62976; }
+.k-social-card--youtube { --brand: #e00; }
+.k-social-card--x { --brand: #111; }
+.k-social-card--tiktok { --brand: #fe2c55; }
+.k-social-card--whatsapp { --brand: #25d366; }
+.k-social-card--telegram { --brand: #229ed9; }
+
+/* ==========================================================================
+   3D UI layer (body.k-3d)
+   ========================================================================== */
+.k-3d .k-grid, .k-3d .kcs-plans, .k-3d .k-social-grid { perspective: 1200px; }
+.k-3d [data-tilt] { transform-style: preserve-3d; transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s; will-change: transform; }
+.k-3d [data-tilt].is-tilting { transition: transform .08s linear, box-shadow .25s; box-shadow: 0 30px 60px -20px rgba(15, 10, 30, .35), 0 12px 24px -12px color-mix(in srgb, var(--k-primary) 45%, transparent); }
+.k-3d [data-tilt] > * { transform: translateZ(0); }
+.k-3d [data-tilt].is-tilting .k-card__title, .k-3d [data-tilt].is-tilting .kcs-plan__price, .k-3d [data-tilt].is-tilting .k-social-card__icon, .k-3d [data-tilt].is-tilting .k-feature__icon { transform: translateZ(40px); }
+.k-3d [data-tilt]::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: radial-gradient(400px circle at var(--mx, 50%) var(--my, 0%), rgba(255,255,255,.22), transparent 45%); opacity: 0; transition: opacity .3s; }
+.k-3d [data-tilt].is-tilting::after { opacity: 1; }
+.k-3d .k-card, .k-3d .k-feature, .k-3d .k-testimony, .k-3d .kcs-plan, .k-3d .k-social-card, .k-3d .k-leader { position: relative; box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 14px 30px -18px rgba(15,10,30,.25); }
+.k-3d .k-btn { box-shadow: 0 4px 0 color-mix(in srgb, var(--k-primary) 60%, #000), 0 10px 20px -8px color-mix(in srgb, var(--k-primary) 60%, transparent); }
+.k-3d .k-btn--accent { box-shadow: 0 4px 0 color-mix(in srgb, var(--k-accent) 60%, #000), 0 10px 20px -8px color-mix(in srgb, var(--k-accent) 60%, transparent); }
+.k-3d .k-btn--outline, .k-3d .k-btn--glass, .k-3d .k-btn--light { box-shadow: 0 4px 0 rgba(0,0,0,.15); }
+.k-3d .k-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--k-primary) 60%, #000); }
+
+/* Hero scene: layered orbs, a 3D cross and an orbiting ring */
+.k-hero__scene { position: absolute; inset: 0; z-index: 1; pointer-events: none; perspective: 900px; overflow: hidden; }
+.k-orb { position: absolute; border-radius: 50%; filter: blur(2px); background: radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--k-accent) 85%, #fff), var(--k-primary) 70%); opacity: .55; animation: k-float 12s ease-in-out infinite; }
+.k-orb--1 { width: 260px; height: 260px; right: 8%; top: 18%; }
+.k-orb--2 { width: 120px; height: 120px; right: 30%; bottom: 14%; animation-delay: -4s; opacity: .4; }
+.k-orb--3 { width: 70px; height: 70px; left: 6%; bottom: 22%; animation-delay: -8s; opacity: .35; }
+.k-cross3d { position: absolute; right: 16%; top: 30%; width: 120px; height: 180px; transform-style: preserve-3d; animation: k-spin 18s linear infinite; }
+.k-cross3d i { position: absolute; left: 50%; top: 50%; background: linear-gradient(135deg, rgba(255,255,255,.9), color-mix(in srgb, var(--k-accent) 70%, #fff)); border-radius: 6px; box-shadow: 0 0 40px color-mix(in srgb, var(--k-accent) 60%, transparent); }
+.k-cross3d i:first-child { width: 22px; height: 180px; transform: translate(-50%, -50%); }
+.k-cross3d i:last-child { width: 110px; height: 22px; transform: translate(-50%, -260%); }
+.k-ring3d { position: absolute; right: 9%; top: 22%; width: 300px; height: 300px; border-radius: 50%; border: 2px solid rgba(255,255,255,.25); transform: rotateX(70deg); animation: k-orbit 14s linear infinite; }
+@keyframes k-float { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(-20px, -30px, 60px); } }
+@keyframes k-spin { to { transform: rotateY(360deg); } }
+@keyframes k-orbit { to { transform: rotateX(70deg) rotateZ(360deg); } }
+body:not(.k-3d) .k-hero__scene { display: none; }
+.k-hero--classic .k-cross3d, .k-hero--classic .k-ring3d { right: 50%; transform-origin: center; opacity: .25; }
+@media (max-width: 860px) { .k-cross3d { right: 6%; top: 12%; width: 70px; height: 110px; opacity: .55; } .k-cross3d i:first-child { height: 110px; width: 14px; } .k-cross3d i:last-child { width: 68px; height: 14px; } .k-ring3d { width: 180px; height: 180px; right: -10%; top: 8%; } .k-orb--1 { width: 160px; height: 160px; right: -10%; } }
+.k-3d .k-hero__content { transform-style: preserve-3d; }
+.k-3d .k-hero__title { text-shadow: 0 2px 0 rgba(0,0,0,.15), 0 18px 40px rgba(0,0,0,.35); }
+
+/* Glass depth on floating UI */
+.k-3d .k-floating-card, .k-3d .k-palette__panel { backdrop-filter: blur(14px); background: color-mix(in srgb, var(--k-surface) 85%, transparent); }
+
+@media (prefers-reduced-motion: reduce) {
+	.k-hero__scene * { animation: none !important; }
+	.k-3d [data-tilt] { transform: none !important; }
+}
+
+/* Keep the desktop header on one line: the idle live pill only shows on wide screens */
+@media (max-width: 1500px) { .k-header .kcs-live-badge:not(.is-live) { display: none; } .k-header__inner { gap: 1rem; } .k-menu a { padding-inline: .6rem; } }

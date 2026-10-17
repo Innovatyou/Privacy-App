@@ -6,7 +6,7 @@
  */
 
 ?>
-<article id="post-<?php the_ID(); ?>" <?php post_class( 'k-card' ); ?> data-reveal>
+<article id="post-<?php the_ID(); ?>" <?php post_class( 'k-card' ); ?> data-reveal data-tilt>
 	<?php if ( has_post_thumbnail() ) : ?>
 		<a class="k-card__media" href="<?php the_permalink(); ?>" tabindex="-1" aria-hidden="true"><?php the_post_thumbnail( 'kingdom-card', array( 'loading' => 'lazy' ) ); ?></a>
 	<?php endif; ?>

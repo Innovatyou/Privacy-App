@@ -168,3 +168,24 @@
 .kcs-breadcrumbs ol { list-style: none; display: flex; flex-wrap: wrap; gap: .4rem; padding: 0; margin: 0; font-size: .9rem; }
 .kcs-breadcrumbs li + li::before { content: "/"; margin-right: .4rem; opacity: .5; }
 .kcs-breadcrumbs a { color: inherit; }
+
+/* Plan comparison & upgrade */
+.kcs-plan.is-current { border: 2px solid var(--kcs-accent); }
+.kcs-plan.is-current .kcs-plan__ribbon { background: var(--kcs-primary); color: var(--kcs-primary-contrast); }
+.kcs-plan.is-focus { box-shadow: 0 0 0 4px color-mix(in srgb, var(--kcs-primary) 30%, transparent), 0 18px 40px rgba(0,0,0,.1); }
+.kcs-plans--compare { margin-top: 1rem; }
+.kcs-plans--compare .kcs-plan { gap: .6rem; }
+.kcs-plans--compare .kcs-plan__name { font-size: 1.1rem; }
+.kcs-benefits { padding: 1.25rem 1.5rem; border-radius: var(--kcs-radius); border: 1px solid var(--kcs-border); display: grid; gap: .75rem; justify-items: start; }
+.kcs-benefits h3 { margin: 0; font-size: 1.1rem; }
+
+/* Social connect */
+.kcs-socials { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.kcs-social { display: grid; gap: .15rem; padding: 1rem 1.1rem; border-radius: var(--kcs-radius); color: #fff !important; text-decoration: none !important; transition: transform .2s, box-shadow .2s; }
+.kcs-social:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(0,0,0,.18); }
+.kcs-social span { font-size: .85rem; opacity: .85; }
+.kcs-social--facebook { background: #1877f2; }
+.kcs-social--instagram { background: linear-gradient(45deg, #f58529, #dd2a7b 50%, #8134af); }
+.kcs-social--youtube { background: #e00; }
+.kcs-social--x { background: #111; }
+.kcs-social--tiktok { background: #010101; box-shadow: inset 3px 0 0 #25f4ee, inset -3px 0 0 #fe2c55; }

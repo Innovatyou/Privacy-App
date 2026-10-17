@@ -6,7 +6,7 @@
  */
 
 ?>
-<article <?php post_class( 'k-card k-event-card' ); ?> data-reveal>
+<article <?php post_class( 'k-card k-event-card' ); ?> data-reveal data-tilt>
 	<a class="k-card__media" href="<?php the_permalink(); ?>" tabindex="-1" aria-hidden="true">
 		<?php if ( has_post_thumbnail() ) : ?><?php the_post_thumbnail( 'kingdom-card', array( 'loading' => 'lazy' ) ); ?><?php endif; ?>
 		<?php kingdom_event_badge(); ?>

@@ -46,6 +46,12 @@ class KCS_Email {
 					'body'    => "<p>Dear {first_name},</p><p>This is a friendly reminder that your {frequency} partnership of <strong>{amount}</strong> is due on <strong>{due_date}</strong>.</p><p><a class=\"btn\" href=\"{pay_url}\">Give now</a></p><p>Thank you for standing with us.</p>",
 					'vars'    => array( '{first_name}', '{amount}', '{frequency}', '{due_date}', '{pay_url}', '{church_name}' ),
 				),
+				'plan_changed'      => array(
+					'label'   => __( 'Partnership plan changed', 'kingdom-church-suite' ),
+					'subject' => 'Your partnership is now {plan_name}',
+					'body'    => "<p>Dear {first_name},</p><p>Thank you! Your partnership has been {change} from <strong>{old_plan}</strong> to <strong>{plan_name}</strong> — {amount} ({frequency}).</p><p>Your new benefits are listed on your dashboard.</p><p><a class=\"btn\" href=\"{pay_url}\">Give your first seed on this plan</a></p>",
+					'vars'    => array( '{first_name}', '{old_plan}', '{plan_name}', '{change}', '{amount}', '{frequency}', '{pay_url}', '{church_name}' ),
+				),
 				'admin_new_partner' => array(
 					'label'   => __( 'Admin: new partner', 'kingdom-church-suite' ),
 					'subject' => 'New partner: {name} ({plan_name})',

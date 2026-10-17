@@ -12,4 +12,5 @@ get_header();
 kingdom_page_header();
 kingdom_section( 'contact' );
 kingdom_section( 'page-content' );
+kingdom_section( 'social' );
 get_footer();

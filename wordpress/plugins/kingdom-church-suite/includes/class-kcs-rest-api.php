@@ -125,6 +125,8 @@ class KCS_REST_API {
 			array( '/me', 'GET', 'me', $partner ),
 			array( '/me', 'PUT,PATCH', 'update_me', $partner ),
 			array( '/me/payments', 'GET', 'my_payments', $partner ),
+			array( '/me/plan', 'PUT,POST', 'change_my_plan', $partner ),
+			array( '/testimonies', 'POST', 'submit_testimony', $public ),
 
 			// Admin.
 			array( '/stats', 'GET', 'stats', $manage ),
@@ -488,6 +490,41 @@ class KCS_REST_API {
 		$partner = KCS_Partners::get_by_user( get_current_user_id() );
 		$result  = KCS_Payments::query( array( 'partner_id' => $partner->id, 'page' => (int) ( $req['page'] ? $req['page'] : 1 ), 'per_page' => (int) ( $req['per_page'] ? $req['per_page'] : 20 ) ) );
 		return self::paged( $result, array( 'KCS_Payments', 'to_array' ), $req );
+	}
+
+	/**
+	 * PUT /me/plan — upgrade, downgrade or switch plan.
+	 *
+	 * @param WP_REST_Request $req Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public static function change_my_plan( $req ) {
+		$partner = KCS_Partners::get_by_user( get_current_user_id() );
+		$result  = KCS_Partners::change_plan( $partner, (int) $req['plan_id'], (float) $req['amount'], sanitize_key( (string) $req['frequency'] ) );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+		return rest_ensure_response( array( 'change' => $result, 'partner' => KCS_Partners::to_array( KCS_Partners::get( $partner->id ) ) ) );
+	}
+
+	/**
+	 * POST /testimonies — public testimony submission (held for review).
+	 *
+	 * @param WP_REST_Request $req Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public static function submit_testimony( $req ) {
+		if ( ! empty( $req['website'] ) ) {
+			return rest_ensure_response( array( 'id' => 0 ) );
+		}
+		if ( ! kcs_rate_limit( 'testimony', 3, HOUR_IN_SECONDS ) ) {
+			return new WP_Error( 'kcs_rate', __( 'Too many submissions. Please try again later.', 'kingdom-church-suite' ), array( 'status' => 429 ) );
+		}
+		$id = KCS_Features::submit_testimony( $req->get_params() );
+		if ( is_wp_error( $id ) ) {
+			return $id;
+		}
+		return rest_ensure_response( array( 'id' => $id, 'message' => __( 'Thank you for sharing! Your testimony will appear once our team has reviewed it. 🙌', 'kingdom-church-suite' ) ) );
 	}
 
 	/* ---------------------------------------------------------------------

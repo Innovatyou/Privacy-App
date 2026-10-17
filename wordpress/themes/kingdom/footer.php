@@ -29,6 +29,7 @@ $social   = kingdom_social_links();
 		<?php else : ?>
 			<div class="k-footer__col">
 				<h3 class="k-footer__brand"><?php bloginfo( 'name' ); ?></h3>
+				<?php if ( get_theme_mod( 'kingdom_brand_motto' ) ) : ?><p class="k-footer__motto"><?php echo esc_html( get_theme_mod( 'kingdom_brand_motto' ) ); ?></p><?php endif; ?>
 				<p><?php echo esc_html( get_theme_mod( 'kingdom_footer_about', __( 'Raising a generation of believers who love God, love people and transform their world.', 'kingdom' ) ) ); ?></p>
 				<?php if ( $social ) : ?>
 					<div class="k-social">
@@ -82,6 +83,38 @@ $social   = kingdom_social_links();
 <?php if ( get_theme_mod( 'kingdom_whatsapp_float' ) && get_theme_mod( 'kingdom_social_whatsapp' ) ) : ?>
 	<a class="k-whatsapp" href="<?php echo esc_url( get_theme_mod( 'kingdom_social_whatsapp' ) ); ?>" target="_blank" rel="noopener" aria-label="WhatsApp"><?php echo kingdom_icon( 'whatsapp' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
 <?php endif; ?>
+<?php if ( get_theme_mod( 'kingdom_mobile_nav', true ) ) : ?>
+	<?php
+	$kingdom_tabs = array(
+		array( 'home', __( 'Home', 'kingdom' ), home_url( '/' ) ),
+		array( 'play', __( 'Watch', 'kingdom' ), kingdom_plugin_active() ? kcs_page_url( 'watch_live' ) : kingdom_url( '', 'template-watch-live.php' ) ),
+		array( 'heart', __( 'Give', 'kingdom' ), kingdom_plugin_active() ? kcs_page_url( 'give' ) : kingdom_url( '', 'template-give.php' ) ),
+		array( 'hands', __( 'Prayer', 'kingdom' ), kingdom_plugin_active() ? kcs_page_url( 'prayer' ) : kingdom_url( '', 'template-prayer.php' ) ),
+	);
+	?>
+	<nav class="k-tabbar" aria-label="<?php esc_attr_e( 'Quick navigation', 'kingdom' ); ?>">
+		<?php foreach ( $kingdom_tabs as $kingdom_tab ) : ?>
+			<a href="<?php echo esc_url( $kingdom_tab[2] ); ?>"<?php echo untrailingslashit( $kingdom_tab[2] ) === untrailingslashit( home_url( add_query_arg( array() ) ) ) ? ' aria-current="page"' : ''; ?>><?php echo kingdom_icon( $kingdom_tab[0] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?><span><?php echo esc_html( $kingdom_tab[1] ); ?></span></a>
+		<?php endforeach; ?>
+		<button type="button" data-nav-toggle aria-controls="k-nav" aria-expanded="false"><?php echo kingdom_icon( 'menu' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?><span><?php esc_html_e( 'Menu', 'kingdom' ); ?></span></button>
+	</nav>
+<?php endif; ?>
+
+<?php if ( get_theme_mod( 'kingdom_palette_switcher', true ) ) : ?>
+	<div class="k-palette" data-palette-picker>
+		<button type="button" class="k-palette__toggle" aria-expanded="false" aria-label="<?php esc_attr_e( 'Choose site colours', 'kingdom' ); ?>"><?php echo kingdom_icon( 'palette' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
+		<div class="k-palette__panel" hidden>
+			<p><?php esc_html_e( 'Site colours', 'kingdom' ); ?></p>
+			<div class="k-palette__swatches">
+				<?php foreach ( kingdom_palettes() as $kingdom_slug => $kingdom_p ) : ?>
+					<button type="button" data-palette="<?php echo esc_attr( $kingdom_slug ); ?>" title="<?php echo esc_attr( $kingdom_p[0] ); ?>" style="--sw-a:<?php echo esc_attr( $kingdom_p[1] ); ?>;--sw-b:<?php echo esc_attr( $kingdom_p[2] ); ?>"><span class="screen-reader-text"><?php echo esc_html( $kingdom_p[0] ); ?></span></button>
+				<?php endforeach; ?>
+			</div>
+			<button type="button" class="k-palette__reset" data-palette=""><?php esc_html_e( 'Reset to church colours', 'kingdom' ); ?></button>
+		</div>
+	</div>
+<?php endif; ?>
+
 <button type="button" class="k-to-top" data-to-top aria-label="<?php esc_attr_e( 'Back to top', 'kingdom' ); ?>">↑</button>
 <div class="k-modal" data-video-modal hidden><button type="button" class="k-modal__close" data-modal-close aria-label="<?php esc_attr_e( 'Close', 'kingdom' ); ?>">×</button><div class="k-modal__body"></div></div>
 

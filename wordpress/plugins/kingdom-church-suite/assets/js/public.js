@@ -124,6 +124,19 @@
 				.then(function () { busy(form, false); });
 		});
 	});
+	document.querySelectorAll('[data-kcs-testimony]').forEach(function (form) {
+		form.addEventListener('submit', function (e) {
+			e.preventDefault();
+			busy(form, true);
+			api('testimonies', 'POST', formData(form))
+				.then(function (res) { msg(form, res.message, 'success'); form.reset(); })
+				.catch(function (err) { msg(form, err.message, 'error'); })
+				.then(function () { busy(form, false); });
+		});
+	});
+	var focusPlan = document.querySelector('.kcs-plan.is-focus');
+	if (focusPlan) { setTimeout(function () { focusPlan.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 300); }
+
 	document.addEventListener('click', function (e) {
 		var btn = e.target.closest('[data-kcs-pray]');
 		if (!btn || btn.disabled) { return; }

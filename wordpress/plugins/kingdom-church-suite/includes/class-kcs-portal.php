@@ -129,6 +129,9 @@ class KCS_Portal {
 			case 'password':
 				self::password( $data );
 				break;
+			case 'change_plan':
+				self::change_plan( $data );
+				break;
 		}
 	}
 
@@ -294,6 +297,25 @@ class KCS_Portal {
 			}
 		}
 		self::add_message( __( 'Your profile has been updated.', 'kingdom-church-suite' ), 'success' );
+	}
+
+	/**
+	 * Upgrade / downgrade / switch plan from the dashboard.
+	 *
+	 * @param array $data Data.
+	 */
+	private static function change_plan( $data ) {
+		$partner = KCS_Partners::get_by_user( get_current_user_id() );
+		if ( ! $partner ) {
+			return;
+		}
+		$result = KCS_Partners::change_plan( $partner, absint( $data['plan_id'] ?? 0 ), (float) ( $data['amount'] ?? 0 ), sanitize_key( $data['frequency'] ?? '' ) );
+		if ( is_wp_error( $result ) ) {
+			self::add_message( $result->get_error_message() );
+			return;
+		}
+		wp_safe_redirect( add_query_arg( array( 'kcs_action' => 'pay', 'plan_changed' => $result ), kcs_page_url( 'partner_dashboard' ) ) );
+		exit;
 	}
 
 	/**

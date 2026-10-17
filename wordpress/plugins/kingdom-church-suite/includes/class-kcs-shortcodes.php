@@ -33,6 +33,8 @@ class KCS_Shortcodes {
 			'kcs_sermons'           => 'sermons',
 			'kcs_events'            => 'events',
 			'kcs_verse'             => 'verse',
+			'kcs_testimony_form'    => 'testimony_form',
+			'kcs_social'            => 'social',
 		);
 		foreach ( $map as $tag => $method ) {
 			add_shortcode( $tag, array( __CLASS__, $method ) );
@@ -353,6 +355,57 @@ class KCS_Shortcodes {
 		}
 		wp_reset_postdata();
 		return $out . '</ul>';
+	}
+
+	/**
+	 * Public testimony submission form.
+	 *
+	 * @return string
+	 */
+	public static function testimony_form() {
+		ob_start();
+		?>
+		<form class="kcs-form kcs-testimony-form" data-kcs-testimony>
+			<h3 class="kcs-form__title"><?php esc_html_e( 'Share your testimony', 'kingdom-church-suite' ); ?></h3>
+			<div class="kcs-grid-2">
+				<label for="kcs-t-name"><?php esc_html_e( 'Your name', 'kingdom-church-suite' ); ?><input id="kcs-t-name" type="text" name="name" required></label>
+				<label for="kcs-t-loc"><?php esc_html_e( 'City / country (optional)', 'kingdom-church-suite' ); ?><input id="kcs-t-loc" type="text" name="location"></label>
+			</div>
+			<div class="kcs-grid-2">
+				<label for="kcs-t-email"><?php esc_html_e( 'Email (not published)', 'kingdom-church-suite' ); ?><input id="kcs-t-email" type="email" name="email"></label>
+				<label for="kcs-t-title"><?php esc_html_e( 'Headline (optional)', 'kingdom-church-suite' ); ?><input id="kcs-t-title" type="text" name="title" placeholder="<?php esc_attr_e( 'e.g. Healed after 3 years', 'kingdom-church-suite' ); ?>"></label>
+			</div>
+			<label for="kcs-t-story"><?php esc_html_e( 'What has God done?', 'kingdom-church-suite' ); ?><textarea id="kcs-t-story" name="story" rows="5" required minlength="20"></textarea></label>
+			<label for="kcs-t-video"><?php esc_html_e( 'Video link (optional)', 'kingdom-church-suite' ); ?><input id="kcs-t-video" type="url" name="video_url" placeholder="https://youtu.be/…"></label>
+			<input type="text" name="website" class="kcs-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+			<button type="submit" class="kcs-btn"><?php esc_html_e( 'Submit testimony', 'kingdom-church-suite' ); ?></button>
+			<div class="kcs-form-msg" aria-live="polite"></div>
+		</form>
+		<?php
+		return ob_get_clean();
+	}
+
+	/**
+	 * Social media connect buttons.
+	 *
+	 * @return string
+	 */
+	public static function social() {
+		$nets = array(
+			'facebook'  => array( 'Facebook', __( 'Like our page', 'kingdom-church-suite' ) ),
+			'instagram' => array( 'Instagram', __( 'Follow us', 'kingdom-church-suite' ) ),
+			'youtube'   => array( 'YouTube', __( 'Subscribe', 'kingdom-church-suite' ) ),
+			'x'         => array( 'X', __( 'Follow', 'kingdom-church-suite' ) ),
+			'tiktok'    => array( 'TikTok', __( 'Follow', 'kingdom-church-suite' ) ),
+		);
+		$out = '';
+		foreach ( $nets as $key => $n ) {
+			$url = kcs_get_option( 'social_' . $key );
+			if ( $url ) {
+				$out .= '<a class="kcs-social kcs-social--' . esc_attr( $key ) . '" href="' . esc_url( $url ) . '" target="_blank" rel="noopener"><strong>' . esc_html( $n[0] ) . '</strong><span>' . esc_html( $n[1] ) . '</span></a>';
+			}
+		}
+		return $out ? '<div class="kcs-socials">' . $out . '</div>' : '';
 	}
 
 	/**
