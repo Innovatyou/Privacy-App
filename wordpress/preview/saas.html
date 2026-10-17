@@ -1,0 +1,930 @@
+<title>ChurchHub Platform Preview</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Kingdom Cloud — platform site (landing, sign-up, platform dashboard). */
+:root {
+	--ks-brand: #5b2a86;
+	--ks-accent: #f4a62a;
+	--ks-bg: #faf8fc;
+	--ks-surface: #ffffff;
+	--ks-surface-2: #f3eef8;
+	--ks-text: #1d1724;
+	--ks-muted: #6b6476;
+	--ks-border: #e7e1ee;
+	--ks-ok: #15803d;
+	--ks-warn: #b45309;
+	--ks-bad: #b91c1c;
+	--ks-radius: 18px;
+	--ks-shadow: 0 24px 50px -32px rgba(43, 16, 74, .45);
+	--ks-on-brand: #fff;
+	color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+	:root { --ks-bg: #120f17; --ks-surface: #1c1723; --ks-surface-2: #261f30; --ks-text: #f3eff8; --ks-muted: #b3abbe; --ks-border: #332a3f; --ks-shadow: 0 24px 50px -30px rgba(0, 0, 0, .8); color-scheme: dark; }
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body.ks { margin: 0; font: 16px/1.6 "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--ks-bg); color: var(--ks-text); -webkit-font-smoothing: antialiased; }
+.ks a { color: var(--ks-brand); }
+@media (prefers-color-scheme: dark) { .ks a { color: color-mix(in srgb, var(--ks-brand) 45%, #fff); } }
+.ks h1, .ks h2, .ks h3 { line-height: 1.15; letter-spacing: -.02em; margin: 0 0 .5rem; }
+.ks h1 { font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 800; }
+.ks h2 { font-size: clamp(1.6rem, 3.4vw, 2.4rem); font-weight: 800; }
+.ks h3 { font-size: 1.15rem; font-weight: 700; }
+.ks-skip { position: absolute; left: -999px; }
+.ks-skip:focus { left: 1rem; top: 1rem; z-index: 99; background: var(--ks-surface); padding: .5rem 1rem; border-radius: 8px; }
+.ks-wrap { width: min(1160px, 100% - 32px); margin-inline: auto; }
+.ks-narrow { max-width: 760px; }
+.ks-lead { font-size: 1.12rem; color: var(--ks-muted); margin: 0 0 1.2rem; }
+.ks-muted { color: var(--ks-muted); }
+.ks-small { font-size: .88rem; color: var(--ks-muted); }
+.ks-center { text-align: center; }
+.ks-eyebrow { display: inline-block; font-size: .75rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--ks-brand); margin-bottom: .6rem; }
+@media (prefers-color-scheme: dark) { .ks-eyebrow { color: color-mix(in srgb, var(--ks-brand) 40%, #fff); } }
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--ks-brand) 60%, #fff); outline-offset: 2px; }
+
+/* Buttons */
+.ks-btn { display: inline-flex; align-items: center; justify-content: center; gap: .4em; padding: .8em 1.4em; border-radius: 999px; border: 2px solid var(--ks-brand); background: var(--ks-brand); color: var(--ks-on-brand) !important; font: inherit; font-weight: 700; text-decoration: none; cursor: pointer; line-height: 1.2; transition: transform .15s, box-shadow .15s, background .15s; box-shadow: 0 10px 22px -14px var(--ks-brand); }
+.ks-btn:hover { transform: translateY(-1px); }
+.ks-btn:disabled { opacity: .6; cursor: progress; transform: none; }
+.ks-btn--ghost { background: transparent; color: var(--ks-brand) !important; box-shadow: none; }
+@media (prefers-color-scheme: dark) { .ks-btn--ghost { color: var(--ks-text) !important; border-color: var(--ks-border); } }
+.ks-btn--light { background: #fff; color: var(--ks-brand) !important; border-color: #fff; }
+.ks-btn--danger { background: transparent; border-color: color-mix(in srgb, var(--ks-bad) 50%, transparent); color: var(--ks-bad) !important; box-shadow: none; }
+.ks-btn--sm { padding: .5em 1em; font-size: .88rem; }
+.ks-btn--lg { padding: 1em 1.7em; font-size: 1.05rem; }
+.ks-btn--block { width: 100%; }
+
+/* Header & footer */
+.ks-top { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--ks-bg) 85%, transparent); backdrop-filter: saturate(1.4) blur(12px); border-bottom: 1px solid var(--ks-border); }
+.ks-top__in { display: flex; align-items: center; gap: 1rem; min-height: 68px; }
+.ks-logo { display: inline-flex; align-items: center; gap: .55rem; font-weight: 800; font-size: 1.15rem; color: var(--ks-text) !important; text-decoration: none; }
+.ks-logo__mark { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--ks-brand), var(--ks-accent)); box-shadow: 0 8px 18px -10px var(--ks-brand); }
+.ks-nav { display: none; gap: 1.4rem; margin-left: auto; }
+.ks-nav a { color: var(--ks-text) !important; text-decoration: none; font-weight: 600; }
+.ks-top .ks-btn { margin-left: auto; }
+@media (min-width: 820px) { .ks-nav { display: flex; } .ks-top .ks-btn { margin-left: 1rem; } }
+.ks-foot { border-top: 1px solid var(--ks-border); padding: 2.5rem 0 1.5rem; margin-top: 2rem; }
+.ks-foot__in { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1.5rem; }
+.ks-foot__in p { margin: .3rem 0 0; color: var(--ks-muted); max-width: 420px; }
+.ks-foot__in > div:last-child { display: flex; flex-wrap: wrap; gap: 1.2rem; align-items: center; }
+.ks-foot__copy { color: var(--ks-muted); font-size: .85rem; margin-top: 1.5rem; }
+
+/* Sections */
+.ks-band { padding: clamp(3rem, 8vw, 6rem) 0; }
+.ks-band--alt { background: var(--ks-surface-2); }
+.ks-head { text-align: center; max-width: 720px; margin: 0 auto 2.5rem; }
+.ks-grid { display: grid; gap: 1.2rem; }
+.ks-grid--2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+.ks-grid--3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr)); }
+.ks-card { background: var(--ks-surface); border: 1px solid var(--ks-border); border-radius: var(--ks-radius); padding: clamp(1.1rem, 3vw, 1.6rem); box-shadow: var(--ks-shadow); min-width: 0; }
+
+/* Hero */
+.ks-hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 clamp(2rem, 6vw, 4rem); background: radial-gradient(1000px 500px at 85% -10%, color-mix(in srgb, var(--ks-brand) 18%, transparent), transparent), radial-gradient(800px 400px at 0% 110%, color-mix(in srgb, var(--ks-accent) 16%, transparent), transparent); overflow: hidden; }
+.ks-hero__in { display: grid; gap: 2.5rem; align-items: center; }
+@media (min-width: 960px) { .ks-hero__in { grid-template-columns: 1.05fr .95fr; } }
+.ks-cta { display: flex; flex-wrap: wrap; gap: .8rem; margin: 1.6rem 0 .8rem; }
+.ks-hero__art { position: relative; min-height: 320px; perspective: 1200px; }
+.ks-device { position: relative; border-radius: 18px; overflow: hidden; background: var(--ks-surface); border: 1px solid var(--ks-border); box-shadow: 0 40px 80px -40px rgba(43, 16, 74, .6); transform: rotateY(-10deg) rotateX(4deg); transition: transform .6s; max-width: 520px; margin-left: auto; }
+.ks-hero__art:hover .ks-device { transform: rotateY(-4deg) rotateX(2deg); }
+.ks-device img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
+.ks-device__bar { display: flex; align-items: center; gap: 6px; padding: 10px 12px; background: var(--ks-surface-2); font-size: .78rem; color: var(--ks-muted); }
+.ks-device__bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--ks-border); }
+.ks-device__bar span { margin-left: 8px; padding: 2px 10px; border-radius: 999px; background: var(--ks-surface); }
+.ks-device__cap { position: absolute; left: 16px; bottom: 16px; color: #fff; text-shadow: 0 2px 12px rgba(0, 0, 0, .5); display: grid; }
+.ks-device__cap strong { font-size: 1.4rem; }
+.ks-device--back { position: absolute; inset: 30px auto auto 0; width: 60%; opacity: .55; transform: rotateY(18deg) translateZ(-80px); }
+.ks-float { position: absolute; padding: .7rem 1rem; border-radius: 14px; background: var(--ks-surface); border: 1px solid var(--ks-border); box-shadow: var(--ks-shadow); font-weight: 800; display: grid; animation: ks-bob 5s ease-in-out infinite; }
+.ks-float small { font-weight: 500; color: var(--ks-muted); font-size: .75rem; }
+.ks-float--a { left: -3%; top: 38%; }
+.ks-float--b { right: 2%; top: -4%; animation-delay: -2.5s; }
+@keyframes ks-bob { 50% { transform: translateY(-8px); } }
+@media (prefers-reduced-motion: reduce) { .ks-float { animation: none; } .ks-device { transition: none; } }
+
+.ks-feature__ic { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-size: 1.3rem; color: var(--ks-brand); background: color-mix(in srgb, var(--ks-brand) 12%, transparent); margin-bottom: .8rem; }
+.ks-feature p { margin: 0; color: var(--ks-muted); }
+.ks-steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 1.2rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+.ks-steps li { background: var(--ks-surface); border: 1px solid var(--ks-border); border-radius: var(--ks-radius); padding: 1.4rem; }
+.ks-steps b { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--ks-brand); color: #fff; margin-bottom: .6rem; }
+.ks-steps p { margin: 0; color: var(--ks-muted); }
+
+/* Pricing */
+.ks-toggles { display: flex; flex-wrap: wrap; justify-content: center; gap: .7rem; margin-bottom: 1.8rem; }
+.ks-seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 14px; background: var(--ks-surface-2); border: 1px solid var(--ks-border); max-width: 100%; }
+.ks-seg label { position: relative; cursor: pointer; }
+.ks-seg input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.ks-seg span { display: inline-flex; align-items: center; gap: .35rem; padding: .55rem .95rem; border-radius: 10px; font-weight: 700; font-size: .9rem; color: var(--ks-muted); }
+.ks-seg b { font-size: .72rem; font-weight: 700; opacity: .8; }
+.ks-seg input:checked + span { background: var(--ks-brand); color: #fff; box-shadow: 0 8px 18px -12px var(--ks-brand); }
+.ks-seg input:focus-visible + span { outline: 3px solid color-mix(in srgb, var(--ks-brand) 50%, #fff); }
+.ks-seg--block { display: grid; grid-template-columns: 1fr 1fr; margin-top: .8rem; }
+.ks-seg--block span { justify-content: center; }
+.ks-p { display: none; align-items: baseline; gap: .2rem; font-size: 2.3rem; font-weight: 800; letter-spacing: -.03em; }
+.ks-p small { font-size: .95rem; font-weight: 600; color: var(--ks-muted); letter-spacing: 0; }
+[data-r="international"][data-i="month"] .ks-p--international-month,
+[data-r="international"][data-i="year"] .ks-p--international-year,
+[data-r="local"][data-i="month"] .ks-p--local-month,
+[data-r="local"][data-i="year"] .ks-p--local-year { display: inline-flex; }
+.ks-tier { position: relative; display: flex; flex-direction: column; gap: .4rem; }
+.ks-tier.is-featured { border: 2px solid var(--ks-brand); transform: translateY(-6px); }
+.ks-ribbon { position: absolute; top: -13px; right: 18px; padding: .25rem .75rem; border-radius: 999px; background: var(--ks-accent); color: #2a1a00; font-size: .75rem; font-weight: 800; }
+.ks-ticks { list-style: none; padding: 0; margin: .4rem 0 1.2rem; display: grid; gap: .5rem; flex: 1; }
+.ks-ticks li { display: flex; gap: .55rem; }
+.ks-ticks li::before { content: "✓"; flex: none; width: 20px; height: 20px; margin-top: 2px; border-radius: 50%; display: grid; place-items: center; font-size: .72rem; font-weight: 900; color: var(--ks-ok); background: color-mix(in srgb, var(--ks-ok) 15%, transparent); }
+.ks-faq { display: grid; gap: .7rem; }
+.ks-faq details { background: var(--ks-surface); border: 1px solid var(--ks-border); border-radius: 14px; padding: 1rem 1.2rem; }
+.ks-faq summary { cursor: pointer; font-weight: 700; }
+.ks-faq p { margin: .6rem 0 0; color: var(--ks-muted); }
+.ks-final { text-align: center; background: linear-gradient(135deg, var(--ks-brand), color-mix(in srgb, var(--ks-brand) 55%, #000)); color: #fff; }
+.ks-final h2 { margin-bottom: 1.4rem; }
+
+/* Forms */
+.ks-form { display: grid; gap: 1rem; }
+.ks-form fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: .9rem; min-width: 0; }
+.ks-form legend { font-weight: 800; margin-bottom: .6rem; padding: 0; }
+.ks-form label { display: grid; gap: .35rem; font-weight: 600; font-size: .93rem; }
+.ks input:not([type="radio"]):not([type="checkbox"]):not([type="color"]), .ks select, .ks textarea { width: 100%; padding: .75rem .9rem; border-radius: 12px; border: 1px solid var(--ks-border); background: var(--ks-surface); color: var(--ks-text); font: inherit; min-height: 46px; }
+.ks input:focus, .ks select:focus, .ks textarea:focus { outline: none; border-color: var(--ks-brand); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ks-brand) 22%, transparent); }
+.ks input[type="color"] { width: 64px; height: 42px; border: 1px solid var(--ks-border); border-radius: 10px; padding: 2px; background: var(--ks-surface); }
+.ks-check { display: flex !important; align-items: center; gap: .55rem; font-weight: 500 !important; }
+.ks-domain { display: flex; align-items: stretch; border: 1px solid var(--ks-border); border-radius: 12px; overflow: hidden; background: var(--ks-surface); }
+.ks-domain input { border: 0 !important; border-radius: 0 !important; min-width: 0; box-shadow: none !important; }
+.ks-domain span { display: flex; align-items: center; padding: 0 .9rem; background: var(--ks-surface-2); color: var(--ks-muted); font-weight: 600; white-space: nowrap; font-size: .9rem; max-width: 55%; overflow: hidden; text-overflow: ellipsis; }
+.ks-domain:focus-within { border-color: var(--ks-brand); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ks-brand) 22%, transparent); }
+.ks-hint { margin: -.4rem 0 0; font-size: .86rem; color: var(--ks-muted); }
+.ks-hint.is-ok { color: var(--ks-ok); }
+.ks-hint.is-bad { color: var(--ks-bad); }
+.ks-hp { position: absolute !important; left: -9999px !important; }
+.ks-palettes { display: flex !important; flex-wrap: wrap; gap: .5rem !important; }
+.ks-palettes legend { width: 100%; font-weight: 600 !important; font-size: .93rem; }
+.ks-swatch { position: relative; display: inline-flex !important; align-items: center; gap: .4rem !important; padding: .35rem .7rem .35rem .4rem; border-radius: 999px; border: 1px solid var(--ks-border); cursor: pointer; font-weight: 600 !important; font-size: .85rem !important; }
+.ks-swatch input { position: absolute; opacity: 0; }
+.ks-swatch span { width: 22px; height: 22px; border-radius: 50%; background: var(--sw); }
+.ks-swatch:has(input:checked) { border-color: var(--ks-brand); box-shadow: 0 0 0 2px var(--ks-brand) inset; }
+.ks-pick { display: grid; gap: .5rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); }
+.ks-pick__opt { position: relative; cursor: pointer; }
+.ks-pick__opt input { position: absolute; opacity: 0; }
+.ks-pick__opt span { display: grid; gap: .1rem; padding: .8rem .9rem; border-radius: 12px; border: 1px solid var(--ks-border); height: 100%; }
+.ks-pick__opt small { color: var(--ks-muted); font-weight: 500; }
+.ks-pick__opt input:checked + span { border-color: var(--ks-brand); box-shadow: 0 0 0 2px var(--ks-brand) inset; background: var(--ks-surface-2); }
+.ks-pick__opt input:focus-visible + span { outline: 3px solid color-mix(in srgb, var(--ks-brand) 50%, #fff); }
+.ks-alert { padding: .9rem 1.1rem; border-radius: 12px; background: var(--ks-surface-2); border-left: 4px solid var(--ks-brand); }
+.ks-alert--error { border-left-color: var(--ks-bad); background: color-mix(in srgb, var(--ks-bad) 9%, var(--ks-surface)); }
+.ks-alert--success { border-left-color: var(--ks-ok); background: color-mix(in srgb, var(--ks-ok) 9%, var(--ks-surface)); }
+.ks-signup__in { display: grid; gap: 2.5rem; align-items: start; }
+@media (min-width: 960px) { .ks-signup__in { grid-template-columns: .9fr 1.1fr; } .ks-signup__intro { position: sticky; top: 100px; } }
+.ks-test-tag { display: inline-block; padding: .3rem .8rem; border-radius: 999px; background: color-mix(in srgb, var(--ks-warn) 16%, transparent); color: var(--ks-warn); font-weight: 800; font-size: .8rem; }
+.ks-testpay { text-align: center; justify-items: center; }
+.ks-testpay__actions { display: flex; flex-wrap: wrap; gap: .7rem; justify-content: center; }
+
+/* Badges */
+.ks-badge { display: inline-block; padding: .2rem .65rem; border-radius: 999px; font-size: .75rem; font-weight: 800; vertical-align: middle; background: var(--ks-surface-2); color: var(--ks-muted); }
+.ks-badge--active, .ks-badge--paid, .ks-badge--verified { background: color-mix(in srgb, var(--ks-ok) 15%, transparent); color: var(--ks-ok); }
+.ks-badge--trialing { background: color-mix(in srgb, var(--ks-brand) 14%, transparent); color: var(--ks-brand); }
+.ks-badge--past_due, .ks-badge--pending { background: color-mix(in srgb, var(--ks-warn) 16%, transparent); color: var(--ks-warn); }
+.ks-badge--suspended, .ks-badge--cancelled, .ks-badge--failed { background: color-mix(in srgb, var(--ks-bad) 14%, transparent); color: var(--ks-bad); }
+@media (prefers-color-scheme: dark) { .ks-badge--trialing { color: color-mix(in srgb, var(--ks-brand) 40%, #fff); } }
+
+/* Platform dashboard */
+.ks--platform { background: var(--ks-bg); }
+.ks-app { display: grid; min-height: 100vh; }
+.ks-app > * { min-width: 0; }
+@media (min-width: 960px) { .ks-app { grid-template-columns: 250px minmax(0, 1fr); } }
+.ks-side { background: var(--ks-surface); border-right: 1px solid var(--ks-border); padding: 1rem; display: flex; flex-direction: column; gap: 1rem; }
+.ks-side nav { display: flex; gap: .3rem; overflow-x: auto; padding-bottom: .3rem; scrollbar-width: thin; }
+.ks-side nav a { display: flex; align-items: center; gap: .55rem; padding: .6rem .8rem; border-radius: 10px; color: var(--ks-text) !important; text-decoration: none; font-weight: 600; white-space: nowrap; }
+.ks-side nav a span { width: 20px; text-align: center; color: var(--ks-muted); }
+.ks-side nav a:hover { background: var(--ks-surface-2); }
+.ks-side nav a[aria-current="page"], .ks-side nav a[aria-current="page"]:hover { background: var(--ks-brand); color: #fff !important; }
+.ks-side nav a[aria-current="page"] span { color: #fff; }
+.ks-side__out { color: var(--ks-muted) !important; font-size: .9rem; }
+@media (min-width: 960px) { .ks-side { position: sticky; top: 0; height: 100vh; } .ks-side nav { flex-direction: column; overflow: visible; } .ks-side__out { margin-top: auto; } }
+@media (max-width: 959px) { .ks-side { position: sticky; top: 0; z-index: 10; } .ks-side__out { display: none; } }
+.ks-main { padding: clamp(1rem, 3vw, 2rem); display: grid; gap: 1.2rem; align-content: start; min-width: 0; }
+.ks-main__head { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; }
+.ks-main__head h1 { font-size: clamp(1.5rem, 3vw, 2rem); margin: 0; }
+.ks-app .ks-card h2 { font-size: 1.15rem; letter-spacing: -.01em; margin-bottom: .75rem; }
+.ks-kpis { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+.ks-kpi { display: grid; gap: .2rem; padding: 1.1rem 1.2rem; border-radius: var(--ks-radius); background: var(--ks-surface); border: 1px solid var(--ks-border); }
+.ks-kpi span { color: var(--ks-muted); font-size: .85rem; font-weight: 600; }
+.ks-kpi strong { font-size: 1.55rem; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.ks-kpi small { color: var(--ks-muted); }
+.ks-kpi--warn { border-left: 4px solid var(--ks-warn); }
+.ks-cols { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); align-items: start; }
+.ks-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.ks-list li { display: flex; justify-content: space-between; align-items: center; gap: .8rem; padding: .7rem 0; border-bottom: 1px solid var(--ks-border); }
+.ks-list li:last-child { border-bottom: 0; }
+.ks-list small { display: block; color: var(--ks-muted); }
+.ks-filters { display: flex; flex-wrap: wrap; gap: .5rem; }
+.ks-filters input[type="search"] { flex: 1 1 240px; width: auto !important; }
+.ks-filters select { width: auto !important; }
+.ks-stack { display: grid; gap: .9rem; }
+.ks-church { display: grid; gap: 1rem; }
+@media (min-width: 1100px) { .ks-church { grid-template-columns: minmax(0, 1fr) auto; align-items: start; } }
+.ks-church h3 { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.ks-church p { margin: 0 0 .6rem; overflow-wrap: anywhere; }
+.ks-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .6rem 1.2rem; margin: 0; }
+.ks-facts dt { font-size: .78rem; color: var(--ks-muted); font-weight: 600; }
+.ks-facts dd { margin: 0; font-weight: 600; }
+.ks-church__actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+@media (min-width: 1100px) { .ks-church__actions { flex-direction: column; align-items: stretch; width: 260px; } }
+.ks-inline { display: flex; gap: .4rem; align-items: center; margin: 0; }
+.ks-inline select, .ks-inline input { min-height: 38px !important; padding: .4rem .6rem !important; width: auto !important; flex: 1; }
+.ks-inline input[type="number"] { max-width: 80px; }
+.ks-danger-zone summary { cursor: pointer; color: var(--ks-bad); font-weight: 600; font-size: .88rem; padding: .3rem 0; }
+.ks-table { overflow-x: auto; border-radius: var(--ks-radius); border: 1px solid var(--ks-border); background: var(--ks-surface); }
+.ks-table table { width: 100%; border-collapse: collapse; }
+.ks-table th, .ks-table td { padding: .8rem 1rem; text-align: left; border-bottom: 1px solid var(--ks-border); vertical-align: top; }
+.ks-table th { font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ks-muted); }
+.ks-table td small { display: block; color: var(--ks-muted); }
+.ks-row-actions { display: flex; flex-wrap: wrap; gap: .4rem; }
+@media (max-width: 700px) {
+	.ks-table thead { display: none; }
+	.ks-table tr { display: grid; padding: .6rem 0; border-bottom: 1px solid var(--ks-border); }
+	.ks-table td { border: 0; padding: .3rem 1rem; }
+	.ks-table td[data-label]::before { content: attr(data-label); display: block; font-size: .72rem; color: var(--ks-muted); text-transform: uppercase; letter-spacing: .05em; }
+}
+.ks-narrow-form { max-width: 880px; }
+.ks-plan-edit, .ks-settings { display: grid; gap: 1rem; justify-items: start; }
+.ks-plan-edit > .ks-grid, .ks-settings > .ks-grid { width: 100%; }
+.ks-plan-edit legend code { font-weight: 500; color: var(--ks-muted); }
+.ks code { font-size: .85em; background: var(--ks-surface-2); padding: .1em .4em; border-radius: 6px; overflow-wrap: anywhere; }
+
+:root[data-theme="dark"] { --ks-bg: #120f17; --ks-surface: #1c1723; --ks-surface-2: #261f30; --ks-text: #f3eff8; --ks-muted: #b3abbe; --ks-border: #332a3f; --ks-shadow: 0 24px 50px -30px rgba(0, 0, 0, .8); color-scheme: dark; }
+:root[data-theme="light"] {
+	--ks-brand: #5b2a86;
+	--ks-accent: #f4a62a;
+	--ks-bg: #faf8fc;
+	--ks-surface: #ffffff;
+	--ks-surface-2: #f3eef8;
+	--ks-text: #1d1724;
+	--ks-muted: #6b6476;
+	--ks-border: #e7e1ee;
+	--ks-ok: #15803d;
+	--ks-warn: #b45309;
+	--ks-bad: #b91c1c;
+	--ks-radius: 18px;
+	--ks-shadow: 0 24px 50px -32px rgba(43, 16, 74, .45);
+	--ks-on-brand: #fff;
+	color-scheme: light;
+}
+
+[hidden] { display: none !important; }
+body.ks { padding-bottom: 72px; }
+.ks-wrap { width: auto; max-width: 1160px; margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.pv-bar { position: fixed; z-index: 50; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); display: flex; gap: 4px; padding: 5px; border-radius: 999px; background: #1d1724; box-shadow: 0 16px 40px -14px rgba(0,0,0,.6); max-width: calc(100% - 24px); }
+.pv-bar a { padding: .55rem 1rem; border-radius: 999px; color: #e9e3f1 !important; text-decoration: none; font-weight: 700; font-size: .88rem; white-space: nowrap; }
+.pv-bar a[aria-current="true"] { background: #fff; color: #1d1724 !important; }
+.pv-bar small { align-self: center; padding: 0 .6rem 0 .8rem; color: #a99fb8; font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+@media (max-width: 520px) { .pv-bar small { display: none; } .pv-bar a { padding: .5rem .8rem; } }
+.pv-toast { position: fixed; z-index: 60; left: 50%; transform: translateX(-50%); bottom: calc(76px + env(safe-area-inset-bottom, 0px)); max-width: min(92vw, 460px); padding: .8rem 1.1rem; border-radius: 12px; background: var(--ks-surface); color: var(--ks-text); border: 1px solid var(--ks-border); box-shadow: var(--ks-shadow); font-weight: 600; text-align: center; }
+.ks-side { height: auto; }
+@media (min-width: 960px) { .ks-side { height: 100vh; } }
+</style>
+<div data-view="landing"><header class="ks-top">
+	<div class="ks-wrap ks-top__in">
+		<a class="ks-logo" href="#landing"><span class="ks-logo__mark" aria-hidden="true">✚</span>ChurchHub</a>
+		<nav class="ks-nav" aria-label="Main">
+			<a href="#features">Features</a>
+			<a href="#pricing">Pricing</a>
+			<a href="#faq">FAQ</a>
+		</nav>
+		<a class="ks-btn ks-btn--sm" href="#signup">Start free trial</a>
+	</div>
+</header><main>
+	<section class="ks-hero">
+	<div class="ks-wrap ks-hero__in">
+		<div>
+			<span class="ks-eyebrow">For churches &amp; ministries</span>
+			<h1>Your church online — website, partners and giving in one place</h1>
+			<p class="ks-lead">Your church website, partner portal and online giving — ready in minutes.</p>
+			<div class="ks-cta">
+				<a class="ks-btn ks-btn--lg" href="#signup">Start your 14-day free trial</a>
+				<a class="ks-btn ks-btn--ghost ks-btn--lg" href="#pricing">See pricing</a>
+			</div>
+			<p class="ks-small">No card needed · Live in 2 minutes · Cancel any time</p>
+		</div>
+		<div class="ks-hero__art" aria-hidden="true">
+			<div class="ks-device ks-device--back"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNjAwIDEwMDAiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIHNsaWNlIj48ZGVmcz48cmFkaWFsR3JhZGllbnQgaWQ9InN0IiBjeD0iNTAlIiBjeT0iMjAlIiByPSI4MCUiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzNiMmE2YiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzBmMGExZiIvPjwvcmFkaWFsR3JhZGllbnQ+PHBhdHRlcm4gaWQ9ImswIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiPjxyZWN0IHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgZmlsbD0iI2YyYjcwNSIvPjxyZWN0IHk9IjAiIHdpZHRoPSI2MCIgaGVpZ2h0PSIxMiIgZmlsbD0iIzFkN2E0NiIvPjxyZWN0IHk9IjMwIiB3aWR0aD0iNjAiIGhlaWdodD0iOCIgZmlsbD0iI2MxMjcyZCIvPjxyZWN0IHg9IjI0IiB3aWR0aD0iMTIiIGhlaWdodD0iNjAiIGZpbGw9IiMxZDdhNDYiIG9wYWNpdHk9Ii44NSIvPjxyZWN0IHg9IjAiIHk9IjQ0IiB3aWR0aD0iNjAiIGhlaWdodD0iNCIgZmlsbD0iI2MxMjcyZCIvPjwvcGF0dGVybj48cGF0dGVybiBpZD0iazEiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjZDk3NzA2Ii8+PHJlY3QgeT0iMCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjEyIiBmaWxsPSIjMTExODI3Ii8+PHJlY3QgeT0iMzAiIHdpZHRoPSI2MCIgaGVpZ2h0PSI4IiBmaWxsPSIjZjU5ZTBiIi8+PHJlY3QgeD0iMjQiIHdpZHRoPSIxMiIgaGVpZ2h0PSI2MCIgZmlsbD0iIzExMTgyNyIgb3BhY2l0eT0iLjg1Ii8+PHJlY3QgeD0iMCIgeT0iNDQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI0IiBmaWxsPSIjZjU5ZTBiIi8+PC9wYXR0ZXJuPjxwYXR0ZXJuIGlkPSJrMiIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cmVjdCB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIGZpbGw9IiM3YzNhZWQiLz48cmVjdCB5PSIwIiB3aWR0aD0iNjAiIGhlaWdodD0iMTIiIGZpbGw9IiNmMmI3MDUiLz48cmVjdCB5PSIzMCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjgiIGZpbGw9IiNiZTEyM2MiLz48cmVjdCB4PSIyNCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjYwIiBmaWxsPSIjZjJiNzA1IiBvcGFjaXR5PSIuODUiLz48cmVjdCB4PSIwIiB5PSI0NCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjQiIGZpbGw9IiNiZTEyM2MiLz48L3BhdHRlcm4+PHBhdHRlcm4gaWQ9ImszIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiPjxyZWN0IHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgZmlsbD0iIzBlNzQ5MCIvPjxyZWN0IHk9IjAiIHdpZHRoPSI2MCIgaGVpZ2h0PSIxMiIgZmlsbD0iI2YyYjcwNSIvPjxyZWN0IHk9IjMwIiB3aWR0aD0iNjAiIGhlaWdodD0iOCIgZmlsbD0iI2I0NTMwOSIvPjxyZWN0IHg9IjI0IiB3aWR0aD0iMTIiIGhlaWdodD0iNjAiIGZpbGw9IiNmMmI3MDUiIG9wYWNpdHk9Ii44NSIvPjxyZWN0IHg9IjAiIHk9IjQ0IiB3aWR0aD0iNjAiIGhlaWdodD0iNCIgZmlsbD0iI2I0NTMwOSIvPjwvcGF0dGVybj48cGF0dGVybiBpZD0iazQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjYmUxODVkIi8+PHJlY3QgeT0iMCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjEyIiBmaWxsPSIjZmRlNjhhIi8+PHJlY3QgeT0iMzAiIHdpZHRoPSI2MCIgaGVpZ2h0PSI4IiBmaWxsPSIjMWQ0ZWQ4Ii8+PHJlY3QgeD0iMjQiIHdpZHRoPSIxMiIgaGVpZ2h0PSI2MCIgZmlsbD0iI2ZkZTY4YSIgb3BhY2l0eT0iLjg1Ii8+PHJlY3QgeD0iMCIgeT0iNDQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI0IiBmaWxsPSIjMWQ0ZWQ4Ii8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTYwMCIgaGVpZ2h0PSIxMDAwIiBmaWxsPSJ1cmwoI3N0KSIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjkwIiByPSI2IiBmaWxsPSIjZmZlN2E4Ii8+PHBvbHlnb24gcG9pbnRzPSI5NCw5NiAxMDYsOTYgMjIwLDEwMDAgLTIwLDEwMDAiIGZpbGw9IiNmZmU3YTgiIG9wYWNpdHk9Ii4wNSIvPjxjaXJjbGUgY3g9IjI0MCIgY3k9IjkwIiByPSI2IiBmaWxsPSIjZmZlN2E4Ii8+PHBvbHlnb24gcG9pbnRzPSIyMzQsOTYgMjQ2LDk2IDM2MCwxMDAwIDEyMCwxMDAwIiBmaWxsPSIjZmZlN2E4IiBvcGFjaXR5PSIuMDUiLz48Y2lyY2xlIGN4PSIzODAiIGN5PSI5MCIgcj0iNiIgZmlsbD0iI2ZmZTdhOCIvPjxwb2x5Z29uIHBvaW50cz0iMzc0LDk2IDM4Niw5NiA1MDAsMTAwMCAyNjAsMTAwMCIgZmlsbD0iI2ZmZTdhOCIgb3BhY2l0eT0iLjA1Ii8+PGNpcmNsZSBjeD0iNTIwIiBjeT0iOTAiIHI9IjYiIGZpbGw9IiNmZmU3YTgiLz48cG9seWdvbiBwb2ludHM9IjUxNCw5NiA1MjYsOTYgNjQwLDEwMDAgNDAwLDEwMDAiIGZpbGw9IiNmZmU3YTgiIG9wYWNpdHk9Ii4wNSIvPjxjaXJjbGUgY3g9IjY2MCIgY3k9IjkwIiByPSI2IiBmaWxsPSIjZmZlN2E4Ii8+PHBvbHlnb24gcG9pbnRzPSI2NTQsOTYgNjY2LDk2IDc4MCwxMDAwIDU0MCwxMDAwIiBmaWxsPSIjZmZlN2E4IiBvcGFjaXR5PSIuMDUiLz48Y2lyY2xlIGN4PSI4MDAiIGN5PSI5MCIgcj0iNiIgZmlsbD0iI2ZmZTdhOCIvPjxwb2x5Z29uIHBvaW50cz0iNzk0LDk2IDgwNiw5NiA5MjAsMTAwMCA2ODAsMTAwMCIgZmlsbD0iI2ZmZTdhOCIgb3BhY2l0eT0iLjA1Ii8+PGNpcmNsZSBjeD0iOTQwIiBjeT0iOTAiIHI9IjYiIGZpbGw9IiNmZmU3YTgiLz48cG9seWdvbiBwb2ludHM9IjkzNCw5NiA5NDYsOTYgMTA2MCwxMDAwIDgyMCwxMDAwIiBmaWxsPSIjZmZlN2E4IiBvcGFjaXR5PSIuMDUiLz48Y2lyY2xlIGN4PSIxMDgwIiBjeT0iOTAiIHI9IjYiIGZpbGw9IiNmZmU3YTgiLz48cG9seWdvbiBwb2ludHM9IjEwNzQsOTYgMTA4Niw5NiAxMjAwLDEwMDAgOTYwLDEwMDAiIGZpbGw9IiNmZmU3YTgiIG9wYWNpdHk9Ii4wNSIvPjxjaXJjbGUgY3g9IjEyMjAiIGN5PSI5MCIgcj0iNiIgZmlsbD0iI2ZmZTdhOCIvPjxwb2x5Z29uIHBvaW50cz0iMTIxNCw5NiAxMjI2LDk2IDEzNDAsMTAwMCAxMTAwLDEwMDAiIGZpbGw9IiNmZmU3YTgiIG9wYWNpdHk9Ii4wNSIvPjxjaXJjbGUgY3g9IjEzNjAiIGN5PSI5MCIgcj0iNiIgZmlsbD0iI2ZmZTdhOCIvPjxwb2x5Z29uIHBvaW50cz0iMTM1NCw5NiAxMzY2LDk2IDE0ODAsMTAwMCAxMjQwLDEwMDAiIGZpbGw9IiNmZmU3YTgiIG9wYWNpdHk9Ii4wNSIvPjxjaXJjbGUgY3g9IjE1MDAiIGN5PSI5MCIgcj0iNiIgZmlsbD0iI2ZmZTdhOCIvPjxwb2x5Z29uIHBvaW50cz0iMTQ5NCw5NiAxNTA2LDk2IDE2MjAsMTAwMCAxMzgwLDEwMDAiIGZpbGw9IiNmZmU3YTgiIG9wYWNpdHk9Ii4wNSIvPjxwYXRoIGQ9Ik02MyA2MTUgUTU2IDQ0NCAxMTkgNDMxIFExODIgNDQ0IDE3NCA2MTUgWiIgZmlsbD0idXJsKCNrMykiLz48cGF0aCBkPSJNOTIgNDM1IEwxMTkgNDg5IEwxNDYgNDM1WiIgZmlsbD0iI2ZmZjNkNiIgb3BhY2l0eT0iLjkiLz48cmVjdCB4PSIxMTAiIHk9IjQwNiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjI3IiBmaWxsPSIjOGQ1YTNiIi8+PGVsbGlwc2UgY3g9IjExOSIgY3k9IjM4MSIgcng9IjI1IiByeT0iMzAiIGZpbGw9IiM4ZDVhM2IiLz48cGF0aCBkPSJNMTA4IDM5MiBRMTE5IDQwMSAxMjkgMzkyIiBzdHJva2U9IiMyYTE2MGQiIHN0cm9rZS13aWR0aD0iMi43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48Y2lyY2xlIGN4PSIxMTAiIGN5PSIzNzgiIHI9IjIuNyIgZmlsbD0iIzFhMGUwOCIvPjxjaXJjbGUgY3g9IjEyOCIgY3k9IjM3OCIgcj0iMi43IiBmaWxsPSIjMWEwZTA4Ii8+PHBhdGggZD0iTTg2IDM3NCBRODMgMzE4IDExOSAzMjkgUTE2NSAzMDkgMTUzIDM3NiBRMTE5IDM1NCA4NiAzNzRaIiBmaWxsPSJ1cmwoI2szKSIvPjxwYXRoIGQ9Ik0yMzcgNjA4IFEyMzAgNDM3IDI5MyA0MjMgUTM1NiA0MzcgMzQ4IDYwOCBaIiBmaWxsPSJ1cmwoI2s0KSIvPjxwYXRoIGQ9Ik0yNjYgNDI4IEwyOTMgNDgyIEwzMjAgNDI4WiIgZmlsbD0iI2ZmZjNkNiIgb3BhY2l0eT0iLjkiLz48cmVjdCB4PSIyODUiIHk9IjM5OSIgd2lkdGg9IjE2IiBoZWlnaHQ9IjI3IiBmaWxsPSIjOGQ1YTNiIi8+PGVsbGlwc2UgY3g9IjI5MyIgY3k9IjM3NCIgcng9IjI1IiByeT0iMzAiIGZpbGw9IiM4ZDVhM2IiLz48cGF0aCBkPSJNMjgyIDM4NCBRMjkzIDM5MyAzMDMgMzg0IiBzdHJva2U9IiMyYTE2MGQiIHN0cm9rZS13aWR0aD0iMi43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48Y2lyY2xlIGN4PSIyODQiIGN5PSIzNzAiIHI9IjIuNyIgZmlsbD0iIzFhMGUwOCIvPjxjaXJjbGUgY3g9IjMwMiIgY3k9IjM3MCIgcj0iMi43IiBmaWxsPSIjMWEwZTA4Ii8+PHBhdGggZD0iTTI2NyAzNjggUTI5MyAzMjkgMzE4IDM2OCBRMjkzIDM1MiAyNjcgMzY4WiIgZmlsbD0iIzFhMGUwOCIvPjxwYXRoIGQ9Ik00MTMgNjA2IFE0MDYgNDM1IDQ2OSA0MjEgUTUzMiA0MzUgNTI1IDYwNiBaIiBmaWxsPSJ1cmwoI2syKSIvPjxwYXRoIGQ9Ik00NDIgNDI2IEw0NjkgNDgwIEw0OTYgNDI2WiIgZmlsbD0iI2ZmZjNkNiIgb3BhY2l0eT0iLjkiLz48cmVjdCB4PSI0NjEiIHk9IjM5NyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjI3IiBmaWxsPSIjNmI0NDMwIi8+PGVsbGlwc2UgY3g9IjQ2OSIgY3k9IjM3MiIgcng9IjI1IiByeT0iMzAiIGZpbGw9IiM2YjQ0MzAiLz48cGF0aCBkPSJNNDU4IDM4MyBRNDY5IDM5MiA0ODAgMzgzIiBzdHJva2U9IiMyYTE2MGQiIHN0cm9rZS13aWR0aD0iMi43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48Y2lyY2xlIGN4PSI0NjAiIGN5PSIzNjgiIHI9IjIuNyIgZmlsbD0iIzFhMGUwOCIvPjxjaXJjbGUgY3g9IjQ3OCIgY3k9IjM2OCIgcj0iMi43IiBmaWxsPSIjMWEwZTA4Ii8+PHBhdGggZD0iTTQzNiAzNjUgUTQzMyAzMDkgNDY5IDMyMCBRNTE2IDMwMCA1MDMgMzY2IFE0NjkgMzQ1IDQzNiAzNjVaIiBmaWxsPSJ1cmwoI2syKSIvPjxwYXRoIGQ9Ik01ODMgNjE4IFE1NzYgNDQ3IDYzOSA0MzMgUTcwMiA0NDcgNjk1IDYxOCBaIiBmaWxsPSJ1cmwoI2swKSIvPjxwYXRoIGQ9Ik02MTIgNDM4IEw2MzkgNDkyIEw2NjYgNDM4WiIgZmlsbD0iI2ZmZjNkNiIgb3BhY2l0eT0iLjkiLz48cmVjdCB4PSI2MzEiIHk9IjQwOSIgd2lkdGg9IjE2IiBoZWlnaHQ9IjI3IiBmaWxsPSIjNGEyZTFmIi8+PGVsbGlwc2UgY3g9IjYzOSIgY3k9IjM4NCIgcng9IjI1IiByeT0iMzAiIGZpbGw9IiM0YTJlMWYiLz48cGF0aCBkPSJNNjI4IDM5NSBRNjM5IDQwNCA2NTAgMzk1IiBzdHJva2U9IiMyYTE2MGQiIHN0cm9rZS13aWR0aD0iMi43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48Y2lyY2xlIGN4PSI2MzAiIGN5PSIzODAiIHI9IjIuNyIgZmlsbD0iIzFhMGUwOCIvPjxjaXJjbGUgY3g9IjY0OCIgY3k9IjM4MCIgcj0iMi43IiBmaWxsPSIjMWEwZTA4Ii8+PHBhdGggZD0iTTYxNCAzNzggUTYzOSAzMzkgNjY0IDM3OCBRNjM5IDM2MiA2MTQgMzc4WiIgZmlsbD0iIzFhMGUwOCIvPjxwYXRoIGQ9Ik03NTggNjE3IFE3NTEgNDQ2IDgxNCA0MzMgUTg3NyA0NDYgODcwIDYxNyBaIiBmaWxsPSJ1cmwoI2s0KSIvPjxwYXRoIGQ9Ik03ODcgNDM3IEw4MTQgNDkxIEw4NDEgNDM3WiIgZmlsbD0iI2ZmZjNkNiIgb3BhY2l0eT0iLjkiLz48cmVjdCB4PSI4MDYiIHk9IjQwOCIgd2lkdGg9IjE2IiBoZWlnaHQ9IjI3IiBmaWxsPSIjYTA2OTRhIi8+PGVsbGlwc2UgY3g9IjgxNCIgY3k9IjM4MyIgcng9IjI1IiByeT0iMzAiIGZpbGw9IiNhMDY5NGEiLz48cGF0aCBkPSJNODAzIDM5NCBRODE0IDQwMyA4MjUgMzk0IiBzdHJva2U9IiMyYTE2MGQiIHN0cm9rZS13aWR0aD0iMi43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48Y2lyY2xlIGN4PSI4MDUiIGN5PSIzNzkiIHI9IjIuNyIgZmlsbD0iIzFhMGUwOCIvPjxjaXJjbGUgY3g9IjgyMyIgY3k9IjM3OSIgcj0iMi43IiBmaWxsPSIjMWEwZTA4Ii8+PHBhdGggZD0iTTc4MiAzNzYgUTc3OCAzMjAgODE0IDMzMSBRODYxIDMxMSA4NDggMzc4IFE4MTQgMzU2IDc4MiAzNzZaIiBmaWxsPSJ1cmwoI2s0KSIvPjxwYXRoIGQ9Ik05MDAgNjE1IFE4OTIgNDQ0IDk1NSA0MzAgUTEwMTggNDQ0IDEwMTEgNjE1IFoiIGZpbGw9InVybCgjazApIi8+PHBhdGggZD0iTTkyOCA0MzUgTDk1NSA0ODkgTDk4MiA0MzVaIiBmaWxsPSIjZmZmM2Q2IiBvcGFjaXR5PSIuOSIvPjxyZWN0IHg9Ijk0NyIgeT0iNDA2IiB3aWR0aD0iMTYiIGhlaWdodD0iMjciIGZpbGw9IiM1YTM4MjUiLz48ZWxsaXBzZSBjeD0iOTU1IiBjeT0iMzgxIiByeD0iMjUiIHJ5PSIzMCIgZmlsbD0iIzVhMzgyNSIvPjxwYXRoIGQ9Ik05NDUgMzkxIFE5NTUgNDAwIDk2NiAzOTEiIHN0cm9rZT0iIzJhMTYwZCIgc3Ryb2tlLXdpZHRoPSIyLjciIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxjaXJjbGUgY3g9Ijk0NiIgY3k9IjM3NyIgcj0iMi43IiBmaWxsPSIjMWEwZTA4Ii8+PGNpcmNsZSBjeD0iOTY0IiBjeT0iMzc3IiByPSIyLjciIGZpbGw9IiMxYTBlMDgiLz48cGF0aCBkPSJNOTIzIDM3MyBROTE5IDMxOCA5NTUgMzI4IFExMDAyIDMwOSA5OTAgMzc1IFE5NTUgMzU0IDkyMyAzNzNaIiBmaWxsPSJ1cmwoI2swKSIvPjxwYXRoIGQ9Ik0xMDc2IDYwNSBRMTA2OSA0MzQgMTEzMiA0MjAgUTExOTUgNDM0IDExODggNjA1IFoiIGZpbGw9InVybCgjazMpIi8+PHBhdGggZD0iTTExMDUgNDI1IEwxMTMyIDQ3OSBMMTE1OSA0MjVaIiBmaWxsPSIjZmZmM2Q2IiBvcGFjaXR5PSIuOSIvPjxyZWN0IHg9IjExMjQiIHk9IjM5NiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjI3IiBmaWxsPSIjN2E0ZTMzIi8+PGVsbGlwc2UgY3g9IjExMzIiIGN5PSIzNzEiIHJ4PSIyNSIgcnk9IjMwIiBmaWxsPSIjN2E0ZTMzIi8+PHBhdGggZD0iTTExMjEgMzgxIFExMTMyIDM5MCAxMTQzIDM4MSIgc3Ryb2tlPSIjMmExNjBkIiBzdHJva2Utd2lkdGg9IjIuNyIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGNpcmNsZSBjeD0iMTEyMyIgY3k9IjM2NyIgcj0iMi43IiBmaWxsPSIjMWEwZTA4Ii8+PGNpcmNsZSBjeD0iMTE0MSIgY3k9IjM2NyIgcj0iMi43IiBmaWxsPSIjMWEwZTA4Ii8+PHBhdGggZD0iTTExMDAgMzYzIFExMDk2IDMwOCAxMTMyIDMxOCBRMTE3OSAyOTkgMTE2NiAzNjUgUTExMzIgMzQ0IDExMDAgMzYzWiIgZmlsbD0idXJsKCNrMykiLz48cGF0aCBkPSJNMTI2NCA2MTQgUTEyNTcgNDQzIDEzMjAgNDMwIFExMzgzIDQ0MyAxMzc2IDYxNCBaIiBmaWxsPSJ1cmwoI2syKSIvPjxwYXRoIGQ9Ik0xMjkzIDQzNCBMMTMyMCA0ODggTDEzNDcgNDM0WiIgZmlsbD0iI2ZmZjNkNiIgb3BhY2l0eT0iLjkiLz48cmVjdCB4PSIxMzEyIiB5PSI0MDYiIHdpZHRoPSIxNiIgaGVpZ2h0PSIyNyIgZmlsbD0iIzhkNWEzYiIvPjxlbGxpcHNlIGN4PSIxMzIwIiBjeT0iMzgwIiByeD0iMjUiIHJ5PSIzMCIgZmlsbD0iIzhkNWEzYiIvPjxwYXRoIGQ9Ik0xMzA5IDM5MSBRMTMyMCA0MDAgMTMzMSAzOTEiIHN0cm9rZT0iIzJhMTYwZCIgc3Ryb2tlLXdpZHRoPSIyLjciIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxjaXJjbGUgY3g9IjEzMTEiIGN5PSIzNzciIHI9IjIuNyIgZmlsbD0iIzFhMGUwOCIvPjxjaXJjbGUgY3g9IjEzMjkiIGN5PSIzNzciIHI9IjIuNyIgZmlsbD0iIzFhMGUwOCIvPjxwYXRoIGQ9Ik0xMjg4IDM3MyBRMTI4NCAzMTcgMTMyMCAzMjggUTEzNjcgMzA4IDEzNTQgMzc1IFExMzIwIDM1MyAxMjg4IDM3M1oiIGZpbGw9InVybCgjazIpIi8+PHBhdGggZD0iTTE0MTIgNjE3IFExNDA1IDQ0NiAxNDY4IDQzMyBRMTUzMSA0NDYgMTUyMyA2MTcgWiIgZmlsbD0idXJsKCNrMykiLz48cGF0aCBkPSJNMTQ0MSA0MzcgTDE0NjggNDkxIEwxNDk1IDQzN1oiIGZpbGw9IiNmZmYzZDYiIG9wYWNpdHk9Ii45Ii8+PHJlY3QgeD0iMTQ1OSIgeT0iNDA4IiB3aWR0aD0iMTYiIGhlaWdodD0iMjciIGZpbGw9IiM0YTJlMWYiLz48ZWxsaXBzZSBjeD0iMTQ2OCIgY3k9IjM4MyIgcng9IjI1IiByeT0iMzAiIGZpbGw9IiM0YTJlMWYiLz48cGF0aCBkPSJNMTQ1NyAzOTQgUTE0NjggNDAzIDE0NzggMzk0IiBzdHJva2U9IiMyYTE2MGQiIHN0cm9rZS13aWR0aD0iMi43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48Y2lyY2xlIGN4PSIxNDU5IiBjeT0iMzc5IiByPSIyLjciIGZpbGw9IiMxYTBlMDgiLz48Y2lyY2xlIGN4PSIxNDc3IiBjeT0iMzc5IiByPSIyLjciIGZpbGw9IiMxYTBlMDgiLz48cGF0aCBkPSJNMTQ0MiAzNzggUTE0NjggMzM4IDE0OTMgMzc4IFExNDY4IDM2MSAxNDQyIDM3OFoiIGZpbGw9IiMxYTBlMDgiLz48cGF0aCBkPSJNNTkgODYzIFE1MCA2NDUgMTMwIDYyNyBRMjExIDY0NSAyMDIgODYzIFoiIGZpbGw9InVybCgjazIpIi8+PHBhdGggZD0iTTk2IDYzMyBMMTMwIDcwMiBMMTY1IDYzM1oiIGZpbGw9IiNmZmYzZDYiIG9wYWNpdHk9Ii45Ii8+PHJlY3QgeD0iMTIwIiB5PSI1OTYiIHdpZHRoPSIyMSIgaGVpZ2h0PSIzNCIgZmlsbD0iIzZiNDQzMCIvPjxlbGxpcHNlIGN4PSIxMzAiIGN5PSI1NjQiIHJ4PSIzMiIgcnk9IjM4IiBmaWxsPSIjNmI0NDMwIi8+PHBhdGggZD0iTTExNiA1NzggUTEzMCA1ODkgMTQ0IDU3OCIgc3Ryb2tlPSIjMmExNjBkIiBzdHJva2Utd2lkdGg9IjMuNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGNpcmNsZSBjeD0iMTE5IiBjeT0iNTYwIiByPSIzLjQiIGZpbGw9IiMxYTBlMDgiLz48Y2lyY2xlIGN4PSIxNDIiIGN5PSI1NjAiIHI9IjMuNCIgZmlsbD0iIzFhMGUwOCIvPjxwYXRoIGQ9Ik04OSA1NTUgUTg0IDQ4NCAxMzAgNDk3IFExOTAgNDcyIDE3NCA1NTcgUTEzMCA1MzAgODkgNTU1WiIgZmlsbD0idXJsKCNrMikiLz48cGF0aCBkPSJNMjYxIDg2MCBRMjUyIDY0MiAzMzMgNjI1IFE0MTMgNjQyIDQwNCA4NjAgWiIgZmlsbD0idXJsKCNrMCkiLz48cGF0aCBkPSJNMjk4IDYzMCBMMzMzIDY5OSBMMzY3IDYzMFoiIGZpbGw9IiNmZmYzZDYiIG9wYWNpdHk9Ii45Ii8+PHJlY3QgeD0iMzIyIiB5PSI1OTMiIHdpZHRoPSIyMSIgaGVpZ2h0PSIzNCIgZmlsbD0iIzhkNWEzYiIvPjxlbGxpcHNlIGN4PSIzMzMiIGN5PSI1NjEiIHJ4PSIzMiIgcnk9IjM4IiBmaWxsPSIjOGQ1YTNiIi8+PHBhdGggZD0iTTMxOSA1NzUgUTMzMyA1ODcgMzQ2IDU3NSIgc3Ryb2tlPSIjMmExNjBkIiBzdHJva2Utd2lkdGg9IjMuNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGNpcmNsZSBjeD0iMzIxIiBjeT0iNTU3IiByPSIzLjQiIGZpbGw9IiMxYTBlMDgiLz48Y2lyY2xlIGN4PSIzNDQiIGN5PSI1NTciIHI9IjMuNCIgZmlsbD0iIzFhMGUwOCIvPjxwYXRoIGQ9Ik0yOTEgNTUyIFEyODcgNDgxIDMzMyA0OTUgUTM5MiA0NjkgMzc2IDU1NCBRMzMzIDUyNyAyOTEgNTUyWiIgZmlsbD0idXJsKCNrMCkiLz48cGF0aCBkPSJNNDk2IDg1MCBRNDg3IDYzMiA1NjcgNjE1IFE2NDggNjMyIDYzOCA4NTAgWiIgZmlsbD0idXJsKCNrMCkiLz48cGF0aCBkPSJNNTMzIDYyMCBMNTY3IDY4OSBMNjAyIDYyMFoiIGZpbGw9IiNmZmYzZDYiIG9wYWNpdHk9Ii45Ii8+PHJlY3QgeD0iNTU3IiB5PSI1ODQiIHdpZHRoPSIyMSIgaGVpZ2h0PSIzNCIgZmlsbD0iI2EwNjk0YSIvPjxlbGxpcHNlIGN4PSI1NjciIGN5PSI1NTEiIHJ4PSIzMiIgcnk9IjM4IiBmaWxsPSIjYTA2OTRhIi8+PHBhdGggZD0iTTU1MyA1NjUgUTU2NyA1NzcgNTgxIDU2NSIgc3Ryb2tlPSIjMmExNjBkIiBzdHJva2Utd2lkdGg9IjMuNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGNpcmNsZSBjeD0iNTU2IiBjeT0iNTQ3IiByPSIzLjQiIGZpbGw9IiMxYTBlMDgiLz48Y2lyY2xlIGN4PSI1NzkiIGN5PSI1NDciIHI9IjMuNCIgZmlsbD0iIzFhMGUwOCIvPjxwYXRoIGQ9Ik01MjYgNTQyIFE1MjEgNDcxIDU2NyA0ODUgUTYyNyA0NTkgNjExIDU0NCBRNTY3IDUxNyA1MjYgNTQyWiIgZmlsbD0idXJsKCNrMCkiLz48cGF0aCBkPSJNNzIwIDg2NyBRNzExIDY0OSA3OTEgNjMxIFE4NzIgNjQ5IDg2MyA4NjcgWiIgZmlsbD0idXJsKCNrMykiLz48cGF0aCBkPSJNNzU3IDYzNyBMNzkxIDcwNiBMODI2IDYzN1oiIGZpbGw9IiNmZmYzZDYiIG9wYWNpdHk9Ii45Ii8+PHJlY3QgeD0iNzgxIiB5PSI2MDAiIHdpZHRoPSIyMSIgaGVpZ2h0PSIzNCIgZmlsbD0iIzhkNWEzYiIvPjxlbGxpcHNlIGN4PSI3OTEiIGN5PSI1NjgiIHJ4PSIzMiIgcnk9IjM4IiBmaWxsPSIjOGQ1YTNiIi8+PHBhdGggZD0iTTc3NyA1ODIgUTc5MSA1OTQgODA1IDU4MiIgc3Ryb2tlPSIjMmExNjBkIiBzdHJva2Utd2lkdGg9IjMuNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGNpcmNsZSBjeD0iNzgwIiBjeT0iNTY0IiByPSIzLjQiIGZpbGw9IiMxYTBlMDgiLz48Y2lyY2xlIGN4PSI4MDMiIGN5PSI1NjQiIHI9IjMuNCIgZmlsbD0iIzFhMGUwOCIvPjxwYXRoIGQ9Ik03NTkgNTYxIFE3OTEgNTExIDgyMyA1NjEgUTc5MSA1NDEgNzU5IDU2MVoiIGZpbGw9IiMxYTBlMDgiLz48cGF0aCBkPSJNOTUyIDg1MCBROTQzIDYzMiAxMDI0IDYxNSBRMTEwNCA2MzIgMTA5NSA4NTAgWiIgZmlsbD0idXJsKCNrMSkiLz48cGF0aCBkPSJNOTg5IDYyMCBMMTAyNCA2ODkgTDEwNTggNjIwWiIgZmlsbD0iI2ZmZjNkNiIgb3BhY2l0eT0iLjkiLz48cmVjdCB4PSIxMDEzIiB5PSI1ODQiIHdpZHRoPSIyMSIgaGVpZ2h0PSIzNCIgZmlsbD0iI2EwNjk0YSIvPjxlbGxpcHNlIGN4PSIxMDI0IiBjeT0iNTUxIiByeD0iMzIiIHJ5PSIzOCIgZmlsbD0iI2EwNjk0YSIvPjxwYXRoIGQ9Ik0xMDEwIDU2NSBRMTAyNCA1NzcgMTAzNyA1NjUiIHN0cm9rZT0iIzJhMTYwZCIgc3Ryb2tlLXdpZHRoPSIzLjQiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxjaXJjbGUgY3g9IjEwMTIiIGN5PSI1NDciIHI9IjMuNCIgZmlsbD0iIzFhMGUwOCIvPjxjaXJjbGUgY3g9IjEwMzUiIGN5PSI1NDciIHI9IjMuNCIgZmlsbD0iIzFhMGUwOCIvPjxwYXRoIGQ9Ik05ODIgNTQyIFE5NzggNDcxIDEwMjQgNDg1IFExMDgzIDQ1OSAxMDY3IDU0NSBRMTAyNCA1MTcgOTgyIDU0MloiIGZpbGw9InVybCgjazEpIi8+PHBhdGggZD0iTTExNzAgODU2IFExMTYwIDYzNyAxMjQxIDYyMCBRMTMyMSA2MzcgMTMxMiA4NTYgWiIgZmlsbD0idXJsKCNrMykiLz48cGF0aCBkPSJNMTIwNiA2MjYgTDEyNDEgNjk1IEwxMjc1IDYyNloiIGZpbGw9IiNmZmYzZDYiIG9wYWNpdHk9Ii45Ii8+PHJlY3QgeD0iMTIzMSIgeT0iNTg5IiB3aWR0aD0iMjEiIGhlaWdodD0iMzQiIGZpbGw9IiM1YTM4MjUiLz48ZWxsaXBzZSBjeD0iMTI0MSIgY3k9IjU1NyIgcng9IjMyIiByeT0iMzgiIGZpbGw9IiM1YTM4MjUiLz48cGF0aCBkPSJNMTIyNyA1NzAgUTEyNDEgNTgyIDEyNTUgNTcwIiBzdHJva2U9IiMyYTE2MGQiIHN0cm9rZS13aWR0aD0iMy40IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48Y2lyY2xlIGN4PSIxMjI5IiBjeT0iNTUyIiByPSIzLjQiIGZpbGw9IiMxYTBlMDgiLz48Y2lyY2xlIGN4PSIxMjUyIiBjeT0iNTUyIiByPSIzLjQiIGZpbGw9IiMxYTBlMDgiLz48cGF0aCBkPSJNMTIwMCA1NDcgUTExOTUgNDc2IDEyNDEgNDkwIFExMzAxIDQ2NSAxMjg1IDU1MCBRMTI0MSA1MjIgMTIwMCA1NDdaIiBmaWxsPSJ1cmwoI2szKSIvPjxwYXRoIGQ9Ik0xNDE1IDg0OSBRMTQwNiA2MzEgMTQ4NiA2MTMgUTE1NjcgNjMxIDE1NTggODQ5IFoiIGZpbGw9InVybCgjazMpIi8+PHBhdGggZD0iTTE0NTIgNjE5IEwxNDg2IDY4OCBMMTUyMSA2MTlaIiBmaWxsPSIjZmZmM2Q2IiBvcGFjaXR5PSIuOSIvPjxyZWN0IHg9IjE0NzYiIHk9IjU4MiIgd2lkdGg9IjIxIiBoZWlnaHQ9IjM0IiBmaWxsPSIjOGQ1YTNiIi8+PGVsbGlwc2UgY3g9IjE0ODYiIGN5PSI1NTAiIHJ4PSIzMiIgcnk9IjM4IiBmaWxsPSIjOGQ1YTNiIi8+PHBhdGggZD0iTTE0NzIgNTY0IFExNDg2IDU3NiAxNTAwIDU2NCIgc3Ryb2tlPSIjMmExNjBkIiBzdHJva2Utd2lkdGg9IjMuNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGNpcmNsZSBjeD0iMTQ3NSIgY3k9IjU0NiIgcj0iMy40IiBmaWxsPSIjMWEwZTA4Ii8+PGNpcmNsZSBjeD0iMTQ5OCIgY3k9IjU0NiIgcj0iMy40IiBmaWxsPSIjMWEwZTA4Ii8+PHBhdGggZD0iTTE0NDUgNTQxIFExNDQwIDQ3MCAxNDg2IDQ4NCBRMTU0NiA0NTggMTUzMCA1NDMgUTE0ODYgNTE2IDE0NDUgNTQxWiIgZmlsbD0idXJsKCNrMykiLz48cmVjdCB5PSI5MDAiIHdpZHRoPSIxNjAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzE0MGQyNCIvPjwvc3ZnPg==" alt=""></div>
+			<div class="ks-device"><div class="ks-device__bar"><i></i><i></i><i></i><span>gracechapel.org</span></div><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNjAwIDEwMDAiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIHNsaWNlIj48ZGVmcz48cmFkaWFsR3JhZGllbnQgaWQ9ImciIGN4PSI1MCUiIGN5PSIzOCUiIHI9IjcwJSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZkMDhhIi8+PHN0b3Agb2Zmc2V0PSIuMjUiIHN0b3AtY29sb3I9IiNmMDhhNGIiLz48c3RvcCBvZmZzZXQ9Ii41NSIgc3RvcC1jb2xvcj0iIzdhMmU2ZSIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzFiMGYyYSIvPjwvcmFkaWFsR3JhZGllbnQ+PGxpbmVhckdyYWRpZW50IGlkPSJiZWFtIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZmNmQ4IiBzdG9wLW9wYWNpdHk9Ii41NSIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2ZmZjZkOCIgc3RvcC1vcGFjaXR5PSIwIi8+PC9saW5lYXJHcmFkaWVudD48ZmlsdGVyIGlkPSJnbG93Ij48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIxNCIvPjwvZmlsdGVyPjwvZGVmcz48cmVjdCB3aWR0aD0iMTYwMCIgaGVpZ2h0PSIxMDAwIiBmaWxsPSJ1cmwoI2cpIi8+PHBvbHlnb24gcG9pbnRzPSIzMDAsMCAzNjAsMCA2ODAsMTAwMCAtMjAsMTAwMCIgZmlsbD0idXJsKCNiZWFtKSIgb3BhY2l0eT0iLjM1Ii8+PHBvbHlnb24gcG9pbnRzPSI2MjAsMCA2ODAsMCAxMDAwLDEwMDAgMzAwLDEwMDAiIGZpbGw9InVybCgjYmVhbSkiIG9wYWNpdHk9Ii4zNSIvPjxwb2x5Z29uIHBvaW50cz0iOTgwLDAgMTA0MCwwIDEzNjAsMTAwMCA2NjAsMTAwMCIgZmlsbD0idXJsKCNiZWFtKSIgb3BhY2l0eT0iLjM1Ii8+PHBvbHlnb24gcG9pbnRzPSIxMzAwLDAgMTM2MCwwIDE2ODAsMTAwMCA5ODAsMTAwMCIgZmlsbD0idXJsKCNiZWFtKSIgb3BhY2l0eT0iLjM1Ii8+PGcgZmlsdGVyPSJ1cmwoI2dsb3cpIiBvcGFjaXR5PSIuOSI+PHJlY3QgeD0iNzgyIiB5PSIxNTAiIHdpZHRoPSIzNiIgaGVpZ2h0PSIyNTAiIHJ4PSI4IiBmaWxsPSIjZmZmM2M0Ii8+PHJlY3QgeD0iNzEwIiB5PSIyMTUiIHdpZHRoPSIxODAiIGhlaWdodD0iMzYiIHJ4PSI4IiBmaWxsPSIjZmZmM2M0Ii8+PC9nPjxyZWN0IHg9Ijc4MiIgeT0iMTUwIiB3aWR0aD0iMzYiIGhlaWdodD0iMjUwIiByeD0iOCIgZmlsbD0iI2ZmZmJlOSIvPjxyZWN0IHg9IjcxMCIgeT0iMjE1IiB3aWR0aD0iMTgwIiBoZWlnaHQ9IjM2IiByeD0iOCIgZmlsbD0iI2ZmZmJlOSIvPjxyZWN0IHg9IjAiIHk9IjUyMCIgd2lkdGg9IjE2MDAiIGhlaWdodD0iMjIiIGZpbGw9IiMyYjE2MzYiIG9wYWNpdHk9Ii42Ii8+PHBhdGggZD0iTS0yOC44IDYzOS45IFEtMjguOCA1ODkuNSAtOC4xIDU4OC4yIFExMi43IDU4OS41IDEyLjcgNjM5LjkgWiIgZmlsbD0iIzNhMWY0NSIvPjxjaXJjbGUgY3g9Ii04LjEiIGN5PSI1NjguNiIgcj0iMTMuMSIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik05LjQgNTkzLjQgUTMwLjMgNTU4LjcgMjkuOCA1MjMuOSIgc3Ryb2tlPSIjM2ExZjQ1IiBzdHJva2Utd2lkdGg9IjcuNyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjI5LjgiIGN5PSI1MjAuNCIgcng9IjQuOCIgcnk9IjYuNSIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik0zOC4yIDYyNS45IFEzOC4yIDU3Mi42IDYwLjIgNTcxLjIgUTgyLjIgNTcyLjYgODIuMiA2MjUuOSBaIiBmaWxsPSIjM2ExZjQ1Ii8+PGNpcmNsZSBjeD0iNjAuMiIgY3k9IjU1MC41IiByPSIxMy44IiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTQxLjcgNTc2LjggUTE5LjYgNTQwLjUgMjAuMSA1MDQuMiIgc3Ryb2tlPSIjM2ExZjQ1IiBzdHJva2Utd2lkdGg9IjguMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjIwLjEiIGN5PSI1MDAuNSIgcng9IjUuMCIgcnk9IjYuOSIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik0xMzcuNCA2MzQuOCBRMTM3LjQgNTgxLjkgMTU5LjMgNTgwLjUgUTE4MS4xIDU4MS45IDE4MS4xIDYzNC44IFoiIGZpbGw9IiMzYTFmNDUiLz48Y2lyY2xlIGN4PSIxNTkuMyIgY3k9IjU1OS45IiByPSIxMy43IiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTE0MC45IDU4Ni4wIFExMTYuNyA1NTIuMSAxMTUuMCA1MTguMyIgc3Ryb2tlPSIjM2ExZjQ1IiBzdHJva2Utd2lkdGg9IjguMSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjExNS4wIiBjeT0iNTE0LjUiIHJ4PSI1LjAiIHJ5PSI2LjkiIGZpbGw9IiMzYTFmNDUiLz48cGF0aCBkPSJNMTc3LjYgNTg2LjAgUTE5Ny42IDU1My42IDE5NS4xIDUyMS4zIiBzdHJva2U9IiMzYTFmNDUiIHN0cm9rZS13aWR0aD0iOC4xIiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48ZWxsaXBzZSBjeD0iMTk1LjEiIGN5PSI1MTcuNSIgcng9IjUuMCIgcnk9IjYuOSIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik0xODkuMSA2MzQuOSBRMTg5LjEgNTg2LjcgMjA5LjAgNTg1LjUgUTIyOC45IDU4Ni43IDIyOC45IDYzNC45IFoiIGZpbGw9IiMzYTFmNDUiLz48Y2lyY2xlIGN4PSIyMDkuMCIgY3k9IjU2Ni43IiByPSIxMi41IiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTE5Mi4zIDU5MC41IFExNzAuNiA1NTYuOSAxNjkuMyA1MjMuMyIgc3Ryb2tlPSIjM2ExZjQ1IiBzdHJva2Utd2lkdGg9IjcuNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjE2OS4zIiBjeT0iNTE5LjkiIHJ4PSI0LjUiIHJ5PSI2LjIiIGZpbGw9IiMzYTFmNDUiLz48cGF0aCBkPSJNMjI1LjcgNTkwLjUgUTI0NC4yIDU1NS4wIDI0Mi4xIDUxOS41IiBzdHJva2U9IiMzYTFmNDUiIHN0cm9rZS13aWR0aD0iNy40IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48ZWxsaXBzZSBjeD0iMjQyLjEiIGN5PSI1MTYuMSIgcng9IjQuNSIgcnk9IjYuMiIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik0yODUuMSA2MjQuMCBRMjg1LjEgNTcyLjMgMzA2LjQgNTcxLjAgUTMyNy43IDU3Mi4zIDMyNy43IDYyNC4wIFoiIGZpbGw9IiMzYTFmNDUiLz48Y2lyY2xlIGN4PSIzMDYuNCIgY3k9IjU1MC44IiByPSIxMy40IiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTI5MC4zIDU0Ni44IFEyOTQuMyA1MjEuMyAzMDkuMSA1MjguMCBRMzI3LjkgNTIyLjcgMzIzLjIgNTQ4LjIgWiIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik0yODguNSA1NzYuMyBRMjY3LjUgNTQ1LjggMjY4LjQgNTE1LjMiIHN0cm9rZT0iIzNhMWY0NSIgc3Ryb2tlLXdpZHRoPSI3LjkiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxlbGxpcHNlIGN4PSIyNjguNCIgY3k9IjUxMS43IiByeD0iNC45IiByeT0iNi43IiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTMyNC4zIDU3Ni4zIFEzNDYuNCA1NDAuMCAzNDYuNiA1MDMuNiIgc3Ryb2tlPSIjM2ExZjQ1IiBzdHJva2Utd2lkdGg9IjcuOSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjM0Ni42IiBjeT0iNTAwLjAiIHJ4PSI0LjkiIHJ5PSI2LjciIGZpbGw9IiMzYTFmNDUiLz48cGF0aCBkPSJNMzUxLjUgNjQxLjcgUTM1MS41IDU4NS4yIDM3NC44IDU4My43IFEzOTguMSA1ODUuMiAzOTguMSA2NDEuNyBaIiBmaWxsPSIjM2ExZjQ1Ii8+PGNpcmNsZSBjeD0iMzc0LjgiIGN5PSI1NjEuOCIgcj0iMTQuNyIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik0zNTcuMiA1NTcuNCBRMzYxLjYgNTI5LjUgMzc3LjcgNTM2LjggUTM5OC4zIDUzMS4wIDM5My4xIDU1OC44IFoiIGZpbGw9IiMzYTFmNDUiLz48cGF0aCBkPSJNMzU1LjIgNTg5LjYgUTMzMy4yIDU1Mi4zIDMzNS4xIDUxNC45IiBzdHJva2U9IiMzYTFmNDUiIHN0cm9rZS13aWR0aD0iOC43IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48ZWxsaXBzZSBjeD0iMzM1LjEiIGN5PSI1MTAuOSIgcng9IjUuMyIgcnk9IjcuMyIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik0zOTQuNCA1ODkuNiBRNDE5LjQgNTU2LjAgNDIwLjQgNTIyLjQiIHN0cm9rZT0iIzNhMWY0NSIgc3Ryb2tlLXdpZHRoPSI4LjciIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxlbGxpcHNlIGN4PSI0MjAuNCIgY3k9IjUxOC40IiByeD0iNS4zIiByeT0iNy4zIiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTQxNi4yIDYyMS4yIFE0MTYuMiA1NzEuMSA0MzYuOSA1NjkuOCBRNDU3LjYgNTcxLjEgNDU3LjYgNjIxLjIgWiIgZmlsbD0iIzNhMWY0NSIvPjxjaXJjbGUgY3g9IjQzNi45IiBjeT0iNTUwLjIiIHI9IjEzLjAiIGZpbGw9IiMzYTFmNDUiLz48cGF0aCBkPSJNNDIxLjMgNTQ2LjMgUTQyNS4yIDUyMS42IDQzOS41IDUyOC4xIFE0NTcuOCA1MjIuOSA0NTMuMiA1NDcuNiBaIiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTUxMS4zIDY0MS40IFE1MTEuMyA1ODcuMyA1MzMuNyA1ODUuOSBRNTU2LjAgNTg3LjMgNTU2LjAgNjQxLjQgWiIgZmlsbD0iIzNhMWY0NSIvPjxjaXJjbGUgY3g9IjUzMy43IiBjeT0iNTY0LjgiIHI9IjE0LjAiIGZpbGw9IiMzYTFmNDUiLz48cGF0aCBkPSJNNTE2LjggNTYwLjYgUTUyMS4wIDUzMy45IDUzNi41IDU0MS4wIFE1NTYuMSA1MzUuMyA1NTEuMiA1NjIuMCBaIiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTUxNC45IDU5MS41IFE0OTMuNiA1NTQuMyA0OTUuMiA1MTcuMSIgc3Ryb2tlPSIjM2ExZjQ1IiBzdHJva2Utd2lkdGg9IjguMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjQ5NS4yIiBjeT0iNTEzLjIiIHJ4PSI1LjEiIHJ5PSI3LjAiIGZpbGw9IiMzYTFmNDUiLz48cGF0aCBkPSJNNTUyLjQgNTkxLjUgUTU3MS40IDU1Ni4wIDU2Ny41IDUyMC41IiBzdHJva2U9IiMzYTFmNDUiIHN0cm9rZS13aWR0aD0iOC4zIiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48ZWxsaXBzZSBjeD0iNTY3LjUiIGN5PSI1MTYuNyIgcng9IjUuMSIgcnk9IjcuMCIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik01NjguMyA2MjAuNyBRNTY4LjMgNTcyLjIgNTg4LjQgNTcwLjkgUTYwOC40IDU3Mi4yIDYwOC40IDYyMC43IFoiIGZpbGw9IiMzYTFmNDUiLz48Y2lyY2xlIGN4PSI1ODguNCIgY3k9IjU1Mi4wIiByPSIxMi42IiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTU3My4zIDU0OC4zIFE1NzcuMCA1MjQuMyA1OTAuOSA1MzAuNiBRNjA4LjUgNTI1LjYgNjA0LjEgNTQ5LjUgWiIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik02NTkuOSA2MzIuOCBRNjU5LjkgNTc3LjggNjgyLjcgNTc2LjMgUTcwNS40IDU3Ny44IDcwNS40IDYzMi44IFoiIGZpbGw9IiMzYTFmNDUiLz48Y2lyY2xlIGN4PSI2ODIuNyIgY3k9IjU1NC45IiByPSIxNC4zIiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTY2My42IDU4Mi4wIFE2MzguNyA1NDkuMiA2MzcuMyA1MTYuNCIgc3Ryb2tlPSIjM2ExZjQ1IiBzdHJva2Utd2lkdGg9IjguNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjYzNy4zIiBjeT0iNTEyLjUiIHJ4PSI1LjIiIHJ5PSI3LjEiIGZpbGw9IiMzYTFmNDUiLz48cGF0aCBkPSJNNzAxLjggNTgyLjAgUTcyMy45IDU0NS4yIDcyMi42IDUwOC4zIiBzdHJva2U9IiMzYTFmNDUiIHN0cm9rZS13aWR0aD0iOC40IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48ZWxsaXBzZSBjeD0iNzIyLjYiIGN5PSI1MDQuNCIgcng9IjUuMiIgcnk9IjcuMSIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik03MTkuMiA2NDguNCBRNzE5LjIgNTkyLjQgNzQyLjIgNTkxLjAgUTc2NS4zIDU5Mi40IDc2NS4zIDY0OC40IFoiIGZpbGw9IiMzYTFmNDUiLz48Y2lyY2xlIGN4PSI3NDIuMiIgY3k9IjU2OS4yIiByPSIxNC41IiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTcyMi44IDU5Ni44IFE2OTYuOSA1NTguMiA2OTQuNiA1MTkuNiIgc3Ryb2tlPSIjM2ExZjQ1IiBzdHJva2Utd2lkdGg9IjguNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjY5NC42IiBjeT0iNTE1LjYiIHJ4PSI1LjMiIHJ5PSI3LjMiIGZpbGw9IiMzYTFmNDUiLz48cGF0aCBkPSJNNzYxLjYgNTk2LjggUTc4My42IDU2Mi4xIDc4MS45IDUyNy41IiBzdHJva2U9IiMzYTFmNDUiIHN0cm9rZS13aWR0aD0iOC42IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48ZWxsaXBzZSBjeD0iNzgxLjkiIGN5PSI1MjMuNSIgcng9IjUuMyIgcnk9IjcuMyIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik03OTkuMiA2MTkuMiBRNzk5LjIgNTcwLjMgODE5LjQgNTY5LjAgUTgzOS42IDU3MC4zIDgzOS42IDYxOS4yIFoiIGZpbGw9IiMzYTFmNDUiLz48Y2lyY2xlIGN4PSI4MTkuNCIgY3k9IjU1MC4wIiByPSIxMi43IiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTgwNC4yIDU0Ni4yIFE4MDguMCA1MjIuMSA4MjEuOSA1MjguNCBRODM5LjcgNTIzLjMgODM1LjIgNTQ3LjUgWiIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik04MDIuNCA1NzQuMSBRNzgzLjkgNTQ1LjUgNzg2LjEgNTE2LjkiIHN0cm9rZT0iIzNhMWY0NSIgc3Ryb2tlLXdpZHRoPSI3LjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxlbGxpcHNlIGN4PSI3ODYuMSIgY3k9IjUxMy41IiByeD0iNC42IiByeT0iNi4zIiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTg4OS43IDYzMC41IFE4ODkuNyA1NzkuMyA5MTAuOCA1NzguMCBROTMyLjAgNTc5LjMgOTMyLjAgNjMwLjUgWiIgZmlsbD0iIzNhMWY0NSIvPjxjaXJjbGUgY3g9IjkxMC44IiBjeT0iNTU4LjEiIHI9IjEzLjMiIGZpbGw9IiMzYTFmNDUiLz48cGF0aCBkPSJNODkzLjEgNTgzLjMgUTg3MS4xIDU0OS4zIDg3MC44IDUxNS4zIiBzdHJva2U9IiMzYTFmNDUiIHN0cm9rZS13aWR0aD0iNy44IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48ZWxsaXBzZSBjeD0iODcwLjgiIGN5PSI1MTEuNyIgcng9IjQuOCIgcnk9IjYuNiIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik05MjguNiA1ODMuMyBROTUwLjIgNTQ4LjAgOTUwLjAgNTEyLjciIHN0cm9rZT0iIzNhMWY0NSIgc3Ryb2tlLXdpZHRoPSI3LjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxlbGxpcHNlIGN4PSI5NTAuMCIgY3k9IjUwOS4xIiByeD0iNC44IiByeT0iNi42IiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTk4Mi4wIDYyOS42IFE5ODIuMCA1NzIuOSAxMDA1LjQgNTcxLjQgUTEwMjguOSA1NzIuOSAxMDI4LjkgNjI5LjYgWiIgZmlsbD0iIzNhMWY0NSIvPjxjaXJjbGUgY3g9IjEwMDUuNCIgY3k9IjU0OS4zIiByPSIxNC43IiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTk4NS43IDU3Ny4zIFE5NjMuMyA1MzkuOSA5NjUuMCA1MDIuNSIgc3Ryb2tlPSIjM2ExZjQ1IiBzdHJva2Utd2lkdGg9IjguNyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9Ijk2NS4wIiBjeT0iNDk4LjUiIHJ4PSI1LjQiIHJ5PSI3LjQiIGZpbGw9IiMzYTFmNDUiLz48cGF0aCBkPSJNMTAyNS4xIDU3Ny4zIFExMDQ3LjYgNTQyLjUgMTA0NS45IDUwNy42IiBzdHJva2U9IiMzYTFmNDUiIHN0cm9rZS13aWR0aD0iOC43IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48ZWxsaXBzZSBjeD0iMTA0NS45IiBjeT0iNTAzLjYiIHJ4PSI1LjQiIHJ5PSI3LjQiIGZpbGw9IiMzYTFmNDUiLz48cGF0aCBkPSJNMTAyOC4wIDY0NS4xIFExMDI4LjAgNTkzLjIgMTA0OS41IDU5MS44IFExMDcwLjkgNTkzLjIgMTA3MC45IDY0NS4xIFoiIGZpbGw9IiMzYTFmNDUiLz48Y2lyY2xlIGN4PSIxMDQ5LjUiIGN5PSI1NzEuNiIgcj0iMTMuNSIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik0xMDMzLjMgNTY3LjYgUTEwMzcuMyA1NDIuMCAxMDUyLjIgNTQ4LjcgUTEwNzEuMCA1NDMuMyAxMDY2LjMgNTY4LjkgWiIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik0xMTEwLjcgNjE2LjIgUTExMTAuNyA1NjguOSAxMTMwLjIgNTY3LjcgUTExNDkuNyA1NjguOSAxMTQ5LjcgNjE2LjIgWiIgZmlsbD0iIzNhMWY0NSIvPjxjaXJjbGUgY3g9IjExMzAuMiIgY3k9IjU0OS4zIiByPSIxMi4zIiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTExNDYuNiA1NzIuNiBRMTE2Ni41IDU0NC40IDExNjYuNCA1MTYuMyIgc3Ryb2tlPSIjM2ExZjQ1IiBzdHJva2Utd2lkdGg9IjcuMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjExNjYuNCIgY3k9IjUxMy4wIiByeD0iNC41IiByeT0iNi4xIiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTEyMDMuNyA2MjUuNSBRMTIwMy43IDU3NC4zIDEyMjQuOSA1NzIuOSBRMTI0Ni4wIDU3NC4zIDEyNDYuMCA2MjUuNSBaIiBmaWxsPSIjM2ExZjQ1Ii8+PGNpcmNsZSBjeD0iMTIyNC45IiBjeT0iNTUzLjAiIHI9IjEzLjMiIGZpbGw9IiMzYTFmNDUiLz48cGF0aCBkPSJNMTIwNy4xIDU3OC4zIFExMTg1LjYgNTQ0LjYgMTE4NS44IDUxMC44IiBzdHJva2U9IiMzYTFmNDUiIHN0cm9rZS13aWR0aD0iNy45IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48ZWxsaXBzZSBjeD0iMTE4NS44IiBjeT0iNTA3LjIiIHJ4PSI0LjgiIHJ5PSI2LjciIGZpbGw9IiMzYTFmNDUiLz48cGF0aCBkPSJNMTI0Mi42IDU3OC4zIFExMjYxLjIgNTQ0LjQgMTI1OC4wIDUxMC42IiBzdHJva2U9IiMzYTFmNDUiIHN0cm9rZS13aWR0aD0iNy45IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48ZWxsaXBzZSBjeD0iMTI1OC4wIiBjeT0iNTA3LjAiIHJ4PSI0LjgiIHJ5PSI2LjciIGZpbGw9IiMzYTFmNDUiLz48cGF0aCBkPSJNMTI5NC4xIDY0NS42IFExMjk0LjEgNTkzLjIgMTMxNS43IDU5MS44IFExMzM3LjMgNTkzLjIgMTMzNy4zIDY0NS42IFoiIGZpbGw9IiMzYTFmNDUiLz48Y2lyY2xlIGN4PSIxMzE1LjciIGN5PSI1NzEuNSIgcj0iMTMuNiIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik0xMjk5LjQgNTY3LjQgUTEzMDMuNSA1NDEuNiAxMzE4LjQgNTQ4LjQgUTEzMzcuNCA1NDIuOSAxMzMyLjcgNTY4LjggWiIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik0xMjk3LjUgNTk3LjMgUTEyNzguNyA1NjMuOSAxMjgyLjAgNTMwLjYiIHN0cm9rZT0iIzNhMWY0NSIgc3Ryb2tlLXdpZHRoPSI4LjAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxlbGxpcHNlIGN4PSIxMjgyLjAiIGN5PSI1MjYuOSIgcng9IjQuOSIgcnk9IjYuOCIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik0xMzMzLjkgNTk3LjMgUTEzNTMuNyA1NjAuMCAxMzUxLjQgNTIyLjYiIHN0cm9rZT0iIzNhMWY0NSIgc3Ryb2tlLXdpZHRoPSI4LjAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxlbGxpcHNlIGN4PSIxMzUxLjQiIGN5PSI1MTguOSIgcng9IjQuOSIgcnk9IjYuOCIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik0xMzU1LjMgNjE5LjIgUTEzNTUuMyA1NzEuNiAxMzc1LjAgNTcwLjQgUTEzOTQuNiA1NzEuNiAxMzk0LjYgNjE5LjIgWiIgZmlsbD0iIzNhMWY0NSIvPjxjaXJjbGUgY3g9IjEzNzUuMCIgY3k9IjU1MS45IiByPSIxMi4zIiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTEzNjAuMSA1NDguMiBRMTM2My44IDUyNC43IDEzNzcuNCA1MzAuOSBRMTM5NC43IDUyNi4wIDEzOTAuNCA1NDkuNCBaIiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTEzNTguNSA1NzUuMyBRMTMzOC44IDU0Ny40IDEzMzkuNCA1MTkuNCIgc3Ryb2tlPSIjM2ExZjQ1IiBzdHJva2Utd2lkdGg9IjcuMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjEzMzkuNCIgY3k9IjUxNi4wIiByeD0iNC41IiByeT0iNi4yIiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTEzOTEuNCA1NzUuMyBRMTQxMS4wIDU0MC4zIDE0MTAuMyA1MDUuMyIgc3Ryb2tlPSIjM2ExZjQ1IiBzdHJva2Utd2lkdGg9IjcuMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjE0MTAuMyIgY3k9IjUwMS45IiByeD0iNC41IiByeT0iNi4yIiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTTE0MjAuMyA2NDYuMCBRMTQyMC4zIDU5MS40IDE0NDIuOSA1OTAuMCBRMTQ2NS40IDU5MS40IDE0NjUuNCA2NDYuMCBaIiBmaWxsPSIjM2ExZjQ1Ii8+PGNpcmNsZSBjeD0iMTQ0Mi45IiBjeT0iNTY4LjciIHI9IjE0LjIiIGZpbGw9IiMzYTFmNDUiLz48cGF0aCBkPSJNMTQyNC4wIDU5NS43IFExMzk5LjEgNTYwLjcgMTM5Ny40IDUyNS44IiBzdHJva2U9IiMzYTFmNDUiIHN0cm9rZS13aWR0aD0iOC40IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48ZWxsaXBzZSBjeD0iMTM5Ny40IiBjeT0iNTIxLjkiIHJ4PSI1LjIiIHJ5PSI3LjEiIGZpbGw9IiMzYTFmNDUiLz48cGF0aCBkPSJNMTQ2MS44IDU5NS43IFExNDgyLjMgNTU5LjIgMTQ3OS42IDUyMi43IiBzdHJva2U9IiMzYTFmNDUiIHN0cm9rZS13aWR0aD0iOC40IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48ZWxsaXBzZSBjeD0iMTQ3OS42IiBjeT0iNTE4LjgiIHJ4PSI1LjIiIHJ5PSI3LjEiIGZpbGw9IiMzYTFmNDUiLz48cGF0aCBkPSJNMTUyMy4zIDYzNi41IFExNTIzLjMgNTgyLjUgMTU0NS42IDU4MS4xIFExNTY3LjkgNTgyLjUgMTU2Ny45IDYzNi41IFoiIGZpbGw9IiMzYTFmNDUiLz48Y2lyY2xlIGN4PSIxNTQ1LjYiIGN5PSI1NjAuMSIgcj0iMTQuMCIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik0xNTY0LjMgNTg2LjcgUTE1ODcuOCA1NTMuMyAxNTg4LjQgNTE5LjgiIHN0cm9rZT0iIzNhMWY0NSIgc3Ryb2tlLXdpZHRoPSI4LjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxlbGxpcHNlIGN4PSIxNTg4LjQiIGN5PSI1MTYuMCIgcng9IjUuMSIgcnk9IjcuMCIgZmlsbD0iIzNhMWY0NSIvPjxwYXRoIGQ9Ik0xNTU4LjIgNjMyLjcgUTE1NTguMiA1ODEuNiAxNTc5LjMgNTgwLjMgUTE2MDAuMyA1ODEuNiAxNjAwLjMgNjMyLjcgWiIgZmlsbD0iIzNhMWY0NSIvPjxjaXJjbGUgY3g9IjE1NzkuMyIgY3k9IjU2MC40IiByPSIxMy4yIiBmaWxsPSIjM2ExZjQ1Ii8+PHBhdGggZD0iTS0xMy42IDczOC40IFEtMTMuNiA2NjAuNCAxOC42IDY1OC40IFE1MC44IDY2MC40IDUwLjggNzM4LjQgWiIgZmlsbD0iIzI2MTMyZiIvPjxjaXJjbGUgY3g9IjE4LjYiIGN5PSI2MjguMCIgcj0iMjAuMiIgZmlsbD0iIzI2MTMyZiIvPjxwYXRoIGQ9Ik0tOC41IDY2Ni41IFEtMzYuNCA2MTIuOSAtMzEuMyA1NTkuNCIgc3Ryb2tlPSIjMjYxMzJmIiBzdHJva2Utd2lkdGg9IjEyLjAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxlbGxpcHNlIGN4PSItMzEuMyIgY3k9IjU1My45IiByeD0iNy40IiByeT0iMTAuMSIgZmlsbD0iIzI2MTMyZiIvPjxwYXRoIGQ9Ik00NS42IDY2Ni41IFE4MS4xIDYxMS41IDgzLjYgNTU2LjUiIHN0cm9rZT0iIzI2MTMyZiIgc3Ryb2tlLXdpZHRoPSIxMi4wIiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48ZWxsaXBzZSBjeD0iODMuNiIgY3k9IjU1MC45IiByeD0iNy40IiByeT0iMTAuMSIgZmlsbD0iIzI2MTMyZiIvPjxwYXRoIGQ9Ik03NS4zIDc0Ny42IFE3NS4zIDY3NS44IDEwNC45IDY3My45IFExMzQuNSA2NzUuOCAxMzQuNSA3NDcuNiBaIiBmaWxsPSIjMjYxMzJmIi8+PGNpcmNsZSBjeD0iMTA0LjkiIGN5PSI2NDYuMCIgcj0iMTguNiIgZmlsbD0iIzI2MTMyZiIvPjxwYXRoIGQ9Ik0xMjkuOCA2ODEuNCBRMTU1LjUgNjI4LjkgMTUwLjggNTc2LjUiIHN0cm9rZT0iIzI2MTMyZiIgc3Ryb2tlLXdpZHRoPSIxMS4wIiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48ZWxsaXBzZSBjeD0iMTUwLjgiIGN5PSI1NzEuNCIgcng9IjYuOCIgcnk9IjkuMyIgZmlsbD0iIzI2MTMyZiIvPjxwYXRoIGQ9Ik0xNjQuMiA3NDYuNiBRMTY0LjIgNjc1LjAgMTkzLjcgNjczLjIgUTIyMy4zIDY3NS4wIDIyMy4zIDc0Ni42IFoiIGZpbGw9IiMyNjEzMmYiLz48Y2lyY2xlIGN4PSIxOTMuNyIgY3k9IjY0NS4zIiByPSIxOC42IiBmaWxsPSIjMjYxMzJmIi8+PHBhdGggZD0iTTI5OS4yIDcyNi41IFEyOTkuMiA2NTkuOCAzMjYuNyA2NTguMCBRMzU0LjMgNjU5LjggMzU0LjMgNzI2LjUgWiIgZmlsbD0iIzI2MTMyZiIvPjxjaXJjbGUgY3g9IjMyNi43IiBjeT0iNjMyLjEiIHI9IjE3LjMiIGZpbGw9IiMyNjEzMmYiLz48cGF0aCBkPSJNMzQ5LjkgNjY1LjAgUTM3OS40IDYyNC41IDM4MC43IDU4NC4xIiBzdHJva2U9IiMyNjEzMmYiIHN0cm9rZS13aWR0aD0iMTAuMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjM4MC43IiBjeT0iNTc5LjMiIHJ4PSI2LjMiIHJ5PSI4LjciIGZpbGw9IiMyNjEzMmYiLz48cGF0aCBkPSJNMzg0LjEgNzU5LjYgUTM4NC4xIDY4MC42IDQxNi43IDY3OC42IFE0NDkuMyA2ODAuNiA0NDkuMyA3NTkuNiBaIiBmaWxsPSIjMjYxMzJmIi8+PGNpcmNsZSBjeD0iNDE2LjciIGN5PSI2NDcuOCIgcj0iMjAuNSIgZmlsbD0iIzI2MTMyZiIvPjxwYXRoIGQ9Ik0zOTIuMSA2NDEuNyBRMzk4LjMgNjAyLjcgNDIwLjggNjEzLjAgUTQ0OS41IDYwNC44IDQ0Mi4zIDY0My43IFoiIGZpbGw9IiMyNjEzMmYiLz48cGF0aCBkPSJNMzg5LjMgNjg2LjggUTM1Ni43IDY0MC40IDM1Ny42IDU5NC4wIiBzdHJva2U9IiMyNjEzMmYiIHN0cm9rZS13aWR0aD0iMTIuMSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjM1Ny42IiBjeT0iNTg4LjQiIHJ4PSI3LjUiIHJ5PSIxMC4yIiBmaWxsPSIjMjYxMzJmIi8+PHBhdGggZD0iTTQ0NC4xIDY4Ni44IFE0NzkuMSA2MzEuNyA0ODAuNSA1NzYuNyIgc3Ryb2tlPSIjMjYxMzJmIiBzdHJva2Utd2lkdGg9IjEyLjEiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxlbGxpcHNlIGN4PSI0ODAuNSIgY3k9IjU3MS4xIiByeD0iNy41IiByeT0iMTAuMiIgZmlsbD0iIzI2MTMyZiIvPjxwYXRoIGQ9Ik01MjEuOCA3MzcuNiBRNTIxLjggNjYxLjkgNTUzLjEgNjU5LjkgUTU4NC4zIDY2MS45IDU4NC4zIDczNy42IFoiIGZpbGw9IiMyNjEzMmYiLz48Y2lyY2xlIGN4PSI1NTMuMSIgY3k9IjYzMC41IiByPSIxOS42IiBmaWxsPSIjMjYxMzJmIi8+PHBhdGggZD0iTTUyNi44IDY2Ny44IFE0OTMuMSA2MjEuMSA0OTEuNSA1NzQuNCIgc3Ryb2tlPSIjMjYxMzJmIiBzdHJva2Utd2lkdGg9IjExLjYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxlbGxpcHNlIGN4PSI0OTEuNSIgY3k9IjU2OS4xIiByeD0iNy4xIiByeT0iOS44IiBmaWxsPSIjMjYxMzJmIi8+PHBhdGggZD0iTTYyNS44IDczMS44IFE2MjUuOCA2NjIuNyA2NTQuMyA2NjAuOSBRNjgyLjggNjYyLjcgNjgyLjggNzMxLjggWiIgZmlsbD0iIzI2MTMyZiIvPjxjaXJjbGUgY3g9IjY1NC4zIiBjeT0iNjM0LjAiIHI9IjE3LjkiIGZpbGw9IiMyNjEzMmYiLz48cGF0aCBkPSJNNjc4LjIgNjY4LjEgUTcwNC40IDYyMy4zIDcwMS4zIDU3OC40IiBzdHJva2U9IiMyNjEzMmYiIHN0cm9rZS13aWR0aD0iMTAuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjcwMS4zIiBjeT0iNTczLjUiIHJ4PSI2LjUiIHJ5PSI5LjAiIGZpbGw9IiMyNjEzMmYiLz48cGF0aCBkPSJNNzA0LjggNzQxLjUgUTcwNC44IDY2My41IDczNy4wIDY2MS41IFE3NjkuMiA2NjMuNSA3NjkuMiA3NDEuNSBaIiBmaWxsPSIjMjYxMzJmIi8+PGNpcmNsZSBjeD0iNzM3LjAiIGN5PSI2MzEuMSIgcj0iMjAuMiIgZmlsbD0iIzI2MTMyZiIvPjxwYXRoIGQ9Ik03MTAuMCA2NjkuNiBRNjc2LjcgNjE0LjIgNjc2LjYgNTU4LjciIHN0cm9rZT0iIzI2MTMyZiIgc3Ryb2tlLXdpZHRoPSIxMi4wIiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48ZWxsaXBzZSBjeD0iNjc2LjYiIGN5PSI1NTMuMiIgcng9IjcuNCIgcnk9IjEwLjEiIGZpbGw9IiMyNjEzMmYiLz48cGF0aCBkPSJNNzY0LjEgNjY5LjYgUTc5Ni4wIDYxNC4wIDc5NC44IDU1OC41IiBzdHJva2U9IiMyNjEzMmYiIHN0cm9rZS13aWR0aD0iMTIuMCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9Ijc5NC44IiBjeT0iNTUyLjkiIHJ4PSI3LjQiIHJ5PSIxMC4xIiBmaWxsPSIjMjYxMzJmIi8+PHBhdGggZD0iTTg1Ni4xIDc0My41IFE4NTYuMSA2NzYuOCA4ODMuNyA2NzUuMSBROTExLjMgNjc2LjggOTExLjMgNzQzLjUgWiIgZmlsbD0iIzI2MTMyZiIvPjxjaXJjbGUgY3g9Ijg4My43IiBjeT0iNjQ5LjEiIHI9IjE3LjMiIGZpbGw9IiMyNjEzMmYiLz48cGF0aCBkPSJNODYwLjYgNjgyLjAgUTgzMC40IDYzNC45IDgyOC42IDU4Ny45IiBzdHJva2U9IiMyNjEzMmYiIHN0cm9rZS13aWR0aD0iMTAuMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjgyOC42IiBjeT0iNTgzLjIiIHJ4PSI2LjMiIHJ5PSI4LjciIGZpbGw9IiMyNjEzMmYiLz48cGF0aCBkPSJNOTAxLjggNzUwLjIgUTkwMS44IDY3NC4yIDkzMy4yIDY3Mi4yIFE5NjQuNSA2NzQuMiA5NjQuNSA3NTAuMiBaIiBmaWxsPSIjMjYxMzJmIi8+PGNpcmNsZSBjeD0iOTMzLjIiIGN5PSI2NDIuNiIgcj0iMTkuNyIgZmlsbD0iIzI2MTMyZiIvPjxwYXRoIGQ9Ik05MDkuNSA2MzYuNyBROTE1LjQgNTk5LjIgOTM3LjEgNjA5LjEgUTk2NC43IDYwMS4yIDk1Ny44IDYzOC43IFoiIGZpbGw9IiMyNjEzMmYiLz48cGF0aCBkPSJNOTU5LjUgNjgwLjEgUTk5MS42IDYzNC4zIDk5MS4zIDU4OC41IiBzdHJva2U9IiMyNjEzMmYiIHN0cm9rZS13aWR0aD0iMTEuNyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9Ijk5MS4zIiBjeT0iNTgzLjEiIHJ4PSI3LjIiIHJ5PSI5LjkiIGZpbGw9IiMyNjEzMmYiLz48cGF0aCBkPSJNMTAxMC40IDczNS4yIFExMDEwLjQgNjYwLjUgMTA0MS4yIDY1OC42IFExMDcyLjAgNjYwLjUgMTA3Mi4wIDczNS4yIFoiIGZpbGw9IiMyNjEzMmYiLz48Y2lyY2xlIGN4PSIxMDQxLjIiIGN5PSI2MjkuNSIgcj0iMTkuNCIgZmlsbD0iIzI2MTMyZiIvPjxwYXRoIGQ9Ik0xMDE1LjMgNjY2LjMgUTk4OC4zIDYxNi4yIDk5My4xIDU2Ni4xIiBzdHJva2U9IiMyNjEzMmYiIHN0cm9rZS13aWR0aD0iMTEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9Ijk5My4xIiBjeT0iNTYwLjgiIHJ4PSI3LjAiIHJ5PSI5LjciIGZpbGw9IiMyNjEzMmYiLz48cGF0aCBkPSJNMTA2Ny4xIDY2Ni4zIFExMDk1LjMgNjE5LjUgMTA5MS44IDU3Mi42IiBzdHJva2U9IiMyNjEzMmYiIHN0cm9rZS13aWR0aD0iMTEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjEwOTEuOCIgY3k9IjU2Ny40IiByeD0iNy4wIiByeT0iOS43IiBmaWxsPSIjMjYxMzJmIi8+PHBhdGggZD0iTTExNDEuNiA3NDguNyBRMTE0MS42IDY3Ni41IDExNzEuNCA2NzQuNiBRMTIwMS4yIDY3Ni41IDEyMDEuMiA3NDguNyBaIiBmaWxsPSIjMjYxMzJmIi8+PGNpcmNsZSBjeD0iMTE3MS40IiBjeT0iNjQ2LjUiIHI9IjE4LjciIGZpbGw9IiMyNjEzMmYiLz48cGF0aCBkPSJNMTI0MC4yIDc1MC43IFExMjQwLjIgNjc5LjUgMTI2OS42IDY3Ny42IFExMjk5LjAgNjc5LjUgMTI5OS4wIDc1MC43IFoiIGZpbGw9IiMyNjEzMmYiLz48Y2lyY2xlIGN4PSIxMjY5LjYiIGN5PSI2NDkuOSIgcj0iMTguNSIgZmlsbD0iIzI2MTMyZiIvPjxwYXRoIGQ9Ik0xMjk0LjMgNjg1LjAgUTEzMjMuNCA2MzQuNSAxMzIyLjMgNTgzLjkiIHN0cm9rZT0iIzI2MTMyZiIgc3Ryb2tlLXdpZHRoPSIxMC45IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48ZWxsaXBzZSBjeD0iMTMyMi4zIiBjeT0iNTc4LjkiIHJ4PSI2LjciIHJ5PSI5LjIiIGZpbGw9IiMyNjEzMmYiLz48cGF0aCBkPSJNMTM1Ny4zIDczNy4wIFExMzU3LjMgNjY4LjYgMTM4NS42IDY2Ni44IFExNDEzLjggNjY4LjYgMTQxMy44IDczNy4wIFoiIGZpbGw9IiMyNjEzMmYiLz48Y2lyY2xlIGN4PSIxMzg1LjYiIGN5PSI2NDAuMiIgcj0iMTcuOCIgZmlsbD0iIzI2MTMyZiIvPjxwYXRoIGQ9Ik0xMzYxLjggNjczLjkgUTEzMzAuOCA2MzEuOCAxMzI4LjggNTg5LjciIHN0cm9rZT0iIzI2MTMyZiIgc3Ryb2tlLXdpZHRoPSIxMC41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48ZWxsaXBzZSBjeD0iMTMyOC44IiBjeT0iNTg0LjkiIHJ4PSI2LjUiIHJ5PSI4LjkiIGZpbGw9IiMyNjEzMmYiLz48cGF0aCBkPSJNMTQwOS4zIDY3My45IFExNDM2LjcgNjI5LjUgMTQzNS4yIDU4NS4xIiBzdHJva2U9IiMyNjEzMmYiIHN0cm9rZS13aWR0aD0iMTAuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjE0MzUuMiIgY3k9IjU4MC4zIiByeD0iNi41IiByeT0iOC45IiBmaWxsPSIjMjYxMzJmIi8+PHBhdGggZD0iTTE0OTUuNyA3MzUuNyBRMTQ5NS43IDY2Ni4yIDE1MjQuNCA2NjQuNCBRMTU1My4wIDY2Ni4yIDE1NTMuMCA3MzUuNyBaIiBmaWxsPSIjMjYxMzJmIi8+PGNpcmNsZSBjeD0iMTUyNC40IiBjeT0iNjM3LjQiIHI9IjE4LjAiIGZpbGw9IiMyNjEzMmYiLz48cGF0aCBkPSJNMTUwMC4zIDY3MS42IFExNDcwLjYgNjIyLjYgMTQ3MC40IDU3My42IiBzdHJva2U9IiMyNjEzMmYiIHN0cm9rZS13aWR0aD0iMTAuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjE0NzAuNCIgY3k9IjU2OC43IiByeD0iNi41IiByeT0iOS4wIiBmaWxsPSIjMjYxMzJmIi8+PHBhdGggZD0iTTE1NzkuNCA3NDQuNSBRMTU3OS40IDY3Ny40IDE2MDcuMSA2NzUuNiBRMTYzNC44IDY3Ny40IDE2MzQuOCA3NDQuNSBaIiBmaWxsPSIjMjYxMzJmIi8+PGNpcmNsZSBjeD0iMTYwNy4xIiBjeT0iNjQ5LjUiIHI9IjE3LjQiIGZpbGw9IiMyNjEzMmYiLz48cGF0aCBkPSJNMTU4Ni4yIDY0NC4zIFExNTkxLjQgNjExLjIgMTYxMC41IDYxOS45IFExNjM0LjkgNjEzLjAgMTYyOC44IDY0Ni4wIFoiIGZpbGw9IiMyNjEzMmYiLz48cGF0aCBkPSJNMTU4My44IDY4Mi42IFExNTUzLjQgNjMzLjMgMTU1MS41IDU4NC4xIiBzdHJva2U9IiMyNjEzMmYiIHN0cm9rZS13aWR0aD0iMTAuMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjE1NTEuNSIgY3k9IjU3OS4zIiByeD0iNi4zIiByeT0iOC43IiBmaWxsPSIjMjYxMzJmIi8+PHBhdGggZD0iTTE2MzAuMyA2ODIuNiBRMTY1NS40IDYzMy41IDE2NTIuMSA1ODQuNCIgc3Ryb2tlPSIjMjYxMzJmIiBzdHJva2Utd2lkdGg9IjEwLjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxlbGxpcHNlIGN4PSIxNjUyLjEiIGN5PSI1NzkuNiIgcng9IjYuMyIgcnk9IjguNyIgZmlsbD0iIzI2MTMyZiIvPjxwYXRoIGQ9Ik0tNTAuNSA4ODguMCBRLTUwLjUgNzg5LjQgLTkuOCA3ODYuOCBRMzAuOSA3ODkuNCAzMC45IDg4OC4wIFoiIGZpbGw9IiMxNDBhMWMiLz48Y2lyY2xlIGN4PSItOS44IiBjeT0iNzQ4LjUiIHI9IjI1LjYiIGZpbGw9IiMxNDBhMWMiLz48cGF0aCBkPSJNLTQzLjkgNzk3LjEgUS04Mi44IDczMS42IC03OS43IDY2Ni4xIiBzdHJva2U9IiMxNDBhMWMiIHN0cm9rZS13aWR0aD0iMTUuMSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9Ii03OS43IiBjeT0iNjU5LjEiIHJ4PSI5LjMiIHJ5PSIxMi44IiBmaWxsPSIjMTQwYTFjIi8+PHBhdGggZD0iTTI0LjQgNzk3LjEgUTYyLjIgNzI0LjggNTguMSA2NTIuNSIgc3Ryb2tlPSIjMTQwYTFjIiBzdHJva2Utd2lkdGg9IjE1LjEiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxlbGxpcHNlIGN4PSI1OC4xIiBjeT0iNjQ1LjUiIHJ4PSI5LjMiIHJ5PSIxMi44IiBmaWxsPSIjMTQwYTFjIi8+PHBhdGggZD0iTTExNS4yIDkwMC4zIFExMTUuMiA3OTQuNiAxNTguOCA3OTEuOCBRMjAyLjQgNzk0LjYgMjAyLjQgOTAwLjMgWiIgZmlsbD0iIzE0MGExYyIvPjxjaXJjbGUgY3g9IjE1OC44IiBjeT0iNzUwLjciIHI9IjI3LjQiIGZpbGw9IiMxNDBhMWMiLz48cGF0aCBkPSJNMTIyLjEgODAyLjggUTg0LjMgNzM2LjYgOTEuMyA2NzAuNSIgc3Ryb2tlPSIjMTQwYTFjIiBzdHJva2Utd2lkdGg9IjE2LjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxlbGxpcHNlIGN4PSI5MS4zIiBjeT0iNjYzLjAiIHJ4PSIxMC4wIiByeT0iMTMuNyIgZmlsbD0iIzE0MGExYyIvPjxwYXRoIGQ9Ik0zMjkuMyA4OTkuMCBRMzI5LjMgODA3LjYgMzY3LjAgODA1LjMgUTQwNC43IDgwNy42IDQwNC43IDg5OS4wIFoiIGZpbGw9IiMxNDBhMWMiLz48Y2lyY2xlIGN4PSIzNjcuMCIgY3k9Ijc2OS43IiByPSIyMy43IiBmaWxsPSIjMTQwYTFjIi8+PHBhdGggZD0iTTM5OC43IDgxNC44IFE0MzQuOSA3NTMuOCA0MzIuMyA2OTIuOSIgc3Ryb2tlPSIjMTQwYTFjIiBzdHJva2Utd2lkdGg9IjE0LjAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxlbGxpcHNlIGN4PSI0MzIuMyIgY3k9IjY4Ni40IiByeD0iOC42IiByeT0iMTEuOCIgZmlsbD0iIzE0MGExYyIvPjxwYXRoIGQ9Ik00NzEuNyA4OTguMiBRNDcxLjcgODAwLjggNTExLjkgNzk4LjMgUTU1Mi4xIDgwMC44IDU1Mi4xIDg5OC4yIFoiIGZpbGw9IiMxNDBhMWMiLz48Y2lyY2xlIGN4PSI1MTEuOSIgY3k9Ijc2MC40IiByPSIyNS4zIiBmaWxsPSIjMTQwYTFjIi8+PHBhdGggZD0iTTQ4MS42IDc1Mi44IFE0ODkuMiA3MDQuOCA1MTcuMCA3MTcuNCBRNTUyLjQgNzA3LjMgNTQzLjUgNzU1LjMgWiIgZmlsbD0iIzE0MGExYyIvPjxwYXRoIGQ9Ik00NzguMSA4MDguNCBRNDQzLjUgNzQxLjEgNDUwLjMgNjczLjgiIHN0cm9rZT0iIzE0MGExYyIgc3Ryb2tlLXdpZHRoPSIxNC45IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48ZWxsaXBzZSBjeD0iNDUwLjMiIGN5PSI2NjYuOSIgcng9IjkuMiIgcnk9IjEyLjYiIGZpbGw9IiMxNDBhMWMiLz48cGF0aCBkPSJNNTQ1LjcgODA4LjQgUTU4NC41IDc1MC40IDU4Mi4wIDY5Mi40IiBzdHJva2U9IiMxNDBhMWMiIHN0cm9rZS13aWR0aD0iMTQuOSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjU4Mi4wIiBjeT0iNjg1LjYiIHJ4PSI5LjIiIHJ5PSIxMi42IiBmaWxsPSIjMTQwYTFjIi8+PHBhdGggZD0iTTU2Ni4yIDkxMi4yIFE1NjYuMiA4MTIuMSA2MDcuNSA4MDkuNSBRNjQ4LjggODEyLjEgNjQ4LjggOTEyLjIgWiIgZmlsbD0iIzE0MGExYyIvPjxjaXJjbGUgY3g9IjYwNy41IiBjeT0iNzcwLjUiIHI9IjI2LjAiIGZpbGw9IiMxNDBhMWMiLz48cGF0aCBkPSJNNTc2LjMgNzYyLjcgUTU4NC4xIDcxMy40IDYxMi43IDcyNi40IFE2NDkuMSA3MTYuMCA2NDAuMCA3NjUuMyBaIiBmaWxsPSIjMTQwYTFjIi8+PHBhdGggZD0iTTU3Mi44IDgxOS45IFE1MjcuOCA3NjAuNCA1MjUuMyA3MDAuOSIgc3Ryb2tlPSIjMTQwYTFjIiBzdHJva2Utd2lkdGg9IjE1LjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxlbGxpcHNlIGN4PSI1MjUuMyIgY3k9IjY5My44IiByeD0iOS40IiByeT0iMTMuMCIgZmlsbD0iIzE0MGExYyIvPjxwYXRoIGQ9Ik02NDIuMiA4MTkuOSBRNjg3LjMgNzU0LjQgNjg5LjkgNjg4LjgiIHN0cm9rZT0iIzE0MGExYyIgc3Ryb2tlLXdpZHRoPSIxNS40IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48ZWxsaXBzZSBjeD0iNjg5LjkiIGN5PSI2ODEuNyIgcng9IjkuNCIgcnk9IjEzLjAiIGZpbGw9IiMxNDBhMWMiLz48cGF0aCBkPSJNNzUyLjcgODk1LjYgUTc1Mi43IDc5Ny4wIDc5My40IDc5NC41IFE4MzQuMSA3OTcuMCA4MzQuMSA4OTUuNiBaIiBmaWxsPSIjMTQwYTFjIi8+PGNpcmNsZSBjeD0iNzkzLjQiIGN5PSI3NTYuMSIgcj0iMjUuNiIgZmlsbD0iIzE0MGExYyIvPjxwYXRoIGQ9Ik03NTkuMyA4MDQuNyBRNzI0LjQgNzM2LjMgNzMxLjQgNjY3LjkiIHN0cm9rZT0iIzE0MGExYyIgc3Ryb2tlLXdpZHRoPSIxNS4xIiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48ZWxsaXBzZSBjeD0iNzMxLjQiIGN5PSI2NjAuOSIgcng9IjkuMyIgcnk9IjEyLjgiIGZpbGw9IiMxNDBhMWMiLz48cGF0aCBkPSJNODI3LjYgODA0LjcgUTg3Mi44IDczMi4zIDg3Ni4yIDY1OS45IiBzdHJva2U9IiMxNDBhMWMiIHN0cm9rZS13aWR0aD0iMTUuMSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9Ijg3Ni4yIiBjeT0iNjUzLjAiIHJ4PSI5LjMiIHJ5PSIxMi44IiBmaWxsPSIjMTQwYTFjIi8+PHBhdGggZD0iTTkyMy44IDg4My41IFE5MjMuOCA3OTIuMiA5NjEuNSA3ODkuOCBROTk5LjIgNzkyLjIgOTk5LjIgODgzLjUgWiIgZmlsbD0iIzE0MGExYyIvPjxjaXJjbGUgY3g9Ijk2MS41IiBjeT0iNzU0LjMiIHI9IjIzLjciIGZpbGw9IiMxNDBhMWMiLz48cGF0aCBkPSJNOTI5LjggNzk5LjMgUTg5Mi4zIDc0My4xIDg5My41IDY4Ni44IiBzdHJva2U9IiMxNDBhMWMiIHN0cm9rZS13aWR0aD0iMTQuMCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9Ijg5My41IiBjeT0iNjgwLjQiIHJ4PSI4LjYiIHJ5PSIxMS44IiBmaWxsPSIjMTQwYTFjIi8+PHBhdGggZD0iTTk5My4yIDc5OS4zIFExMDI5LjggNzM2LjQgMTAyNy42IDY3My42IiBzdHJva2U9IiMxNDBhMWMiIHN0cm9rZS13aWR0aD0iMTQuMCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjEwMjcuNiIgY3k9IjY2Ny4xIiByeD0iOC42IiByeT0iMTEuOCIgZmlsbD0iIzE0MGExYyIvPjxwYXRoIGQ9Ik0xMDYxLjkgOTAwLjkgUTEwNjEuOSA3OTcuNCAxMTA0LjYgNzk0LjcgUTExNDcuMiA3OTcuNCAxMTQ3LjIgOTAwLjkgWiIgZmlsbD0iIzE0MGExYyIvPjxjaXJjbGUgY3g9IjExMDQuNiIgY3k9Ijc1NC41IiByPSIyNi44IiBmaWxsPSIjMTQwYTFjIi8+PHBhdGggZD0iTTEwNzIuNCA3NDYuNCBRMTA4MC40IDY5NS41IDExMDkuOSA3MDguOSBRMTE0Ny41IDY5OC4xIDExMzguMSA3NDkuMSBaIiBmaWxsPSIjMTQwYTFjIi8+PHBhdGggZD0iTTEwNjguNyA4MDUuNSBRMTAzMi40IDczNy4wIDEwNDAuMSA2NjguNCIgc3Ryb2tlPSIjMTQwYTFjIiBzdHJva2Utd2lkdGg9IjE1LjkiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxlbGxpcHNlIGN4PSIxMDQwLjEiIGN5PSI2NjEuMSIgcng9IjkuOCIgcnk9IjEzLjQiIGZpbGw9IiMxNDBhMWMiLz48cGF0aCBkPSJNMTE0MC40IDgwNS41IFExMTg4LjQgNzM2LjggMTE5Mi41IDY2OC4yIiBzdHJva2U9IiMxNDBhMWMiIHN0cm9rZS13aWR0aD0iMTUuOSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjExOTIuNSIgY3k9IjY2MC44IiByeD0iOS44IiByeT0iMTMuNCIgZmlsbD0iIzE0MGExYyIvPjxwYXRoIGQ9Ik0xMjExLjAgODkwLjQgUTEyMTEuMCA3OTMuOSAxMjUwLjggNzkxLjQgUTEyOTAuNiA3OTMuOSAxMjkwLjYgODkwLjQgWiIgZmlsbD0iIzE0MGExYyIvPjxjaXJjbGUgY3g9IjEyNTAuOCIgY3k9Ijc1My45IiByPSIyNS4wIiBmaWxsPSIjMTQwYTFjIi8+PHBhdGggZD0iTTEyMTcuMyA4MDEuNSBRMTE3Ny41IDczMS44IDExNzguNiA2NjIuMSIgc3Ryb2tlPSIjMTQwYTFjIiBzdHJva2Utd2lkdGg9IjE0LjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxlbGxpcHNlIGN4PSIxMTc4LjYiIGN5PSI2NTUuMyIgcng9IjkuMSIgcnk9IjEyLjUiIGZpbGw9IiMxNDBhMWMiLz48cGF0aCBkPSJNMTI4NC4yIDgwMS41IFExMzI4LjkgNzQwLjUgMTMzMi42IDY3OS42IiBzdHJva2U9IiMxNDBhMWMiIHN0cm9rZS13aWR0aD0iMTQuOCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+PGVsbGlwc2UgY3g9IjEzMzIuNiIgY3k9IjY3Mi43IiByeD0iOS4xIiByeT0iMTIuNSIgZmlsbD0iIzE0MGExYyIvPjxwYXRoIGQ9Ik0xMzg0LjUgODgzLjcgUTEzODQuNSA3OTEuNSAxNDIyLjYgNzg5LjEgUTE0NjAuNyA3OTEuNSAxNDYwLjcgODgzLjcgWiIgZmlsbD0iIzE0MGExYyIvPjxjaXJjbGUgY3g9IjE0MjIuNiIgY3k9Ijc1My4yIiByPSIyMy45IiBmaWxsPSIjMTQwYTFjIi8+PHBhdGggZD0iTTEzOTAuNiA3OTguNiBRMTM1NC4xIDczOS44IDEzNTYuNyA2ODEuMCIgc3Ryb2tlPSIjMTQwYTFjIiBzdHJva2Utd2lkdGg9IjE0LjEiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxlbGxpcHNlIGN4PSIxMzU2LjciIGN5PSI2NzQuNCIgcng9IjguNyIgcnk9IjEyLjAiIGZpbGw9IiMxNDBhMWMiLz48cGF0aCBkPSJNMTU4NC4xIDg3Ny4xIFExNTg0LjEgNzg2LjggMTYyMS4zIDc4NC40IFExNjU4LjYgNzg2LjggMTY1OC42IDg3Ny4xIFoiIGZpbGw9IiMxNDBhMWMiLz48Y2lyY2xlIGN4PSIxNjIxLjMiIGN5PSI3NDkuMyIgcj0iMjMuNCIgZmlsbD0iIzE0MGExYyIvPjwvc3ZnPg==" alt=""><div class="ks-device__cap"><strong>Grace Chapel</strong><span>Sunday Service · 9:00 AM</span></div></div>
+			<div class="ks-float ks-float--a">₦250,000 <small>tithes this week</small></div>
+			<div class="ks-float ks-float--b">+18 <small>new partners</small></div>
+		</div>
+	</div>
+</section>
+
+<section class="ks-band" id="features">
+	<div class="ks-wrap">
+		<header class="ks-head"><span class="ks-eyebrow">Everything included</span><h2>Built for the way churches really work</h2></header>
+		<div class="ks-grid ks-grid--3">
+							<article class="ks-card ks-feature"><span class="ks-feature__ic" aria-hidden="true">⛪</span><h3>Beautiful church website</h3><p>25+ page designs, sermons, events, live streaming, prayer requests, testimonies and Plan-your-visit — all editable without code.</p></article>
+							<article class="ks-card ks-feature"><span class="ks-feature__ic" aria-hidden="true">♥</span><h3>Partnership portal</h3><p>Partners sign up, pay and get their own dashboard by plan. Unpaid partners are locked out until they renew.</p></article>
+							<article class="ks-card ks-feature"><span class="ks-feature__ic" aria-hidden="true">₦</span><h3>Tithe, offering &amp; giving</h3><p>Paystack, Flutterwave, Stripe, PayPal and bank transfer — in US dollars or your local currency.</p></article>
+							<article class="ks-card ks-feature"><span class="ks-feature__ic" aria-hidden="true">◎</span><h3>Church Admin dashboard</h3><p>Manage partners, payments, prayers, visits and notifications from a simple dashboard — no WordPress skills needed.</p></article>
+							<article class="ks-card ks-feature"><span class="ks-feature__ic" aria-hidden="true">✆</span><h3>WhatsApp built in</h3><p>Visitors chat with your team, and partners reach their pastors on WhatsApp straight from their dashboard.</p></article>
+							<article class="ks-card ks-feature"><span class="ks-feature__ic" aria-hidden="true">⌘</span><h3>Your own domain</h3><p>Start on yourchurch.yourplatform.com and connect yourchurch.org whenever you are ready, with free https.</p></article>
+					</div>
+	</div>
+</section>
+
+<section class="ks-band ks-band--alt">
+	<div class="ks-wrap">
+		<header class="ks-head"><span class="ks-eyebrow">How it works</span><h2>Live in three steps</h2></header>
+		<ol class="ks-steps">
+			<li><b>1</b><h3>Sign up</h3><p>Enter your church name and pick your web address.</p></li>
+			<li><b>2</b><h3>Make it yours</h3><p>Add your logo, colours, photos, service times and partnership plans.</p></li>
+			<li><b>3</b><h3>Share &amp; receive</h3><p>Share your link and start receiving partners, tithes and offerings online.</p></li>
+		</ol>
+	</div>
+</section>
+
+<section class="ks-band" id="pricing">
+	<div class="ks-wrap ks-pricing" data-ks-prices="" data-r="international" data-i="month">
+		<header class="ks-head"><span class="ks-eyebrow">Pricing</span><h2>Simple plans that grow with your church</h2><p class="ks-lead">Every plan starts with a 14-day free trial.</p></header>
+		<div class="ks-toggles">
+			<div class="ks-seg" role="radiogroup" aria-label="Currency">
+				<label><input type="radio" name="ks_region_view" value="international" checked=""><span>🌍 International <b>USD</b></span></label>
+				<label><input type="radio" name="ks_region_view" value="local"><span>📍 Nigeria <b>NGN</b></span></label>			</div>
+			<div class="ks-seg" role="radiogroup" aria-label="Billing period">
+				<label><input type="radio" name="ks_interval_view" value="month" checked=""><span>Monthly</span></label>
+				<label><input type="radio" name="ks_interval_view" value="year"><span>Yearly <b>2 months free</b></span></label>
+			</div>
+		</div>
+		<div class="ks-grid ks-grid--3 ks-price-grid">
+							<article class="ks-card ks-tier">
+										<h3>Starter</h3>
+					<p class="ks-muted">For new and growing churches.</p>
+					<div class="ks-price">
+																													<span class="ks-p ks-p--international-month">$19<small>/month</small></span>
+																							<span class="ks-p ks-p--international-year">$190<small>/year</small></span>
+																																				<span class="ks-p ks-p--local-month">₦15,000<small>/month</small></span>
+																							<span class="ks-p ks-p--local-year">₦150,000<small>/year</small></span>
+																		</div>
+					<ul class="ks-ticks"><li>Church website with 25+ page designs</li><li>Partner portal &amp; dashboards</li><li>Online giving, tithe &amp; offering</li><li>Up to 100 partners</li><li>yourchurch subdomain</li></ul>
+					<a class="ks-btn ks-btn--block ks-btn--ghost" data-plan-link="" href="#signup">Start free trial</a>
+				</article>
+							<article class="ks-card ks-tier is-featured">
+					<span class="ks-ribbon">Most popular</span>					<h3>Growth</h3>
+					<p class="ks-muted">Everything a busy church needs.</p>
+					<div class="ks-price">
+																													<span class="ks-p ks-p--international-month">$49<small>/month</small></span>
+																							<span class="ks-p ks-p--international-year">$490<small>/year</small></span>
+																																				<span class="ks-p ks-p--local-month">₦40,000<small>/month</small></span>
+																							<span class="ks-p ks-p--local-year">₦400,000<small>/year</small></span>
+																		</div>
+					<ul class="ks-ticks"><li>Everything in Starter</li><li>Use your own domain (yourchurch.org)</li><li>Up to 1,000 partners</li><li>Newsletter &amp; partner notifications</li><li>Priority email support</li></ul>
+					<a class="ks-btn ks-btn--block" data-plan-link="" href="#signup">Start free trial</a>
+				</article>
+							<article class="ks-card ks-tier">
+										<h3>Ministry</h3>
+					<p class="ks-muted">For large churches and networks.</p>
+					<div class="ks-price">
+																													<span class="ks-p ks-p--international-month">$99<small>/month</small></span>
+																							<span class="ks-p ks-p--international-year">$990<small>/year</small></span>
+																																				<span class="ks-p ks-p--local-month">₦80,000<small>/month</small></span>
+																							<span class="ks-p ks-p--local-year">₦800,000<small>/year</small></span>
+																		</div>
+					<ul class="ks-ticks"><li>Everything in Growth</li><li>Unlimited partners</li><li>No platform branding</li><li>Onboarding call</li><li>WhatsApp support</li></ul>
+					<a class="ks-btn ks-btn--block ks-btn--ghost" data-plan-link="" href="#signup">Start free trial</a>
+				</article>
+					</div>
+	</div>
+</section>
+
+<section class="ks-band ks-band--alt" id="faq">
+	<div class="ks-wrap ks-narrow">
+		<header class="ks-head"><span class="ks-eyebrow">Questions</span><h2>Frequently asked</h2></header>
+		<div class="ks-faq">
+			<details><summary>Do I need technical skills?</summary><p>No. Your site is ready with pages, colours and sample content. You change text, photos and settings from the Church Admin dashboard.</p></details>
+			<details><summary>Who receives the tithes and partnership payments?</summary><p>Your church does. You connect your own Paystack, Flutterwave, Stripe or PayPal account, so money goes straight to your church account.</p></details>
+			<details><summary>Can I use my own domain?</summary><p>Yes, on Growth and Ministry. Add your domain in Church Admin → Custom domain, follow the DNS steps, and we connect it with free https.</p></details>
+			<details><summary>What happens after the free trial?</summary><p>Choose a plan and pay by card, bank transfer or USSD. If you do not, your site stays online for a short grace period and is then paused — your content is kept safe.</p></details>
+		</div>
+	</div>
+</section>
+
+<section class="ks-band ks-final">
+	<div class="ks-wrap ks-narrow">
+		<h2>Ready to bring your church online?</h2>
+		<a class="ks-btn ks-btn--lg ks-btn--light" href="#signup">Start free trial</a>
+	</div>
+</section>
+</main><footer class="ks-foot">
+	<div class="ks-wrap ks-foot__in">
+		<div><strong>ChurchHub</strong><p>Your church website, partner portal and online giving — ready in minutes.</p></div>
+		<div><a href="#signup">Start free trial</a><a href="mailto:super@yourplatform.com">Contact sales</a><a href="#p-overview">Log in</a></div>
+	</div>
+	<p class="ks-wrap ks-foot__copy">© 2026 ChurchHub</p>
+</footer></div>
+<div data-view="signup" hidden><header class="ks-top">
+	<div class="ks-wrap ks-top__in">
+		<a class="ks-logo" href="#landing"><span class="ks-logo__mark" aria-hidden="true">✚</span>ChurchHub</a>
+		<nav class="ks-nav" aria-label="Main">
+			<a href="#features">Features</a>
+			<a href="#pricing">Pricing</a>
+			<a href="#faq">FAQ</a>
+		</nav>
+		<a class="ks-btn ks-btn--sm" href="#signup">Start free trial</a>
+	</div>
+</header><main>
+	<section class="ks-band ks-signup">
+	<div class="ks-wrap ks-signup__in">
+		<div class="ks-signup__intro">
+			<span class="ks-eyebrow">14-day free trial · no card needed</span>
+			<h1>Create your church website</h1>
+			<p class="ks-lead">You will get your website, partner portal, online giving and Church Admin dashboard straight away.</p>
+			<ul class="ks-ticks">
+				<li>Ready-made pages for your church</li>
+				<li>Partnership plans and partner dashboards</li>
+				<li>Tithe &amp; offering with Paystack, Stripe and more</li>
+				<li>Connect your own domain on Growth and Ministry</li>
+			</ul>
+		</div>
+		<form method="post" class="ks-card ks-form" data-ks-signup="" novalidate="">
+						<input type="hidden" name="ks_do" value="signup">
+			<input type="hidden" id="_ks" name="_ks" value="0a1de80441">			<fieldset>
+				<legend>1. Your church</legend>
+				<label>Church name<input name="church_name" required="" maxlength="120" value="" placeholder="Grace Chapel International" data-ks-church=""></label>
+				<label>Website address					<span class="ks-domain"><input name="subdomain" required="" maxlength="40" pattern="[a-z0-9-]{3,40}" value="" placeholder="gracechapel" autocapitalize="none" autocomplete="off" spellcheck="false" data-ks-subdomain=""><span>.yourplatform.com</span></span>
+				</label>
+				<p class="ks-hint" data-ks-subdomain-msg="" aria-live="polite">You can connect your own domain later.</p>
+				<fieldset class="ks-palettes">
+					<legend>Website colours</legend>
+											<label class="ks-swatch"><input type="radio" name="palette" value="royal" checked="checked"><span style="--sw:#5b2a86"></span>Royal</label>
+											<label class="ks-swatch"><input type="radio" name="palette" value="ocean"><span style="--sw:#1d4ed8"></span>Ocean</label>
+											<label class="ks-swatch"><input type="radio" name="palette" value="emerald"><span style="--sw:#047857"></span>Emerald</label>
+											<label class="ks-swatch"><input type="radio" name="palette" value="crimson"><span style="--sw:#b91c1c"></span>Crimson</label>
+											<label class="ks-swatch"><input type="radio" name="palette" value="jordan"><span style="--sw:#0f766e"></span>Jordan</label>
+									</fieldset>
+			</fieldset>
+			<fieldset>
+				<legend>2. Your account</legend>
+				<label>Your name<input name="name" required="" autocomplete="name" value=""></label>
+				<label>Email<input type="email" name="email" required="" autocomplete="email" value=""></label>
+				<label>Password<input type="password" name="password" required="" minlength="8" autocomplete="new-password"></label>
+			</fieldset>
+			<fieldset>
+				<legend>3. Plan after your trial</legend>
+				<div class="ks-pick">
+											<label class="ks-pick__opt"><input type="radio" name="plan" value="starter"><span><strong>Starter</strong><small>$19 · ₦15,000 / month</small></span></label>
+											<label class="ks-pick__opt"><input type="radio" name="plan" value="growth" checked="checked"><span><strong>Growth</strong><small>$49 · ₦40,000 / month</small></span></label>
+											<label class="ks-pick__opt"><input type="radio" name="plan" value="ministry"><span><strong>Ministry</strong><small>$99 · ₦80,000 / month</small></span></label>
+									</div>
+									<div class="ks-seg ks-seg--block" role="radiogroup" aria-label="Billing currency">
+						<label><input type="radio" name="region" value="international" checked="checked"><span>🌍 Pay in USD</span></label>
+						<label><input type="radio" name="region" value="local"><span>📍 Pay in NGN</span></label>
+					</div>
+							</fieldset>
+			<input type="text" name="website" class="ks-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+			<label class="ks-check"><input type="checkbox" name="terms" value="1" required=""> I agree to the terms of service and privacy policy.</label>
+			<button class="ks-btn ks-btn--lg ks-btn--block">Create my church website</button>
+			<p class="ks-small ks-center">Already have a church site? <a href="#p-overview">Log in</a></p>
+		</form>
+	</div>
+</section>
+</main><footer class="ks-foot">
+	<div class="ks-wrap ks-foot__in">
+		<div><strong>ChurchHub</strong><p>Your church website, partner portal and online giving — ready in minutes.</p></div>
+		<div><a href="#signup">Start free trial</a><a href="mailto:super@yourplatform.com">Contact sales</a><a href="#p-overview">Log in</a></div>
+	</div>
+	<p class="ks-wrap ks-foot__copy">© 2026 ChurchHub</p>
+</footer></div>
+<div data-view="platform" hidden><div class="ks-app"><aside class="ks-side">
+		<a class="ks-logo" href="#landing"><span class="ks-logo__mark" aria-hidden="true">✚</span>ChurchHub</a>
+		<nav aria-label="Platform">
+							<a href="#p-overview" aria-current="page"><span aria-hidden="true">◎</span>Overview</a>
+							<a href="#p-churches"><span aria-hidden="true">⛪</span>Churches</a>
+							<a href="#p-new"><span aria-hidden="true">＋</span>Add a church</a>
+							<a href="#p-invoices"><span aria-hidden="true">₦</span>Payments</a>
+							<a href="#p-domains"><span aria-hidden="true">⌘</span>Domains</a>
+							<a href="#p-plans"><span aria-hidden="true">◈</span>Plans &amp; pricing</a>
+							<a href="#p-settings"><span aria-hidden="true">⚙</span>Settings</a>
+					</nav>
+		<a class="ks-side__out" href="#p-overview">Log out</a>
+	</aside><section class="ks-main" data-tab="overview" hidden>
+		<header class="ks-main__head">
+			<h1>Overview</h1>
+					</header>
+		
+				<div class="ks-kpis">
+			<div class="ks-kpi"><span>Churches</span><strong>3</strong><small>1 paying · 1 on trial</small></div>
+			<div class="ks-kpi"><span>Monthly recurring revenue</span><strong>₦40,000</strong><small>from active plans</small></div>
+			<div class="ks-kpi"><span>Received (30 days)</span><strong>$155 + ₦560,000</strong><small>paid invoices</small></div>
+			<div class="ks-kpi ks-kpi--warn"><span>Need attention</span><strong>1</strong><small>1 payment due · 0 suspended</small></div>
+		</div>
+		<div class="ks-cols">
+			<div class="ks-card">
+				<h2>Newest churches</h2>
+				<ul class="ks-list">
+											<li><span><strong>Living Waters Assembly</strong><small>livingwaters.yourplatform.com · Starter</small></span><span class="ks-badge ks-badge--past_due">Payment due</span></li>
+											<li><span><strong>Faith Bible Church</strong><small>faith.yourplatform.com · Starter</small></span><span class="ks-badge ks-badge--trialing">Free trial</span></li>
+											<li><span><strong>Grace Chapel International</strong><small>gracechapel.test · Growth</small></span><span class="ks-badge ks-badge--active">Active</span></li>
+									</ul>
+			</div>
+			<div class="ks-card">
+				<h2>Billing checks</h2>
+				<p class="ks-muted">Trials, renewals, reminders, suspensions and pending domains are checked automatically twice a day. You can also run the check now.</p>
+				<form method="post"><input type="hidden" name="ks_do" value="run_lifecycle"><input type="hidden" name="tab" value="overview"><input type="hidden" id="_ks" name="_ks" value="946f62118a"><button class="ks-btn">Run checks now</button></form>
+			</div>
+		</div>
+
+	</section><section class="ks-main" data-tab="churches" hidden>
+		<header class="ks-main__head">
+			<h1>Churches</h1>
+					</header>
+		
+		<form class="ks-filters" method="get" action="http://yourplatform.com/platform/">
+			<input type="hidden" name="tab" value="churches">
+			<input type="search" name="s" value="" placeholder="Church, email or address…" aria-label="Search churches">
+			<select name="status" aria-label="Status"><option value="">All statuses</option><option value="trialing">Free trial</option><option value="active">Active</option><option value="past_due">Payment due</option><option value="suspended">Suspended</option><option value="cancelled">Cancelled</option></select>
+			<button class="ks-btn">Filter</button>
+		</form>
+		<div class="ks-stack">
+											<article class="ks-card ks-church">
+					<div class="ks-church__main">
+						<h3>Living Waters Assembly <span class="ks-badge ks-badge--past_due">Payment due</span></h3>
+						<p class="ks-muted"><a href="#" data-pv-note="Opens the church’s own website or Church Admin on the live platform.">livingwaters.yourplatform.com</a> · office@livingwaters.test</p>
+						<dl class="ks-facts">
+							<div><dt>Plan</dt><dd>Starter · monthly · USD</dd></div>
+							<div><dt>Paid until</dt><dd>15 Oct 2026</dd></div>
+							<div><dt>Partners</dt><dd>0</dd></div>
+							<div><dt>Joined</dt><dd>17 Oct 2026</dd></div>
+						</dl>
+					</div>
+					<div class="ks-church__actions">
+						<a class="ks-btn ks-btn--sm" href="#" data-pv-note="Opens the church’s own website or Church Admin on the live platform.">Open Church Admin</a>
+						<form method="post" class="ks-inline"><input type="hidden" name="ks_do" value="plan"><input type="hidden" name="tab" value="churches"><input type="hidden" id="_ks" name="_ks" value="946f62118a"><input type="hidden" name="blog_id" value="13"><select name="plan" aria-label="Plan"><option value="starter" selected="selected">Starter</option><option value="growth">Growth</option><option value="ministry">Ministry</option></select><button class="ks-btn ks-btn--ghost ks-btn--sm">Set plan</button></form>
+						<form method="post" class="ks-inline"><input type="hidden" name="ks_do" value="extend"><input type="hidden" name="tab" value="churches"><input type="hidden" id="_ks" name="_ks" value="946f62118a"><input type="hidden" name="blog_id" value="13"><input type="number" name="days" value="14" min="1" max="366" aria-label="Days"><button class="ks-btn ks-btn--ghost ks-btn--sm">Extend days</button></form>
+													<form method="post" class="ks-inline"><input type="hidden" name="ks_do" value="suspend"><input type="hidden" name="tab" value="churches"><input type="hidden" id="_ks" name="_ks" value="946f62118a"><input type="hidden" name="blog_id" value="13"><button class="ks-btn ks-btn--danger ks-btn--sm">Suspend</button></form>
+												<details class="ks-danger-zone"><summary>Delete</summary>
+							<form method="post" class="ks-inline"><input type="hidden" name="ks_do" value="delete"><input type="hidden" name="tab" value="churches"><input type="hidden" id="_ks" name="_ks" value="946f62118a"><input type="hidden" name="blog_id" value="13"><input name="confirm" placeholder="Type DELETE" aria-label="Type DELETE to confirm"><button class="ks-btn ks-btn--danger ks-btn--sm">Delete site</button></form>
+						</details>
+					</div>
+				</article>
+											<article class="ks-card ks-church">
+					<div class="ks-church__main">
+						<h3>Faith Bible Church <span class="ks-badge ks-badge--trialing">Free trial</span></h3>
+						<p class="ks-muted"><a href="#" data-pv-note="Opens the church’s own website or Church Admin on the live platform.">faith.yourplatform.com</a> · ngozi@faithbible.test</p>
+						<dl class="ks-facts">
+							<div><dt>Plan</dt><dd>Starter · monthly · USD</dd></div>
+							<div><dt>Trial ends</dt><dd>26 Oct 2026</dd></div>
+							<div><dt>Partners</dt><dd>2</dd></div>
+							<div><dt>Joined</dt><dd>17 Oct 2026</dd></div>
+						</dl>
+					</div>
+					<div class="ks-church__actions">
+						<a class="ks-btn ks-btn--sm" href="#" data-pv-note="Opens the church’s own website or Church Admin on the live platform.">Open Church Admin</a>
+						<form method="post" class="ks-inline"><input type="hidden" name="ks_do" value="plan"><input type="hidden" name="tab" value="churches"><input type="hidden" id="_ks" name="_ks" value="946f62118a"><input type="hidden" name="blog_id" value="12"><select name="plan" aria-label="Plan"><option value="starter" selected="selected">Starter</option><option value="growth">Growth</option><option value="ministry">Ministry</option></select><button class="ks-btn ks-btn--ghost ks-btn--sm">Set plan</button></form>
+						<form method="post" class="ks-inline"><input type="hidden" name="ks_do" value="extend"><input type="hidden" name="tab" value="churches"><input type="hidden" id="_ks" name="_ks" value="946f62118a"><input type="hidden" name="blog_id" value="12"><input type="number" name="days" value="14" min="1" max="366" aria-label="Days"><button class="ks-btn ks-btn--ghost ks-btn--sm">Extend days</button></form>
+													<form method="post" class="ks-inline"><input type="hidden" name="ks_do" value="suspend"><input type="hidden" name="tab" value="churches"><input type="hidden" id="_ks" name="_ks" value="946f62118a"><input type="hidden" name="blog_id" value="12"><button class="ks-btn ks-btn--danger ks-btn--sm">Suspend</button></form>
+												<details class="ks-danger-zone"><summary>Delete</summary>
+							<form method="post" class="ks-inline"><input type="hidden" name="ks_do" value="delete"><input type="hidden" name="tab" value="churches"><input type="hidden" id="_ks" name="_ks" value="946f62118a"><input type="hidden" name="blog_id" value="12"><input name="confirm" placeholder="Type DELETE" aria-label="Type DELETE to confirm"><button class="ks-btn ks-btn--danger ks-btn--sm">Delete site</button></form>
+						</details>
+					</div>
+				</article>
+											<article class="ks-card ks-church">
+					<div class="ks-church__main">
+						<h3>Grace Chapel International <span class="ks-badge ks-badge--active">Active</span></h3>
+						<p class="ks-muted"><a href="#" data-pv-note="Opens the church’s own website or Church Admin on the live platform.">gracechapel.test</a> · ade@gracechapel.test</p>
+						<dl class="ks-facts">
+							<div><dt>Plan</dt><dd>Growth · yearly · NGN</dd></div>
+							<div><dt>Paid until</dt><dd>17 Oct 2027</dd></div>
+							<div><dt>Partners</dt><dd>0</dd></div>
+							<div><dt>Joined</dt><dd>17 Oct 2026</dd></div>
+						</dl>
+					</div>
+					<div class="ks-church__actions">
+						<a class="ks-btn ks-btn--sm" href="#" data-pv-note="Opens the church’s own website or Church Admin on the live platform.">Open Church Admin</a>
+						<form method="post" class="ks-inline"><input type="hidden" name="ks_do" value="plan"><input type="hidden" name="tab" value="churches"><input type="hidden" id="_ks" name="_ks" value="946f62118a"><input type="hidden" name="blog_id" value="11"><select name="plan" aria-label="Plan"><option value="starter">Starter</option><option value="growth" selected="selected">Growth</option><option value="ministry">Ministry</option></select><button class="ks-btn ks-btn--ghost ks-btn--sm">Set plan</button></form>
+						<form method="post" class="ks-inline"><input type="hidden" name="ks_do" value="extend"><input type="hidden" name="tab" value="churches"><input type="hidden" id="_ks" name="_ks" value="946f62118a"><input type="hidden" name="blog_id" value="11"><input type="number" name="days" value="14" min="1" max="366" aria-label="Days"><button class="ks-btn ks-btn--ghost ks-btn--sm">Extend days</button></form>
+													<form method="post" class="ks-inline"><input type="hidden" name="ks_do" value="suspend"><input type="hidden" name="tab" value="churches"><input type="hidden" id="_ks" name="_ks" value="946f62118a"><input type="hidden" name="blog_id" value="11"><button class="ks-btn ks-btn--danger ks-btn--sm">Suspend</button></form>
+												<details class="ks-danger-zone"><summary>Delete</summary>
+							<form method="post" class="ks-inline"><input type="hidden" name="ks_do" value="delete"><input type="hidden" name="tab" value="churches"><input type="hidden" id="_ks" name="_ks" value="946f62118a"><input type="hidden" name="blog_id" value="11"><input name="confirm" placeholder="Type DELETE" aria-label="Type DELETE to confirm"><button class="ks-btn ks-btn--danger ks-btn--sm">Delete site</button></form>
+						</details>
+					</div>
+				</article>
+					</div>
+
+	</section><section class="ks-main" data-tab="new" hidden>
+		<header class="ks-main__head">
+			<h1>Add a church</h1>
+					</header>
+		
+		<form method="post" class="ks-card ks-form ks-narrow-form">
+			<input type="hidden" name="ks_do" value="create"><input type="hidden" name="tab" value="new"><input type="hidden" id="_ks" name="_ks" value="946f62118a">			<p class="ks-muted">Create a church for a customer you signed up yourself (for example after a sales call). They get an email with a link to set their password.</p>
+			<div class="ks-grid ks-grid--2">
+				<label>Church name<input name="church_name" required="" value=""></label>
+				<label>Subdomain<span class="ks-domain"><input name="subdomain" required="" value="" data-ks-subdomain=""><span>.yourplatform.com</span></span></label>
+				<label>Contact name<input name="name" value=""></label>
+				<label>Contact email<input type="email" name="email" required="" value=""></label>
+				<label>Plan<select name="plan"><option value="starter">Starter</option><option value="growth">Growth</option><option value="ministry">Ministry</option></select></label>
+				<label>Billing<select name="interval"><option value="month">Monthly</option><option value="year">Yearly</option></select></label>
+				<label>Currency<select name="region"><option value="international">USD</option><option value="local">NGN</option></select></label>
+				<label>Start as<select name="status"><option value="trialing">Free trial</option><option value="active">Active (paid offline)</option></select></label>
+				<label>Trial days<input type="number" name="trial_days" min="0" value="14"></label>
+			</div>
+			<button class="ks-btn">Create church</button>
+		</form>
+
+	</section><section class="ks-main" data-tab="invoices" hidden>
+		<header class="ks-main__head">
+			<h1>Payments</h1>
+					</header>
+		
+		<div class="ks-table">
+			<table>
+				<thead><tr><th>Church</th><th>Plan</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+				<tbody>
+														<tr>
+						<td data-label="Church"><strong>Living Waters Assembly</strong><small>KSI-261017-2HMGEEYA · 17 Oct 2026</small></td>
+						<td data-label="Plan">Starter · month</td>
+						<td data-label="Amount"><strong>$19</strong><small>bank</small></td>
+						<td data-label="Status"><span class="ks-badge ks-badge--pending">Pending</span></td>
+						<td><form method="post" class="ks-inline"><input type="hidden" name="ks_do" value="invoice_paid"><input type="hidden" name="tab" value="invoices"><input type="hidden" id="_ks" name="_ks" value="946f62118a"><input type="hidden" name="reference" value="KSI-261017-2HMGEEYA"><button class="ks-btn ks-btn--sm">Mark paid</button></form></td>
+					</tr>
+														<tr>
+						<td data-label="Church"><strong>Faith Bible Church</strong><small>KSI-261017-FOJ7PW9H · 17 Oct 2026</small></td>
+						<td data-label="Plan">Starter · month</td>
+						<td data-label="Amount"><strong>$19</strong><small>test</small></td>
+						<td data-label="Status"><span class="ks-badge ks-badge--paid">Paid</span></td>
+						<td></td>
+					</tr>
+														<tr>
+						<td data-label="Church"><strong>Faith Bible Church</strong><small>KSI-261017-NRWVTB65 · 17 Oct 2026</small></td>
+						<td data-label="Plan">Growth · month</td>
+						<td data-label="Amount"><strong>$49</strong><small>stripe</small></td>
+						<td data-label="Status"><span class="ks-badge ks-badge--paid">Paid</span></td>
+						<td></td>
+					</tr>
+														<tr>
+						<td data-label="Church"><strong>Faith Bible Church</strong><small>KSI-261017-UQQUS9TS · 17 Oct 2026</small></td>
+						<td data-label="Plan">Growth · month</td>
+						<td data-label="Amount"><strong>₦40,000</strong><small>paystack</small></td>
+						<td data-label="Status"><span class="ks-badge ks-badge--paid">Paid</span></td>
+						<td></td>
+					</tr>
+														<tr>
+						<td data-label="Church"><strong>Faith Bible Church</strong><small>KSI-261017-TNTBOBMJ · 17 Oct 2026</small></td>
+						<td data-label="Plan">Ministry · year</td>
+						<td data-label="Amount"><strong>₦800,000</strong><small>paystack</small></td>
+						<td data-label="Status"><span class="ks-badge ks-badge--failed">Failed</span></td>
+						<td></td>
+					</tr>
+														<tr>
+						<td data-label="Church"><strong>Faith Bible Church</strong><small>KSI-261017-ZMFEMVJ1 · 17 Oct 2026</small></td>
+						<td data-label="Plan">Growth · month</td>
+						<td data-label="Amount"><strong>₦40,000</strong><small>paystack</small></td>
+						<td data-label="Status"><span class="ks-badge ks-badge--paid">Paid</span></td>
+						<td></td>
+					</tr>
+														<tr>
+						<td data-label="Church"><strong>Faith Bible Church</strong><small>KSI-261017-ICPXMERA · 17 Oct 2026</small></td>
+						<td data-label="Plan">Starter · month</td>
+						<td data-label="Amount"><strong>$19</strong><small>test</small></td>
+						<td data-label="Status"><span class="ks-badge ks-badge--paid">Paid</span></td>
+						<td></td>
+					</tr>
+														<tr>
+						<td data-label="Church"><strong>Faith Bible Church</strong><small>KSI-261017-AHWUFDX7 · 17 Oct 2026</small></td>
+						<td data-label="Plan">Growth · month</td>
+						<td data-label="Amount"><strong>$49</strong><small>stripe</small></td>
+						<td data-label="Status"><span class="ks-badge ks-badge--paid">Paid</span></td>
+						<td></td>
+					</tr>
+														<tr>
+						<td data-label="Church"><strong>Faith Bible Church</strong><small>KSI-261017-0CNYDDDI · 17 Oct 2026</small></td>
+						<td data-label="Plan">Growth · month</td>
+						<td data-label="Amount"><strong>₦40,000</strong><small>paystack</small></td>
+						<td data-label="Status"><span class="ks-badge ks-badge--paid">Paid</span></td>
+						<td></td>
+					</tr>
+														<tr>
+						<td data-label="Church"><strong>Faith Bible Church</strong><small>KSI-261017-JB5HOGRG · 17 Oct 2026</small></td>
+						<td data-label="Plan">Ministry · year</td>
+						<td data-label="Amount"><strong>₦800,000</strong><small>paystack</small></td>
+						<td data-label="Status"><span class="ks-badge ks-badge--failed">Failed</span></td>
+						<td></td>
+					</tr>
+														<tr>
+						<td data-label="Church"><strong>Faith Bible Church</strong><small>KSI-261017-5TSSFDGJ · 17 Oct 2026</small></td>
+						<td data-label="Plan">Growth · month</td>
+						<td data-label="Amount"><strong>₦40,000</strong><small>paystack</small></td>
+						<td data-label="Status"><span class="ks-badge ks-badge--paid">Paid</span></td>
+						<td></td>
+					</tr>
+														<tr>
+						<td data-label="Church"><strong>Faith Bible Church</strong><small>KSI-261017-XDGZF3DZ · 17 Oct 2026</small></td>
+						<td data-label="Plan">Starter · month</td>
+						<td data-label="Amount"><strong>$19</strong><small>bank</small></td>
+						<td data-label="Status"><span class="ks-badge ks-badge--paid">Paid</span></td>
+						<td></td>
+					</tr>
+														<tr>
+						<td data-label="Church"><strong>Grace Chapel International</strong><small>KSI-261017-OBZW5VWU · 17 Oct 2026</small></td>
+						<td data-label="Plan">Growth · year</td>
+						<td data-label="Amount"><strong>₦400,000</strong><small>test</small></td>
+						<td data-label="Status"><span class="ks-badge ks-badge--paid">Paid</span></td>
+						<td></td>
+					</tr>
+								</tbody>
+			</table>
+		</div>
+
+	</section><section class="ks-main" data-tab="domains" hidden>
+		<header class="ks-main__head">
+			<h1>Domains</h1>
+					</header>
+		
+		<div class="ks-card">
+			<p class="ks-muted">Point churches’ domains at this server. For automatic https on custom domains, use Caddy with on-demand TLS and set its "ask" URL to <code>http://yourplatform.com/wp-json/ks/v1/tls</code> (see deploy/Caddyfile).</p>
+		</div>
+		<div class="ks-table">
+			<table>
+				<thead><tr><th>Domain</th><th>Church</th><th>Status</th><th></th></tr></thead>
+				<tbody>
+														<tr>
+						<td data-label="Domain"><strong>gracechapel.test</strong><small>Main address</small></td>
+						<td data-label="Church">Grace Chapel International</td>
+						<td data-label="Status"><span class="ks-badge ks-badge--verified">Connected</span></td>
+						<td class="ks-row-actions">
+							<form method="post" class="ks-inline"><input type="hidden" name="ks_do" value="domain_verify"><input type="hidden" name="tab" value="domains"><input type="hidden" id="_ks" name="_ks" value="946f62118a"><input type="hidden" name="id" value="2"><button class="ks-btn ks-btn--sm">Check DNS</button></form>
+							<form method="post" class="ks-inline"><input type="hidden" name="ks_do" value="domain_remove"><input type="hidden" name="tab" value="domains"><input type="hidden" id="_ks" name="_ks" value="946f62118a"><input type="hidden" name="id" value="2"><button class="ks-btn ks-btn--ghost ks-btn--sm">Remove</button></form>
+						</td>
+					</tr>
+								</tbody>
+			</table>
+		</div>
+
+	</section><section class="ks-main" data-tab="plans" hidden>
+		<header class="ks-main__head">
+			<h1>Plans &amp; pricing</h1>
+					</header>
+		
+		<form method="post" class="ks-plan-edit">
+			<input type="hidden" name="ks_do" value="save_plans"><input type="hidden" name="tab" value="plans"><input type="hidden" id="_ks" name="_ks" value="946f62118a">			<div class="ks-grid ks-grid--3">
+									<fieldset class="ks-card ks-form">
+						<legend>Starter <code>starter</code></legend>
+						<label>Name<input name="plans[starter][name]" value="Starter"></label>
+						<label>Short description<input name="plans[starter][desc]" value="For new and growing churches."></label>
+						<div class="ks-grid ks-grid--2">
+							<label>USD / month<input type="number" step="0.01" min="0" name="plans[starter][usd]" value="19"></label>
+							<label>NGN / month<input type="number" step="0.01" min="0" name="plans[starter][local]" value="15000"></label>
+						</div>
+						<label>Max partners (0 = unlimited)<input type="number" min="0" name="plans[starter][max_partners]" value="2"></label>
+						<label class="ks-check"><input type="checkbox" name="plans[starter][custom_domain]" value="1"> Custom domain</label>
+						<label class="ks-check"><input type="checkbox" name="plans[starter][white_label]" value="1"> No “Powered by” branding</label>
+						<label class="ks-check"><input type="checkbox" name="plans[starter][featured]" value="1"> Highlight as “Most popular”</label>
+						<label>Highlights (one per line)<textarea rows="5" name="plans[starter][highlights]">Church website with 25+ page designs
+Partner portal &amp; dashboards
+Online giving, tithe &amp; offering
+Up to 100 partners
+yourchurch subdomain</textarea></label>
+					</fieldset>
+									<fieldset class="ks-card ks-form">
+						<legend>Growth <code>growth</code></legend>
+						<label>Name<input name="plans[growth][name]" value="Growth"></label>
+						<label>Short description<input name="plans[growth][desc]" value="Everything a busy church needs."></label>
+						<div class="ks-grid ks-grid--2">
+							<label>USD / month<input type="number" step="0.01" min="0" name="plans[growth][usd]" value="49"></label>
+							<label>NGN / month<input type="number" step="0.01" min="0" name="plans[growth][local]" value="40000"></label>
+						</div>
+						<label>Max partners (0 = unlimited)<input type="number" min="0" name="plans[growth][max_partners]" value="1000"></label>
+						<label class="ks-check"><input type="checkbox" name="plans[growth][custom_domain]" value="1" checked="checked"> Custom domain</label>
+						<label class="ks-check"><input type="checkbox" name="plans[growth][white_label]" value="1"> No “Powered by” branding</label>
+						<label class="ks-check"><input type="checkbox" name="plans[growth][featured]" value="1" checked="checked"> Highlight as “Most popular”</label>
+						<label>Highlights (one per line)<textarea rows="5" name="plans[growth][highlights]">Everything in Starter
+Use your own domain (yourchurch.org)
+Up to 1,000 partners
+Newsletter &amp; partner notifications
+Priority email support</textarea></label>
+					</fieldset>
+									<fieldset class="ks-card ks-form">
+						<legend>Ministry <code>ministry</code></legend>
+						<label>Name<input name="plans[ministry][name]" value="Ministry"></label>
+						<label>Short description<input name="plans[ministry][desc]" value="For large churches and networks."></label>
+						<div class="ks-grid ks-grid--2">
+							<label>USD / month<input type="number" step="0.01" min="0" name="plans[ministry][usd]" value="99"></label>
+							<label>NGN / month<input type="number" step="0.01" min="0" name="plans[ministry][local]" value="80000"></label>
+						</div>
+						<label>Max partners (0 = unlimited)<input type="number" min="0" name="plans[ministry][max_partners]" value="0"></label>
+						<label class="ks-check"><input type="checkbox" name="plans[ministry][custom_domain]" value="1" checked="checked"> Custom domain</label>
+						<label class="ks-check"><input type="checkbox" name="plans[ministry][white_label]" value="1" checked="checked"> No “Powered by” branding</label>
+						<label class="ks-check"><input type="checkbox" name="plans[ministry][featured]" value="1"> Highlight as “Most popular”</label>
+						<label>Highlights (one per line)<textarea rows="5" name="plans[ministry][highlights]">Everything in Growth
+Unlimited partners
+No platform branding
+Onboarding call
+WhatsApp support</textarea></label>
+					</fieldset>
+							</div>
+			<p class="ks-muted">Yearly price is 10 × the monthly price (two months free).</p>
+			<button class="ks-btn">Save plans</button>
+		</form>
+
+	</section><section class="ks-main" data-tab="settings" hidden>
+		<header class="ks-main__head">
+			<h1>Settings</h1>
+					</header>
+		
+		<form method="post" class="ks-settings">
+			<input type="hidden" name="ks_do" value="save_settings"><input type="hidden" name="tab" value="settings"><input type="hidden" id="_ks" name="_ks" value="946f62118a">			<div class="ks-grid ks-grid--2">
+				<fieldset class="ks-card ks-form">
+					<legend>Brand</legend>
+					<label>Platform name<input name="platform_name" value="ChurchHub"></label>
+					<label>Tagline<textarea name="tagline" rows="2">Your church website, partner portal and online giving — ready in minutes.</textarea></label>
+					<label>Brand colour<input type="color" name="brand_color" value="#5b2a86"></label>
+					<label>Support email (also the sender)<input type="email" name="support_email" value="super@yourplatform.com"></label>
+				</fieldset>
+				<fieldset class="ks-card ks-form">
+					<legend>Domains</legend>
+					<label>Platform domain<input name="base_domain" value="yourplatform.com"></label>
+					<label>CNAME target for custom domains<input name="cname_target" value="" placeholder="yourplatform.com"></label>
+					<label>Server IP (for A records)<input name="server_ip" value="" placeholder="203.0.113.10"></label>
+					<label class="ks-check"><input type="checkbox" name="https" value="1"> Church sites use https</label>
+					<label>Reserved subdomains<input name="reserved" value="www,mail,ftp,admin,administrator,api,app,platform,billing,support,help,docs,status,blog,static,assets,cdn,dev,staging,test,root,webmail,smtp,ns1,ns2"></label>
+				</fieldset>
+				<fieldset class="ks-card ks-form">
+					<legend>Trials &amp; renewals</legend>
+					<label>Free trial days<input type="number" min="0" name="trial_days" value="14"></label>
+					<label>Grace days before suspension<input type="number" min="0" name="grace_days" value="7"></label>
+					<label>Reminder days before due date<input type="number" min="0" name="reminder_days" value="3"></label>
+					<label>Local currency (empty = USD only)<input name="local_currency" maxlength="3" value="NGN"></label>
+					<label>Local label<input name="local_label" value="Nigeria"></label>
+				</fieldset>
+				<fieldset class="ks-card ks-form">
+					<legend>Payments</legend>
+					<label>Paystack secret key<input type="password" name="paystack_secret" value="" autocomplete="off"></label>
+					<label>Stripe secret key<input type="password" name="stripe_secret" value="" autocomplete="off"></label>
+					<label>Stripe webhook signing secret<input type="password" name="stripe_webhook" value="" autocomplete="off"></label>
+					<label>Bank transfer details (shown to churches)<textarea name="bank_details" rows="3">ChurchHub Ltd
+GTBank 0123456789</textarea></label>
+					<label class="ks-check"><input type="checkbox" name="test_mode" value="1"> Test mode (adds a simulated “Test payment” option)</label>
+					<p class="ks-small">Webhooks: <code>http://yourplatform.com/wp-json/ks/v1/webhooks/paystack</code> · <code>http://yourplatform.com/wp-json/ks/v1/webhooks/stripe</code></p>
+				</fieldset>
+			</div>
+			<button class="ks-btn">Save settings</button>
+		</form>
+	</section></div></div>
+<nav class="pv-bar" aria-label="Preview pages"><small>Preview</small><a href="#landing" data-pv="landing">Landing</a><a href="#signup" data-pv="signup">Sign-up</a><a href="#p-overview" data-pv="platform">Super admin</a></nav>
+<div class="pv-toast" role="status" hidden></div>
+<script>
+(function () {
+  var views = document.querySelectorAll('[data-view]'), toast = document.querySelector('.pv-toast'), tt;
+  function say(m) { toast.textContent = m; toast.hidden = false; clearTimeout(tt); tt = setTimeout(function () { toast.hidden = true; }, 3600); }
+  function route() {
+    var h = (location.hash || '#landing').slice(1), view = 'landing', tab = null, anchor = null;
+    if (h === 'signup') { view = 'signup'; }
+    else if (h.indexOf('p-') === 0) { view = 'platform'; tab = h.slice(2); }
+    else if (['features', 'pricing', 'faq'].indexOf(h) >= 0) { anchor = h; }
+    views.forEach(function (v) { v.hidden = v.dataset.view !== view; });
+    document.body.className = 'ks ks--' + view;
+    document.querySelectorAll('[data-pv]').forEach(function (a) { a.setAttribute('aria-current', a.dataset.pv === view); });
+    if (view === 'platform') {
+      if (!document.querySelector('[data-tab="' + tab + '"]')) { tab = 'overview'; }
+      document.querySelectorAll('[data-tab]').forEach(function (s) { s.hidden = s.dataset.tab !== tab; });
+      document.querySelectorAll('.ks-side nav a').forEach(function (a) { if (a.getAttribute('href') === '#p-' + tab) { a.setAttribute('aria-current', 'page'); } else { a.removeAttribute('aria-current'); } });
+    }
+    if (anchor) { var el = document.getElementById(anchor); if (el) { el.scrollIntoView(); } } else { window.scrollTo(0, 0); }
+  }
+  window.addEventListener('hashchange', route); route();
+
+  document.addEventListener('click', function (e) {
+    var n = e.target.closest('[data-pv-note]');
+    if (n) { e.preventDefault(); say(n.dataset.pvNote); }
+  });
+  document.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var f = e.target, act = (f.querySelector('[name=ks_do]') || {}).value || '';
+    var msgs = { signup: 'On the live platform this creates the church’s website in about 2 seconds and signs them in.', suspend: 'Suspends the church: visitors see a “short break” page.', reactivate: 'Reactivates the church.', extend: 'Adds the days to the trial or paid period.', plan: 'Changes the church’s plan.', invoice_paid: 'Confirms the bank transfer and emails a receipt.', domain_verify: 'Checks the church’s DNS and connects the domain.', domain_remove: 'Removes the domain; the site goes back to its subdomain.', run_lifecycle: 'Checks every trial and renewal now and sends reminders.', save_plans: 'Saves plans and prices.', save_settings: 'Saves platform settings.', create: 'Creates the church and emails the owner.', 'delete': 'Deletes the church’s website.' };
+    say((msgs[act] || 'Saved.') + ' (Preview only — nothing is saved.)');
+  });
+
+  /* Pricing switches */
+  document.querySelectorAll('[data-ks-prices]').forEach(function (scope) {
+    scope.addEventListener('change', function (e) {
+      if (e.target.type !== 'radio') { return; }
+      if (/region/.test(e.target.name)) { scope.setAttribute('data-r', e.target.value); }
+      if (/interval/.test(e.target.name)) { scope.setAttribute('data-i', e.target.value); }
+    });
+  });
+
+  /* Sign-up: suggest and check the web address (sample data) */
+  var church = document.querySelector('[data-view=signup] [data-ks-church]'), sub = document.querySelector('[data-view=signup] [data-ks-subdomain]'), msg = document.querySelector('[data-ks-subdomain-msg]'), touched = false;
+  var taken = ['grace', 'faith', 'livingwaters', 'www', 'admin', 'api', 'app', 'mail', 'platform', 'billing', 'support'];
+  function slug(s) { return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 34); }
+  function check() {
+    var v = sub.value.trim().toLowerCase(); sub.value = v;
+    if (!v) { msg.textContent = ''; return; }
+    var ok = /^[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])$/.test(v), free = taken.indexOf(v) < 0;
+    msg.textContent = !ok ? '✕ Use 3–40 letters, numbers or hyphens (not at the start or end).' : free ? '✓ ' + v + '.yourplatform.com is available' : '✕ That address is already taken.';
+    msg.className = 'ks-hint ' + (ok && free ? 'is-ok' : 'is-bad');
+  }
+  if (church && sub) {
+    church.addEventListener('input', function () { if (!touched) { sub.value = slug(church.value); check(); } });
+    sub.addEventListener('input', function () { touched = true; check(); });
+  }
+  document.querySelectorAll('[data-view=platform] [data-ks-subdomain]').forEach(function (i) { i.addEventListener('input', function () { i.value = i.value.toLowerCase(); }); });
+})();
+</script>
