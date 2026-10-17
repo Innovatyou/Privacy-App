@@ -16,6 +16,7 @@ kingdom_section( 'sermons', array( 'layout' => 'featured' ) );
 kingdom_section( 'events', array( 'layout' => 'list', 'count' => 4 ) );
 kingdom_section( 'verse' );
 kingdom_section( 'ministries' );
+kingdom_section( 'gallery' );
 kingdom_section( 'give' );
 kingdom_section( 'testimonies' );
 kingdom_section( 'page-content' );

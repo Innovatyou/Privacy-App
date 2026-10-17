@@ -665,7 +665,7 @@ class KCS_Admin {
 				<p><label><input type="checkbox" name="allow_custom_amount" value="1" <?php checked( (int) $v( 'allow_custom_amount', 0 ), 1 ); ?>> <?php esc_html_e( 'Partner chooses amount & frequency', 'kingdom-church-suite' ); ?></label></p>
 				<p><label><input type="checkbox" name="is_featured" value="1" <?php checked( (int) $v( 'is_featured', 0 ), 1 ); ?>> <?php esc_html_e( 'Featured ("Most popular")', 'kingdom-church-suite' ); ?></label></p>
 				<p><label><input type="checkbox" name="is_active" value="1" <?php checked( (int) $v( 'is_active', 1 ), 1 ); ?>> <?php esc_html_e( 'Active', 'kingdom-church-suite' ); ?></label></p>
-				<p><label><?php esc_html_e( 'Sort order', 'kingdom-church-suite' ); ?> <input type="number" name="sort_order" value="<?php echo esc_attr( $v( 'sort_order', 0 ) ); ?>" style="width:80px"></label></p>
+				<p><label><?php esc_html_e( 'Level order', 'kingdom-church-suite' ); ?> <input type="number" name="sort_order" value="<?php echo esc_attr( $v( 'sort_order', 0 ) ); ?>" style="width:80px"></label><br><small><?php esc_html_e( 'Higher number = higher partnership level. The highest plan gets every pastor and all partner updates.', 'kingdom-church-suite' ); ?></small></p>
 				<?php submit_button( $edit ? __( 'Update plan', 'kingdom-church-suite' ) : __( 'Add plan', 'kingdom-church-suite' ) ); ?>
 			</form>
 		</div></div>

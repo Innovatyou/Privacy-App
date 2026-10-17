@@ -124,6 +124,16 @@
 				.then(function () { busy(form, false); });
 		});
 	});
+	document.querySelectorAll('[data-kcs-visit]').forEach(function (form) {
+		form.addEventListener('submit', function (e) {
+			e.preventDefault();
+			busy(form, true);
+			api('visits', 'POST', formData(form))
+				.then(function (res) { msg(form, res.message, 'success'); form.reset(); })
+				.catch(function (err) { msg(form, err.message, 'error'); })
+				.then(function () { busy(form, false); });
+		});
+	});
 	document.querySelectorAll('[data-kcs-testimony]').forEach(function (form) {
 		form.addEventListener('submit', function (e) {
 			e.preventDefault();

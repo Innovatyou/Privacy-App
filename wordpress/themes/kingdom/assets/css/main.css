@@ -631,3 +631,29 @@ body:not(.k-3d) .k-hero__scene { display: none; }
 
 /* Keep the desktop header on one line: the idle live pill only shows on wide screens */
 @media (max-width: 1500px) { .k-header .kcs-live-badge:not(.is-live) { display: none; } .k-header__inner { gap: 1rem; } .k-menu a { padding-inline: .6rem; } }
+
+/* Church gallery & visit booking */
+.k-gallery { display: grid; gap: .75rem; grid-template-columns: repeat(2, 1fr); grid-auto-rows: 160px; }
+@media (min-width: 860px) { .k-gallery { grid-template-columns: repeat(4, 1fr); grid-auto-rows: 210px; gap: 1rem; } .k-gallery__item--1 { grid-column: span 2; grid-row: span 2; } .k-gallery__item--6 { grid-column: span 2; } }
+.k-gallery__item { position: relative; margin: 0; border-radius: var(--k-radius); overflow: hidden; background: var(--k-surface-2); }
+.k-gallery__item img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s; }
+.k-gallery__item:hover img { transform: scale(1.06); }
+.k-gallery__item figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 1.5rem .9rem .7rem; color: #fff; font-weight: 600; font-size: .9rem; background: linear-gradient(transparent, rgba(0,0,0,.7)); }
+.k-visit__book { margin-top: clamp(2rem, 5vw, 3.5rem); }
+.k-visit__photo { margin: 0; border-radius: calc(var(--k-radius) * 1.4); overflow: hidden; position: relative; box-shadow: var(--k-shadow-lg); }
+.k-visit__photo img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.k-visit__photo figcaption { position: absolute; left: .75rem; right: .75rem; bottom: .75rem; display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; padding: .7rem 1rem; border-radius: 14px; background: color-mix(in srgb, var(--k-surface) 90%, transparent); backdrop-filter: blur(8px); font-size: .92rem; color: var(--k-text); }
+.k-split__media img[src$=".svg"] { object-position: center 30%; }
+
+/* App-style dashboards */
+.k-app { padding-block: clamp(1.25rem, 3vw, 2.5rem) clamp(2rem, 5vw, 4rem); }
+.is-dashboard .k-palette, .is-dashboard .k-whatsapp { display: none; }
+.is-dashboard-admin .k-tabbar { display: none !important; }
+.is-dashboard-admin.has-mobile-nav { padding-bottom: env(safe-area-inset-bottom); }
+.is-dashboard-admin .k-header__actions .k-nav-toggle { display: inline-grid !important; }
+@media (max-width: 1240px) { .is-dashboard-admin .k-nav-toggle { display: inline-grid !important; } }
+/* Palette swatches inside the mobile menu */
+.k-nav__palette { display: grid; gap: .6rem; margin-bottom: 1.25rem; padding: 1rem; border-radius: var(--k-radius); background: var(--k-surface-2); }
+.k-nav__palette span { font-weight: 700; font-size: .9rem; }
+@media (max-width: 860px) { .has-mobile-nav .k-palette { display: none; } }
+@media (min-width: 1241px) { .k-nav__palette { display: none; } }

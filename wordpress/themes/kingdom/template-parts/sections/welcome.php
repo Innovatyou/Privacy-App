@@ -5,7 +5,7 @@
  * @package Kingdom
  */
 
-$kingdom_img = get_theme_mod( 'kingdom_welcome_image' );
+$kingdom_img = kingdom_image( 'kingdom_welcome_image' );
 $kingdom_btn = get_theme_mod( 'kingdom_welcome_btn_text', __( 'Our story', 'kingdom' ) );
 ?>
 <section class="k-section k-welcome">

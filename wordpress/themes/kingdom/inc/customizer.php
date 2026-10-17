@@ -59,6 +59,7 @@ function kingdom_customize_register( $wp ) {
 		'kingdom_colors'   => __( 'Custom Colours & Typography', 'kingdom' ),
 		'kingdom_ux'       => __( '3D Effects & Mobile', 'kingdom' ),
 		'kingdom_header'   => __( 'Header', 'kingdom' ),
+		'kingdom_images'   => __( 'Church Images & Gallery', 'kingdom' ),
 		'kingdom_hero'     => __( 'Homepage Hero', 'kingdom' ),
 		'kingdom_home'     => __( 'Homepage Sections', 'kingdom' ),
 		'kingdom_welcome'  => __( 'Welcome / Pastor', 'kingdom' ),
@@ -90,6 +91,16 @@ function kingdom_customize_register( $wp ) {
 	$add( 'kingdom_ux', 'kingdom_3d', __( 'Enable 3D effects (tilt cards, depth, floating hero)', 'kingdom' ), 'checkbox', true, array(), __( 'Automatically reduced for visitors who prefer reduced motion.', 'kingdom' ) );
 	$add( 'kingdom_ux', 'kingdom_mobile_nav', __( 'App-style bottom navigation on phones', 'kingdom' ), 'checkbox', true );
 
+	// Church images: every photo on the site can be replaced here without code.
+	$wp->get_section( 'kingdom_images' )->description = __( 'The theme ships with illustrated African church scenes. Upload your own church photos to replace any of them; remove a photo to go back to the illustration.', 'kingdom' );
+	foreach ( kingdom_image_slots() as $slot => $info ) {
+		$add( 'kingdom_images', $slot, $info[0], 'image', '', array(), $info[2] );
+		if ( 0 === strpos( $slot, 'kingdom_gallery_' ) ) {
+			$add( 'kingdom_images', $slot . '_caption', $info[0] . ' — ' . __( 'caption', 'kingdom' ), 'text', '' );
+		}
+	}
+	$add( 'kingdom_images', 'kingdom_gallery_title', __( 'Gallery title', 'kingdom' ), 'text', __( 'Life at church', 'kingdom' ) );
+
 	// Colours & typography.
 	$fonts = array_combine( array_keys( kingdom_fonts() ), array_keys( kingdom_fonts() ) );
 	$add( 'kingdom_colors', 'kingdom_color_primary', __( 'Primary colour', 'kingdom' ), 'color', '#5b2a86' );
@@ -116,7 +127,6 @@ function kingdom_customize_register( $wp ) {
 	$add( 'kingdom_hero', 'kingdom_hero_eyebrow', __( 'Small label', 'kingdom' ), 'text', __( 'Welcome home', 'kingdom' ) );
 	$add( 'kingdom_hero', 'kingdom_hero_title', __( 'Title', 'kingdom' ), 'text', __( 'A place to belong, believe and become', 'kingdom' ) );
 	$add( 'kingdom_hero', 'kingdom_hero_text', __( 'Text', 'kingdom' ), 'textarea', __( 'Join us this Sunday — in person or online — and experience the love of Jesus with a family that cares.', 'kingdom' ) );
-	$add( 'kingdom_hero', 'kingdom_hero_image', __( 'Background image', 'kingdom' ), 'image', '' );
 	$add( 'kingdom_hero', 'kingdom_hero_video', __( 'Background video (MP4 URL)', 'kingdom' ), 'url', '', array(), __( 'Used by "Modern Video" layout. Keep it short and muted (under 10 MB).', 'kingdom' ) );
 	$add( 'kingdom_hero', 'kingdom_hero_youtube', __( 'Watch video (YouTube URL for play button)', 'kingdom' ), 'url', '' );
 	$add( 'kingdom_hero', 'kingdom_hero_btn1_text', __( 'Primary button text', 'kingdom' ), 'text', __( 'Plan your visit', 'kingdom' ) );
@@ -126,7 +136,7 @@ function kingdom_customize_register( $wp ) {
 	$add( 'kingdom_hero', 'kingdom_hero_overlay', __( 'Overlay darkness (0–90)', 'kingdom' ), 'number', 55 );
 
 	// Homepage sections.
-	$add( 'kingdom_home', 'kingdom_home_sections', __( 'Section order', 'kingdom' ), 'textarea', 'hero, service-times, welcome, live, sermons, ministries, events, stats, partnership, testimonies, prayer, visit, give, social, newsletter', array(), __( 'Used when the front page is your latest posts or a page without a template. Available: ', 'kingdom' ) . implode( ', ', array_keys( kingdom_available_sections() ) ) );
+	$add( 'kingdom_home', 'kingdom_home_sections', __( 'Section order', 'kingdom' ), 'textarea', 'hero, service-times, welcome, live, sermons, ministries, events, stats, partnership, gallery, testimonies, prayer, visit, give, social, newsletter', array(), __( 'Used when the front page is your latest posts or a page without a template. Available: ', 'kingdom' ) . implode( ', ', array_keys( kingdom_available_sections() ) ) );
 	$add( 'kingdom_home', 'kingdom_sermons_title', __( 'Sermons title', 'kingdom' ), 'text', __( 'Latest messages', 'kingdom' ) );
 	$add( 'kingdom_home', 'kingdom_events_title', __( 'Events title', 'kingdom' ), 'text', __( 'Upcoming events', 'kingdom' ) );
 	$add( 'kingdom_home', 'kingdom_ministries_title', __( 'Ministries title', 'kingdom' ), 'text', __( 'Find your place', 'kingdom' ) );
@@ -143,7 +153,6 @@ function kingdom_customize_register( $wp ) {
 	$add( 'kingdom_welcome', 'kingdom_welcome_eyebrow', __( 'Small label', 'kingdom' ), 'text', __( 'Welcome', 'kingdom' ) );
 	$add( 'kingdom_welcome', 'kingdom_welcome_title', __( 'Title', 'kingdom' ), 'text', __( 'You are not here by accident', 'kingdom' ) );
 	$add( 'kingdom_welcome', 'kingdom_welcome_text', __( 'Message', 'kingdom' ), 'textarea', __( "We are a family of believers passionate about Jesus, prayer and the Word. Whether you are exploring faith for the first time or looking for a church home, there is a place for you here.\n\nCome as you are — you will be loved, encouraged and equipped to live out your God-given purpose.", 'kingdom' ) );
-	$add( 'kingdom_welcome', 'kingdom_welcome_image', __( 'Pastor photo', 'kingdom' ), 'image', '' );
 	$add( 'kingdom_welcome', 'kingdom_pastor_name', __( 'Pastor name', 'kingdom' ), 'text', __( 'Pastor John & Mary Doe', 'kingdom' ) );
 	$add( 'kingdom_welcome', 'kingdom_pastor_role', __( 'Pastor role', 'kingdom' ), 'text', __( 'Lead Pastors', 'kingdom' ) );
 	$add( 'kingdom_welcome', 'kingdom_welcome_btn_text', __( 'Button text', 'kingdom' ), 'text', __( 'Our story', 'kingdom' ) );
@@ -154,7 +163,6 @@ function kingdom_customize_register( $wp ) {
 
 	// Stats.
 	$add( 'kingdom_stats', 'kingdom_stats', __( 'Stats', 'kingdom' ), 'textarea', "25|Years of ministry\n3000|Members\n40|Ministries\n12|Nations reached", array(), __( 'One per line: number|label', 'kingdom' ) );
-	$add( 'kingdom_stats', 'kingdom_stats_image', __( 'Background image', 'kingdom' ), 'image', '' );
 
 	// Contact.
 	$add( 'kingdom_contact', 'kingdom_address', __( 'Address', 'kingdom' ), 'textarea', '' );

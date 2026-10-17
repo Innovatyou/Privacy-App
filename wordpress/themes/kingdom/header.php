@@ -51,6 +51,9 @@ if ( ! $cta_url && kingdom_plugin_active() ) {
 					)
 				);
 				?>
+				<?php if ( kingdom_plugin_active() && current_user_can( 'manage_kcs' ) ) : ?>
+					<a href="<?php echo esc_url( kcs_page_url( 'church_admin' ) ); ?>"><?php esc_html_e( 'Church admin', 'kingdom' ); ?></a>
+				<?php endif; ?>
 				<?php if ( kingdom_plugin_active() ) : ?>
 					<a href="<?php echo esc_url( is_user_logged_in() && kcs_is_partner() ? kcs_page_url( 'partner_dashboard' ) : kcs_page_url( 'partner_login' ) ); ?>"><?php echo is_user_logged_in() && kcs_is_partner() ? esc_html__( 'My partner dashboard', 'kingdom' ) : esc_html__( 'Partner login', 'kingdom' ); ?></a>
 				<?php endif; ?>
@@ -90,6 +93,16 @@ if ( ! $cta_url && kingdom_plugin_active() ) {
 			);
 			?>
 			<div class="k-nav__mobile-extra">
+				<?php if ( get_theme_mod( 'kingdom_palette_switcher', true ) ) : ?>
+					<div class="k-nav__palette">
+						<span><?php esc_html_e( 'Site colours', 'kingdom' ); ?></span>
+						<div class="k-palette__swatches">
+							<?php foreach ( kingdom_palettes() as $kingdom_slug => $kingdom_p ) : ?>
+								<button type="button" data-palette="<?php echo esc_attr( $kingdom_slug ); ?>" title="<?php echo esc_attr( $kingdom_p[0] ); ?>" style="--sw-a:<?php echo esc_attr( $kingdom_p[1] ); ?>;--sw-b:<?php echo esc_attr( $kingdom_p[2] ); ?>"><span class="screen-reader-text"><?php echo esc_html( $kingdom_p[0] ); ?></span></button>
+							<?php endforeach; ?>
+						</div>
+					</div>
+				<?php endif; ?>
 				<?php if ( $cta_url ) : ?>
 					<a class="k-btn k-btn--accent k-btn--block" href="<?php echo esc_url( $cta_url ); ?>"><?php echo esc_html( $cta_text ); ?></a>
 				<?php endif; ?>

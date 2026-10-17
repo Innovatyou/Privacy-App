@@ -15,6 +15,7 @@ kingdom_section( 'welcome' );
 kingdom_section( 'ministries' );
 kingdom_section( 'sermons' );
 kingdom_section( 'verse' );
+kingdom_section( 'gallery' );
 kingdom_section( 'events' );
 kingdom_section( 'partnership' );
 kingdom_section( 'page-content' );

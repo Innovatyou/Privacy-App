@@ -33,10 +33,27 @@ $completed = array_filter(
 	<header class="kcs-dashboard__head">
 		<div>
 			<h2><?php /* translators: %s: first name */ printf( esc_html__( 'Welcome, %s 👋', 'kingdom-church-suite' ), esc_html( $partner->first_name ) ); ?></h2>
-			<p><?php esc_html_e( 'Partner ID', 'kingdom-church-suite' ); ?>: <strong><?php echo esc_html( $partner->partner_code ); ?></strong> · <?php echo kcs_status_badge( $partner->status ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
+			<p><?php esc_html_e( 'Partner ID', 'kingdom-church-suite' ); ?>: <strong><?php echo esc_html( $partner->partner_code ); ?></strong> · <?php echo kcs_status_badge( $partner->status ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<span class="kcs-tier kcs-tier--<?php echo (int) $tier; ?>" title="<?php esc_attr_e( 'Partnership level', 'kingdom-church-suite' ); ?>"><?php echo esc_html( str_repeat( '★', (int) $tier ) ); ?> <?php echo esc_html( $plan ? $plan->name : __( 'Custom', 'kingdom-church-suite' ) ); ?></span></p>
 		</div>
 		<a class="kcs-btn kcs-btn--ghost" href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>"><?php esc_html_e( 'Log out', 'kingdom-church-suite' ); ?></a>
 	</header>
+
+	<?php $due_in = KCS_Access::days_to_due( $partner ); ?>
+	<?php if ( null !== $due_in && $due_in <= 5 ) : ?>
+		<div class="kcs-alert <?php echo $due_in < 0 ? 'kcs-alert--error' : ''; ?>">
+			<?php
+			if ( $due_in < 0 ) {
+				/* translators: %d: days */
+				printf( esc_html__( 'Your partnership seed was due %d day(s) ago. Renew now to keep access to your dashboard.', 'kingdom-church-suite' ), absint( $due_in ) );
+			} else {
+				/* translators: %d: days */
+				printf( esc_html__( 'Your next partnership seed is due in %d day(s).', 'kingdom-church-suite' ), (int) $due_in );
+			}
+			?>
+			<button type="button" class="kcs-btn" data-tab-link="give"><?php esc_html_e( 'Give now', 'kingdom-church-suite' ); ?></button>
+		</div>
+	<?php endif; ?>
 
 	<?php if ( $changed ) : ?>
 		<div class="kcs-alert kcs-alert--success"><?php /* translators: %s: upgraded/downgraded/switched */ printf( esc_html__( 'Your partnership has been %s. Thank you! You can give your first seed on the new plan below.', 'kingdom-church-suite' ), esc_html( $changed ) ); ?></div>
@@ -49,6 +66,8 @@ $completed = array_filter(
 	<nav class="kcs-tabs" role="tablist">
 		<button type="button" role="tab" data-tab="overview"><?php esc_html_e( 'Overview', 'kingdom-church-suite' ); ?></button>
 		<button type="button" role="tab" data-tab="give"><?php esc_html_e( 'Give', 'kingdom-church-suite' ); ?></button>
+		<button type="button" role="tab" data-tab="pastors"><?php esc_html_e( 'Chat with a pastor', 'kingdom-church-suite' ); ?></button>
+		<button type="button" role="tab" data-tab="news"><?php esc_html_e( 'Updates', 'kingdom-church-suite' ); ?><?php echo $news ? ' <em class="kcs-count">' . count( $news ) . '</em>' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
 		<button type="button" role="tab" data-tab="plan"><?php esc_html_e( 'Upgrade plan', 'kingdom-church-suite' ); ?></button>
 		<button type="button" role="tab" data-tab="history"><?php esc_html_e( 'Giving history', 'kingdom-church-suite' ); ?></button>
 		<button type="button" role="tab" data-tab="profile"><?php esc_html_e( 'Profile', 'kingdom-church-suite' ); ?></button>
@@ -96,6 +115,43 @@ $completed = array_filter(
 		);
 		?>
 		<p class="kcs-muted"><?php esc_html_e( 'Want to give a tithe, offering or towards a project instead?', 'kingdom-church-suite' ); ?> <a href="<?php echo esc_url( kcs_page_url( 'give' ) ); ?>"><?php esc_html_e( 'Use the general giving page', 'kingdom-church-suite' ); ?></a></p>
+	</section>
+
+	<section class="kcs-tab-panel" data-panel="pastors">
+		<h3><?php esc_html_e( 'Chat with a pastor on WhatsApp', 'kingdom-church-suite' ); ?></h3>
+		<p class="kcs-muted">
+			<?php
+			echo $tier >= $tiers
+				? esc_html__( 'As a top-level partner you can reach every pastor directly.', 'kingdom-church-suite' )
+				: esc_html__( 'These pastors are available to partners on your plan. Upgrade to reach more of the pastoral team.', 'kingdom-church-suite' );
+			?>
+		</p>
+		<div class="kcs-pastors">
+			<?php foreach ( $pastors as $pastor ) : ?>
+				<a class="kcs-pastor" href="<?php echo esc_url( KCS_Pastors::whatsapp_link( $pastor, $partner ) ); ?>" target="_blank" rel="noopener">
+					<?php if ( $pastor['photo'] ) : ?><img src="<?php echo esc_url( $pastor['photo'] ); ?>" alt=""><?php else : ?><span class="kcs-pastor__avatar"><?php echo esc_html( mb_substr( $pastor['name'], 0, 1 ) ); ?></span><?php endif; ?>
+					<span class="kcs-pastor__body"><strong><?php echo esc_html( $pastor['name'] ); ?></strong><small><?php echo esc_html( $pastor['role'] ); ?></small></span>
+					<span class="kcs-pastor__wa"><?php esc_html_e( 'Chat', 'kingdom-church-suite' ); ?></span>
+				</a>
+			<?php endforeach; ?>
+			<?php if ( ! $pastors ) : ?><p class="kcs-muted"><?php esc_html_e( 'Pastoral chat is not set up for your plan yet.', 'kingdom-church-suite' ); ?></p><?php endif; ?>
+		</div>
+		<?php if ( $tier < $tiers ) : ?><p><button type="button" class="kcs-btn kcs-btn--ghost" data-tab-link="plan"><?php esc_html_e( 'See plans with more pastors', 'kingdom-church-suite' ); ?></button></p><?php endif; ?>
+	</section>
+
+	<section class="kcs-tab-panel" data-panel="news">
+		<h3><?php esc_html_e( 'Partner updates', 'kingdom-church-suite' ); ?></h3>
+		<div class="kcs-news">
+			<?php foreach ( $news as $item ) : ?>
+				<article class="kcs-news__item kcs-news__item--<?php echo esc_attr( $item->kind ); ?>">
+					<span class="kcs-news__kind"><?php echo esc_html( array( 'news' => __( 'Announcement', 'kingdom-church-suite' ), 'event' => __( 'Event', 'kingdom-church-suite' ), 'resource' => __( 'Resource', 'kingdom-church-suite' ) )[ $item->kind ] ?? '' ); ?> · <?php echo esc_html( mysql2date( get_option( 'date_format' ), $item->created_at ) ); ?></span>
+					<h4><?php echo esc_html( $item->title ); ?></h4>
+					<div><?php echo wp_kses_post( wpautop( KCS_Email::replace( $item->body, array( 'first_name' => $partner->first_name, 'name' => trim( $partner->first_name . ' ' . $partner->last_name ), 'email' => $partner->email, 'unsubscribe_url' => '' ) ) ) ); ?></div>
+					<?php if ( $item->link ) : ?><a class="kcs-btn kcs-btn--ghost" href="<?php echo esc_url( $item->link ); ?>" target="_blank" rel="noopener"><?php echo 'resource' === $item->kind ? esc_html__( 'Open resource', 'kingdom-church-suite' ) : esc_html__( 'Learn more', 'kingdom-church-suite' ); ?></a><?php endif; ?>
+				</article>
+			<?php endforeach; ?>
+			<?php if ( ! $news ) : ?><p class="kcs-muted"><?php esc_html_e( 'No updates yet. The church team will post partner news here.', 'kingdom-church-suite' ); ?></p><?php endif; ?>
+		</div>
 	</section>
 
 	<section class="kcs-tab-panel" data-panel="plan">
@@ -202,4 +258,7 @@ $completed = array_filter(
 			</form>
 		</div>
 	</section>
+	<?php if ( $pastors ) : ?>
+		<button type="button" class="kcs-wa-fab" data-tab-link="pastors" aria-label="<?php esc_attr_e( 'Chat with a pastor on WhatsApp', 'kingdom-church-suite' ); ?>"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 21l1.6-4.6A8.5 8.5 0 1 1 8 19.6z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1.2-1.2-1.7-1-1 .7a4 4 0 0 1-2-2l.7-1-1-1.7z"/></svg></button>
+	<?php endif; ?>
 </div>

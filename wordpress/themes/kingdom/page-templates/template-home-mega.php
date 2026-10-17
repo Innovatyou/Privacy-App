@@ -17,6 +17,7 @@ kingdom_section( 'ministries', array( 'count' => 9 ) );
 kingdom_section( 'countdown' );
 kingdom_section( 'events' );
 kingdom_section( 'leadership' );
+kingdom_section( 'gallery' );
 kingdom_section( 'partnership' );
 kingdom_section( 'testimonies' );
 kingdom_section( 'give' );

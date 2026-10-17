@@ -174,6 +174,9 @@ function kingdom_body_classes( $classes ) {
 		$classes[] = 'has-mobile-nav';
 	}
 	$classes[] = 'btn-' . sanitize_html_class( get_theme_mod( 'kingdom_button_style', 'pill' ) );
+	if ( kingdom_dashboard_type() ) {
+		$classes[] = 'is-dashboard is-dashboard-' . kingdom_dashboard_type();
+	}
 	return $classes;
 }
 add_filter( 'body_class', 'kingdom_body_classes' );

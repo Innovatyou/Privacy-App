@@ -79,14 +79,14 @@
 		var panel = picker.querySelector('.k-palette__panel');
 		var mark = function () {
 			var cur = root.getAttribute('data-palette') || '';
-			picker.querySelectorAll('[data-palette]').forEach(function (b) { b.classList.toggle('is-active', b.dataset.palette === cur && cur !== ''); });
+			document.querySelectorAll('.k-palette [data-palette], .k-nav__palette [data-palette]').forEach(function (b) { b.classList.toggle('is-active', b.dataset.palette === cur && cur !== ''); });
 		};
 		toggle.addEventListener('click', function () {
 			panel.hidden = !panel.hidden;
 			toggle.setAttribute('aria-expanded', panel.hidden ? 'false' : 'true');
 		});
-		picker.addEventListener('click', function (e) {
-			var b = e.target.closest('[data-palette]');
+		document.addEventListener('click', function (e) {
+			var b = e.target.closest('.k-palette [data-palette], .k-nav__palette [data-palette]');
 			if (!b) { return; }
 			if (b.dataset.palette) { root.setAttribute('data-palette', b.dataset.palette); } else { root.removeAttribute('data-palette'); }
 			try { b.dataset.palette ? localStorage.setItem('kingdom-palette', b.dataset.palette) : localStorage.removeItem('kingdom-palette'); } catch (err) { /* private mode */ }

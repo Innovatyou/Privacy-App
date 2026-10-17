@@ -18,7 +18,7 @@
 defined( 'ABSPATH' ) || exit;
 
 define( 'KCS_VERSION', '1.0.0' );
-define( 'KCS_DB_VERSION', '1.0.0' );
+define( 'KCS_DB_VERSION', '1.1.0' );
 define( 'KCS_FILE', __FILE__ );
 define( 'KCS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'KCS_URL', plugin_dir_url( __FILE__ ) );
@@ -42,6 +42,8 @@ require_once KCS_PATH . 'includes/class-kcs-payments.php';
 require_once KCS_PATH . 'includes/class-kcs-newsletter.php';
 require_once KCS_PATH . 'includes/class-kcs-livestream.php';
 require_once KCS_PATH . 'includes/class-kcs-prayer.php';
+require_once KCS_PATH . 'includes/class-kcs-community.php';
+require_once KCS_PATH . 'includes/class-kcs-church-admin.php';
 require_once KCS_PATH . 'includes/class-kcs-seo.php';
 require_once KCS_PATH . 'includes/class-kcs-features.php';
 require_once KCS_PATH . 'includes/class-kcs-shortcodes.php';

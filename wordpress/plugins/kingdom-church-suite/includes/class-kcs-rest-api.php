@@ -127,6 +127,7 @@ class KCS_REST_API {
 			array( '/me/payments', 'GET', 'my_payments', $partner ),
 			array( '/me/plan', 'PUT,POST', 'change_my_plan', $partner ),
 			array( '/testimonies', 'POST', 'submit_testimony', $public ),
+			array( '/visits', 'POST', 'create_visit', $public ),
 
 			// Admin.
 			array( '/stats', 'GET', 'stats', $manage ),
@@ -505,6 +506,26 @@ class KCS_REST_API {
 			return $result;
 		}
 		return rest_ensure_response( array( 'change' => $result, 'partner' => KCS_Partners::to_array( KCS_Partners::get( $partner->id ) ) ) );
+	}
+
+	/**
+	 * POST /visits — plan-your-visit request.
+	 *
+	 * @param WP_REST_Request $req Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public static function create_visit( $req ) {
+		if ( ! empty( $req['website'] ) ) {
+			return rest_ensure_response( array( 'id' => 0 ) );
+		}
+		if ( ! kcs_rate_limit( 'visit', 5, HOUR_IN_SECONDS ) ) {
+			return new WP_Error( 'kcs_rate', __( 'Too many requests. Please try again later.', 'kingdom-church-suite' ), array( 'status' => 429 ) );
+		}
+		$id = KCS_Visits::create( $req->get_params() );
+		if ( is_wp_error( $id ) ) {
+			return $id;
+		}
+		return rest_ensure_response( array( 'id' => $id, 'message' => __( 'Wonderful! We have saved you a seat and our welcome team will look out for you.', 'kingdom-church-suite' ) ) );
 	}
 
 	/**

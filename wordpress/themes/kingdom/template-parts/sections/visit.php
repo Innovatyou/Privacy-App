@@ -24,5 +24,14 @@ $kingdom_steps = array(
 				</div>
 			<?php endforeach; ?>
 		</div>
+		<div class="k-visit__book k-split k-split--top">
+			<figure class="k-visit__photo" data-reveal>
+				<img src="<?php echo esc_url( kingdom_image( 'kingdom_church_image' ) ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>" loading="lazy">
+				<?php if ( get_theme_mod( 'kingdom_address' ) ) : ?>
+					<figcaption><?php echo kingdom_icon( 'pin' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> <?php echo esc_html( strtok( get_theme_mod( 'kingdom_address' ), "\n" ) ); ?> · <a href="<?php echo esc_url( 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( get_theme_mod( 'kingdom_address' ) ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Get directions', 'kingdom' ); ?></a></figcaption>
+				<?php endif; ?>
+			</figure>
+			<div data-reveal><?php kingdom_feature( 'kcs_visit_form', '[kcs_visit_form]' ); ?></div>
+		</div>
 	</div>
 </section>

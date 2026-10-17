@@ -509,8 +509,9 @@ class KCS_Partners {
 		$table = kcs_table( 'partners' );
 		$today = current_time( 'Y-m-d' );
 
-		// Mark overdue (7 days grace).
-		$wpdb->query( $wpdb->prepare( "UPDATE $table SET status = 'overdue' WHERE status = 'active' AND frequency <> 'one_time' AND next_due_date IS NOT NULL AND next_due_date < %s", gmdate( 'Y-m-d', strtotime( $today . ' -7 days' ) ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// Mark overdue once the grace period has passed (this also locks the partner dashboard).
+		$grace = max( 0, (int) kcs_get_option( 'grace_days', 7 ) );
+		$wpdb->query( $wpdb->prepare( "UPDATE $table SET status = 'overdue' WHERE status = 'active' AND frequency <> 'one_time' AND next_due_date IS NOT NULL AND next_due_date < %s", gmdate( 'Y-m-d', strtotime( $today . ' -' . $grace . ' days' ) ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		if ( '1' !== kcs_get_option( 'send_reminders', '1' ) ) {
 			return;

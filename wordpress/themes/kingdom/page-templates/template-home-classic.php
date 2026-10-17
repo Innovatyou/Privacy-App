@@ -16,6 +16,7 @@ kingdom_section( 'sermons' );
 kingdom_section( 'ministries' );
 kingdom_section( 'events' );
 kingdom_section( 'stats' );
+kingdom_section( 'gallery' );
 kingdom_section( 'partnership' );
 kingdom_section( 'testimonies' );
 kingdom_section( 'prayer' );

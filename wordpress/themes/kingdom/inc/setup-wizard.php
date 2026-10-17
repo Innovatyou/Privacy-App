@@ -25,7 +25,7 @@ function kingdom_starter_pages() {
 		'give'        => array( __( 'Give Online', 'kingdom' ), 'template-give.php', '', 'give' ),
 		'partnership' => array( __( 'Partnership', 'kingdom' ), 'template-partnership.php', '', 'partnership' ),
 		'portal'      => array( __( 'Partner Dashboard', 'kingdom' ), 'template-partner-portal.php', '[kcs_partner_dashboard]', 'partner_dashboard' ),
-		'visit'       => array( __( 'Plan Your Visit', 'kingdom' ), 'template-plan-visit.php', '', '' ),
+		'visit'       => array( __( 'Plan Your Visit', 'kingdom' ), 'template-plan-visit.php', '', 'visit' ),
 		'new'         => array( __( "I'm New", 'kingdom' ), 'template-new-here.php', '', '' ),
 		'prayer'      => array( __( 'Prayer Request', 'kingdom' ), 'template-prayer.php', '', 'prayer' ),
 		'testimonies' => array( __( 'Testimonies', 'kingdom' ), 'template-testimonies.php', '', '' ),

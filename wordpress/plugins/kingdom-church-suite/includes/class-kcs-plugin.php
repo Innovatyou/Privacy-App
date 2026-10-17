@@ -48,6 +48,7 @@ final class KCS_Plugin {
 		KCS_Newsletter::init();
 		KCS_Livestream::init();
 		KCS_Prayer::init();
+		KCS_Church_Admin::init();
 		KCS_SEO::init();
 		KCS_Features::init();
 		KCS_Shortcodes::init();

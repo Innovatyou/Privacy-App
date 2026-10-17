@@ -16,6 +16,9 @@ $kingdom_image   = get_theme_mod( 'kingdom_hero_image' );
 if ( ! $kingdom_image && is_page() && has_post_thumbnail() ) {
 	$kingdom_image = get_the_post_thumbnail_url( null, 'kingdom-hero' );
 }
+if ( ! $kingdom_image ) {
+	$kingdom_image = kingdom_image( 'kingdom_hero_image' );
+}
 $kingdom_video   = get_theme_mod( 'kingdom_hero_video' );
 $kingdom_yt      = kingdom_youtube_id( get_theme_mod( 'kingdom_hero_youtube' ) );
 $kingdom_overlay = min( 90, absint( get_theme_mod( 'kingdom_hero_overlay', 55 ) ) ) / 100;

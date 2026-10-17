@@ -9,7 +9,7 @@ $kingdom_lines = array_filter( array_map( 'trim', explode( "\n", get_theme_mod( 
 if ( ! $kingdom_lines ) {
 	return;
 }
-$kingdom_bg = get_theme_mod( 'kingdom_stats_image' );
+$kingdom_bg = kingdom_image( 'kingdom_stats_image' );
 ?>
 <section class="k-stats<?php echo $kingdom_bg ? ' has-image' : ''; ?>"<?php echo $kingdom_bg ? ' style="--k-img:url(' . esc_url( $kingdom_bg ) . ')"' : ''; ?>>
 	<div class="k-container k-stats__grid">

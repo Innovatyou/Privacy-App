@@ -52,6 +52,8 @@ There are also dedicated templates for single and archive views of sermons (vide
 
 **3D UI & mobile-first**: tilt-and-glare cards, layered 3D hero (floating cross, orbs, orbiting ring) with mouse and scroll parallax, pressable 3D buttons, glass panels, and an app-style bottom tab bar on phones (Home, Watch, Give, Prayer, Menu). Both can be toggled in *Customize → 3D Effects & Mobile*, and motion is reduced automatically for visitors who ask for it.
 
+**Church images**: the theme ships with original illustrated African church scenes (worship, church building, choir in kente, preacher, fellowship, kids church) as defaults. Replace any of them with your own photos in *Customize → Church Images & Gallery*, with no code. A six-photo gallery section is included.
+
 **Social connect**: branded cards for Facebook, Instagram, YouTube, X, TikTok, WhatsApp and Telegram, with a church hashtag, plus share buttons on every sermon, event and post.
 
 Other theme features: three header styles (classic, centered, transparent over hero), sticky header, top bar, live "LIVE NOW" badge, dark mode toggle (remembers the visitor's choice), video-modal hero, animated counters, scroll reveal, floating WhatsApp button, back-to-top, breadcrumbs and accessible markup (skip link, focus styles, ARIA, reduced-motion support).
@@ -68,6 +70,21 @@ Other theme features: three header styles (classic, centered, transparent over h
 - Logged-in partners see "Your current plan" and "Upgrade/Switch to this plan" on the public plans grid
 - Partners are kept out of wp-admin and the toolbar is hidden for them
 - Daily cron emails reminders N days before the due date and flags partners **overdue** after 7 days' grace
+
+### Church Admin dashboard (front end, no wp-admin)
+A full church-management dashboard on the **Church Admin** page (`[kcs_church_admin]`), built for church staff with the **Church Admin** role. That role never sees WordPress: logging in goes straight to the dashboard, and wp-admin redirects back to it.
+- **Overview**: active vs overdue (locked) partners, money received, payments due this week, partners by plan
+- **Partners**: search, filter, edit details, plan, amount, status and due date; WhatsApp a partner
+- **Payments**: mark bank transfers received (unlocks the partner and sends the receipt), re-check gateway payments
+- **Prayer requests**, **Visits** ("Plan your visit" bookings with WhatsApp follow-up) and **Testimonies** (publish or remove)
+- **Notify partners**: by plan and status, by email and/or as an update on their dashboard (announcement, event or resource with a link)
+- **Pastors & WhatsApp**: add pastors with WhatsApp numbers and choose which plans can reach them; the highest plan always reaches every pastor
+
+### Partner access by plan & payment lockout
+- Each plan's **level** follows the plan order (Plans → Level order; higher number = higher level). The dashboard shows a star badge for the partner's level.
+- Partners see the pastors and partner updates for their level and every level below. The top plan sees every pastor and every update.
+- The dashboard is **locked** until the first payment, and again when a payment is more than *N* days overdue (Settings → General → grace days, default 7). Locked partners only see a renewal screen with the payment form; it unlocks automatically when the payment is confirmed.
+- A banner warns partners five days before their due date.
 
 ### Admin dashboard (Church Suite menu)
 - **Dashboard**: KPIs, 12-month giving chart, partners by status, recent payments, shortcode reference

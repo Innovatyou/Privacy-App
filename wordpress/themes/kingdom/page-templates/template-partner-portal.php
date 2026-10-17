@@ -9,10 +9,9 @@
  */
 
 get_header();
-kingdom_page_header();
 ?>
-<section class="k-section k-portal">
-	<div class="k-container">
+<section class="k-portal k-container k-app">
+	<div>
 		<?php
 		if ( kingdom_content_has( 'kcs_partner_dashboard' ) ) {
 			while ( have_posts() ) {

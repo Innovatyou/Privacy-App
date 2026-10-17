@@ -35,6 +35,7 @@ class KCS_Shortcodes {
 			'kcs_verse'             => 'verse',
 			'kcs_testimony_form'    => 'testimony_form',
 			'kcs_social'            => 'social',
+			'kcs_visit_form'        => 'visit_form',
 		);
 		foreach ( $map as $tag => $method ) {
 			add_shortcode( $tag, array( __CLASS__, $method ) );
@@ -97,16 +98,20 @@ class KCS_Shortcodes {
 			return '<div class="kcs-alert kcs-alert--info">' . esc_html__( 'You are not a partner yet.', 'kingdom-church-suite' ) . ' <a class="kcs-btn" href="' . esc_url( kcs_page_url( 'partner_register' ) ) . '">' . esc_html__( 'Become a partner', 'kingdom-church-suite' ) . '</a></div>';
 		}
 		$payments = KCS_Payments::query( array( 'partner_id' => $partner->id, 'per_page' => 50 ) );
-		return KCS_Portal::messages() . kcs_get_template(
-			'partner-dashboard',
-			array(
-				'partner'  => $partner,
-				'plan'     => $partner->plan_id ? KCS_Plans::get( $partner->plan_id ) : null,
-				'plans'    => KCS_Plans::all( true ),
-				'payments' => $payments['items'],
-				'user'     => wp_get_current_user(),
-			)
+		$vars     = array(
+			'partner'  => $partner,
+			'plan'     => $partner->plan_id ? KCS_Plans::get( $partner->plan_id ) : null,
+			'plans'    => KCS_Plans::all( true ),
+			'payments' => $payments['items'],
+			'user'     => wp_get_current_user(),
+			'lock'     => KCS_Access::lock_reason( $partner ),
+			'tier'     => KCS_Access::tier( $partner ),
+			'tiers'    => count( KCS_Access::ranked_plans() ),
+			'pastors'  => KCS_Pastors::for_partner( $partner ),
+			'news'     => KCS_Announcements::for_partner( $partner ),
 		);
+		// Locked partners only see the renewal screen until their payment clears.
+		return KCS_Portal::messages() . kcs_get_template( $vars['lock'] ? 'partner-locked' : 'partner-dashboard', $vars );
 	}
 
 	/**
@@ -379,6 +384,37 @@ class KCS_Shortcodes {
 			<label for="kcs-t-video"><?php esc_html_e( 'Video link (optional)', 'kingdom-church-suite' ); ?><input id="kcs-t-video" type="url" name="video_url" placeholder="https://youtu.be/…"></label>
 			<input type="text" name="website" class="kcs-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 			<button type="submit" class="kcs-btn"><?php esc_html_e( 'Submit testimony', 'kingdom-church-suite' ); ?></button>
+			<div class="kcs-form-msg" aria-live="polite"></div>
+		</form>
+		<?php
+		return ob_get_clean();
+	}
+
+	/**
+	 * Plan-your-visit form.
+	 *
+	 * @return string
+	 */
+	public static function visit_form() {
+		$services = KCS_Livestream::schedule();
+		ob_start();
+		?>
+		<form class="kcs-form kcs-visit-form" data-kcs-visit>
+			<h3 class="kcs-form__title"><?php esc_html_e( 'Plan your visit', 'kingdom-church-suite' ); ?></h3>
+			<div class="kcs-grid-2">
+				<label for="kcs-v-name"><?php esc_html_e( 'Your name', 'kingdom-church-suite' ); ?><input id="kcs-v-name" name="name" required autocomplete="name"></label>
+				<label for="kcs-v-phone"><?php esc_html_e( 'Phone / WhatsApp', 'kingdom-church-suite' ); ?><input id="kcs-v-phone" name="phone" type="tel" autocomplete="tel"></label>
+				<label for="kcs-v-email"><?php esc_html_e( 'Email', 'kingdom-church-suite' ); ?><input id="kcs-v-email" name="email" type="email" autocomplete="email"></label>
+				<label for="kcs-v-date"><?php esc_html_e( 'Which day?', 'kingdom-church-suite' ); ?><input id="kcs-v-date" name="visit_date" type="date" min="<?php echo esc_attr( current_time( 'Y-m-d' ) ); ?>"></label>
+				<label for="kcs-v-service"><?php esc_html_e( 'Service', 'kingdom-church-suite' ); ?><select id="kcs-v-service" name="service"><?php foreach ( $services as $s ) : ?><option><?php echo esc_html( $s['name'] . ' — ' . $s['day'] . ' ' . date_i18n( get_option( 'time_format' ), strtotime( $s['time'] ) ) ); ?></option><?php endforeach; ?></select></label>
+				<div class="kcs-grid-2">
+					<label for="kcs-v-adults"><?php esc_html_e( 'Adults', 'kingdom-church-suite' ); ?><input id="kcs-v-adults" name="adults" type="number" min="1" max="50" value="1"></label>
+					<label for="kcs-v-kids"><?php esc_html_e( 'Children', 'kingdom-church-suite' ); ?><input id="kcs-v-kids" name="kids" type="number" min="0" max="50" value="0"></label>
+				</div>
+			</div>
+			<label for="kcs-v-notes"><?php esc_html_e( 'Anything we should know? (optional)', 'kingdom-church-suite' ); ?><textarea id="kcs-v-notes" name="notes" rows="3"></textarea></label>
+			<input type="text" name="website" class="kcs-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+			<button type="submit" class="kcs-btn"><?php esc_html_e( 'Save my seat', 'kingdom-church-suite' ); ?></button>
 			<div class="kcs-form-msg" aria-live="polite"></div>
 		</form>
 		<?php

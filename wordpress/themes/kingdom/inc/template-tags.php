@@ -52,6 +52,7 @@ function kingdom_available_sections() {
 		'newsletter'    => __( 'Newsletter sign-up', 'kingdom' ),
 		'visit'         => __( 'Plan your visit', 'kingdom' ),
 		'social'        => __( 'Social media connect', 'kingdom' ),
+		'gallery'       => __( 'Church photo gallery', 'kingdom' ),
 		'contact'       => __( 'Contact & map', 'kingdom' ),
 		'cta'           => __( 'Call to action', 'kingdom' ),
 	);
@@ -419,4 +420,61 @@ function kingdom_brand_colors() {
 		sanitize_hex_color( get_theme_mod( 'kingdom_color_accent', '#f4a62a' ) ),
 		sanitize_hex_color( get_theme_mod( 'kingdom_color_dark', '#16121c' ) ),
 	);
+}
+
+/**
+ * Default church images (bundled illustrations) keyed by Customizer setting.
+ *
+ * @return array setting => [label, bundled file, description]
+ */
+function kingdom_image_slots() {
+	return array(
+		'kingdom_hero_image'    => array( __( 'Homepage hero', 'kingdom' ), 'worship.svg', __( 'Worship / congregation photo. 1920×1080 or larger.', 'kingdom' ) ),
+		'kingdom_welcome_image' => array( __( 'Pastor / welcome photo', 'kingdom' ), 'pastor.svg', __( 'Portrait of your lead pastor(s). 900×1100.', 'kingdom' ) ),
+		'kingdom_church_image'  => array( __( 'Church building', 'kingdom' ), 'church-building.svg', __( 'Used on Visit us and About. 1600×1000.', 'kingdom' ) ),
+		'kingdom_stats_image'   => array( __( 'Stats background', 'kingdom' ), 'choir.svg', __( 'A wide, busy photo works best (it is darkened).', 'kingdom' ) ),
+		'kingdom_gallery_1'     => array( __( 'Gallery photo 1', 'kingdom' ), 'worship.svg', '' ),
+		'kingdom_gallery_2'     => array( __( 'Gallery photo 2', 'kingdom' ), 'choir.svg', '' ),
+		'kingdom_gallery_3'     => array( __( 'Gallery photo 3', 'kingdom' ), 'community.svg', '' ),
+		'kingdom_gallery_4'     => array( __( 'Gallery photo 4', 'kingdom' ), 'kids.svg', '' ),
+		'kingdom_gallery_5'     => array( __( 'Gallery photo 5', 'kingdom' ), 'pastor.svg', '' ),
+		'kingdom_gallery_6'     => array( __( 'Gallery photo 6', 'kingdom' ), 'church-building.svg', '' ),
+	);
+}
+
+/**
+ * Image URL for a slot: the church's uploaded photo, else the bundled illustration.
+ *
+ * @param string $slot Setting name from kingdom_image_slots().
+ * @return string
+ */
+function kingdom_image( $slot ) {
+	$custom = get_theme_mod( $slot );
+	if ( $custom ) {
+		return $custom;
+	}
+	$slots = kingdom_image_slots();
+	return isset( $slots[ $slot ] ) ? KINGDOM_URI . '/assets/img/' . $slots[ $slot ][1] : '';
+}
+
+/**
+ * Is this page an app-style dashboard (partner or church admin)?
+ *
+ * @return string ''|partner|admin
+ */
+function kingdom_dashboard_type() {
+	if ( ! is_singular() ) {
+		return '';
+	}
+	$post = get_post();
+	if ( ! $post ) {
+		return '';
+	}
+	if ( has_shortcode( $post->post_content, 'kcs_church_admin' ) ) {
+		return 'admin';
+	}
+	if ( has_shortcode( $post->post_content, 'kcs_partner_dashboard' ) || 'page-templates/template-partner-portal.php' === get_page_template_slug( $post ) ) {
+		return 'partner';
+	}
+	return '';
 }

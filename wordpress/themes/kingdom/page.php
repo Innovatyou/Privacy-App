@@ -8,6 +8,15 @@
 get_header();
 while ( have_posts() ) :
 	the_post();
+	if ( kingdom_dashboard_type() ) :
+		// Dashboards get a full-width app layout without the big page title.
+		?>
+		<div class="k-container k-app">
+			<?php the_content(); ?>
+		</div>
+		<?php
+		continue;
+	endif;
 	kingdom_page_header();
 	?>
 	<div class="k-container k-container--narrow k-section">

@@ -53,6 +53,7 @@ class KCS_Installer {
 		if ( get_option( 'kcs_db_version' ) !== KCS_DB_VERSION ) {
 			self::create_tables();
 			self::create_roles();
+			self::create_pages();
 			update_option( 'kcs_db_version', KCS_DB_VERSION );
 		}
 		self::schedule_events();
@@ -211,6 +212,34 @@ class KCS_Installer {
 			KEY status (status)
 		) $charset;";
 
+		$sql[] = 'CREATE TABLE ' . kcs_table( 'visits' ) . " (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			name varchar(191) NOT NULL DEFAULT '',
+			email varchar(191) NOT NULL DEFAULT '',
+			phone varchar(50) NOT NULL DEFAULT '',
+			visit_date date NULL,
+			service varchar(191) NOT NULL DEFAULT '',
+			adults int(11) NOT NULL DEFAULT 1,
+			kids int(11) NOT NULL DEFAULT 0,
+			notes text NULL,
+			status varchar(20) NOT NULL DEFAULT 'new',
+			created_at datetime NOT NULL,
+			PRIMARY KEY  (id),
+			KEY status (status)
+		) $charset;";
+
+		$sql[] = 'CREATE TABLE ' . kcs_table( 'announcements' ) . " (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			title varchar(255) NOT NULL,
+			body longtext NOT NULL,
+			kind varchar(20) NOT NULL DEFAULT 'news',
+			link varchar(255) NOT NULL DEFAULT '',
+			plan_ids varchar(255) NOT NULL DEFAULT '',
+			created_by bigint(20) unsigned NOT NULL DEFAULT 0,
+			created_at datetime NOT NULL,
+			PRIMARY KEY  (id)
+		) $charset;";
+
 		foreach ( $sql as $statement ) {
 			dbDelta( $statement );
 		}
@@ -224,6 +253,15 @@ class KCS_Installer {
 			'kcs_partner',
 			__( 'Church Partner', 'kingdom-church-suite' ),
 			array( 'read' => true )
+		);
+		add_role(
+			'kcs_church_admin',
+			__( 'Church Admin', 'kingdom-church-suite' ),
+			array(
+				'read'         => true,
+				'manage_kcs'   => true,
+				'upload_files' => true,
+			)
 		);
 		$admin = get_role( 'administrator' );
 		if ( $admin ) {
@@ -248,6 +286,8 @@ class KCS_Installer {
 			'thank_you'         => array( __( 'Thank You', 'kingdom-church-suite' ), '[kcs_payment_status]' ),
 			'watch_live'        => array( __( 'Watch Live', 'kingdom-church-suite' ), '[kcs_livestream chat="yes"]' ),
 			'prayer'            => array( __( 'Prayer Request', 'kingdom-church-suite' ), '[kcs_prayer_form][kcs_prayer_wall]' ),
+			'visit'             => array( __( 'Plan Your Visit', 'kingdom-church-suite' ), '[kcs_visit_form]' ),
+			'church_admin'      => array( __( 'Church Admin', 'kingdom-church-suite' ), '[kcs_church_admin]' ),
 		);
 		$settings = get_option( 'kcs_settings', array() );
 		foreach ( $pages as $key => $page ) {

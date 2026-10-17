@@ -71,6 +71,7 @@ class KCS_Settings {
 					'min_amount'          => array( 'label' => __( 'Minimum amount', 'kingdom-church-suite' ), 'type' => 'number', 'default' => '1' ),
 					'giving_purposes'     => array( 'label' => __( 'Giving purposes', 'kingdom-church-suite' ), 'type' => 'textarea', 'default' => "Tithe\nOffering\nPartnership\nBuilding Project\nMissions\nWelfare", 'desc' => __( 'One per line.', 'kingdom-church-suite' ) ),
 					'partner_auto_activate' => array( 'label' => __( 'Activate partners after first successful payment only', 'kingdom-church-suite' ), 'type' => 'checkbox', 'default' => '1' ),
+					'grace_days'          => array( 'label' => __( 'Days after the due date before the partner dashboard locks', 'kingdom-church-suite' ), 'type' => 'number', 'default' => '7' ),
 					'reminder_days'       => array( 'label' => __( 'Send payment reminder N days before due date', 'kingdom-church-suite' ), 'type' => 'number', 'default' => '3' ),
 				),
 				__( 'Pages', 'kingdom-church-suite' ) => array(
@@ -82,6 +83,8 @@ class KCS_Settings {
 					'page_thank_you'         => array( 'label' => __( 'Payment result page', 'kingdom-church-suite' ), 'type' => 'select', 'options' => $pages ),
 					'page_watch_live'        => array( 'label' => __( 'Watch live page', 'kingdom-church-suite' ), 'type' => 'select', 'options' => $pages ),
 					'page_prayer'            => array( 'label' => __( 'Prayer request page', 'kingdom-church-suite' ), 'type' => 'select', 'options' => $pages ),
+					'page_visit'             => array( 'label' => __( 'Plan your visit page', 'kingdom-church-suite' ), 'type' => 'select', 'options' => $pages ),
+					'page_church_admin'      => array( 'label' => __( 'Church admin dashboard page', 'kingdom-church-suite' ), 'type' => 'select', 'options' => $pages ),
 				),
 			),
 			'payments'   => array(),
