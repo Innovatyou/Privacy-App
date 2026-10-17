@@ -40,7 +40,13 @@ class KCS_Church_Admin {
 	 * @return array
 	 */
 	public static function views() {
-		return array(
+		/**
+		 * Filter the Church Admin sections. Add-ons (such as the SaaS billing screen) add their own
+		 * views here and render them on the `kcs_church_admin_view_{slug}` action.
+		 *
+		 * @param array $views slug => array( label, icon ).
+		 */
+		return apply_filters( 'kcs_church_admin_views', array(
 			'overview'    => array( __( 'Overview', 'kingdom-church-suite' ), '◎' ),
 			'partners'    => array( __( 'Partners', 'kingdom-church-suite' ), '♥' ),
 			'plans'       => array( __( 'Plans & currency', 'kingdom-church-suite' ), '◈' ),
@@ -51,7 +57,7 @@ class KCS_Church_Admin {
 			'notify'      => array( __( 'Notify partners', 'kingdom-church-suite' ), '✉' ),
 			'pastors'     => array( __( 'Pastors & WhatsApp', 'kingdom-church-suite' ), '☎' ),
 			'website'     => array( __( 'Website', 'kingdom-church-suite' ), '▣' ),
-		);
+		) );
 	}
 
 	/**
@@ -435,7 +441,14 @@ class KCS_Church_Admin {
 					<span class="kcs-muted"><?php echo esc_html( wp_get_current_user()->display_name ); ?> · <?php echo esc_html( date_i18n( get_option( 'date_format' ) ) ); ?></span>
 				</header>
 				<?php if ( $flash ) : ?><div class="kcs-alert kcs-alert--<?php echo esc_attr( $flash[1] ); ?>" role="status"><?php echo esc_html( $flash[0] ); ?></div><?php endif; ?>
-				<?php call_user_func( array( __CLASS__, 'view_' . $view ) ); ?>
+				<?php
+				do_action( 'kcs_church_admin_before_view', $view );
+				if ( method_exists( __CLASS__, 'view_' . $view ) ) {
+					call_user_func( array( __CLASS__, 'view_' . $view ) );
+				} else {
+					do_action( 'kcs_church_admin_view_' . $view );
+				}
+				?>
 			</main>
 		</div>
 		<?php

@@ -93,6 +93,21 @@ function kingdom_setup_run() {
 	}
 	check_admin_referer( 'kingdom_setup' );
 	$home_tpl = isset( $_POST['home_template'] ) ? sanitize_file_name( wp_unslash( $_POST['home_template'] ) ) : 'template-home-classic.php';
+	kingdom_build_starter_site( $home_tpl );
+	wp_safe_redirect( admin_url( 'themes.php?page=kingdom-setup&done=1' ) );
+	exit;
+}
+add_action( 'admin_post_kingdom_setup', 'kingdom_setup_run' );
+
+/**
+ * Create the starter pages, menus and homepage. Safe to run more than once.
+ *
+ * Also used when a new church site is created automatically (for example by the SaaS add-on).
+ *
+ * @param string $home_tpl Homepage template file.
+ * @return array Page IDs keyed by starter page key.
+ */
+function kingdom_build_starter_site( $home_tpl = 'template-home-classic.php' ) {
 	if ( ! file_exists( KINGDOM_DIR . '/page-templates/' . $home_tpl ) ) {
 		$home_tpl = 'template-home-classic.php';
 	}
@@ -185,10 +200,8 @@ function kingdom_setup_run() {
 		set_theme_mod( 'kingdom_header_cta_url', get_permalink( $ids['give'] ) );
 	}
 
-	wp_safe_redirect( admin_url( 'themes.php?page=kingdom-setup&done=1' ) );
-	exit;
+	return $ids;
 }
-add_action( 'admin_post_kingdom_setup', 'kingdom_setup_run' );
 
 /**
  * Point to the setup screen after activation.

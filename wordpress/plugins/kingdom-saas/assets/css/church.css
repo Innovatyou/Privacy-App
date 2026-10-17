@@ -1,0 +1,45 @@
+/* Kingdom Cloud — Subscription & Custom domain screens inside Church Admin. */
+.ks-banner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .8rem; padding: .9rem 1.1rem; margin-bottom: 1rem; border-radius: var(--kcs-radius, 14px); background: color-mix(in srgb, var(--kcs-primary) 10%, var(--kcs-surface)); border: 1px solid color-mix(in srgb, var(--kcs-primary) 30%, transparent); font-weight: 600; }
+.ks-banner--past_due { background: color-mix(in srgb, #b45309 12%, var(--kcs-surface)); border-color: color-mix(in srgb, #b45309 35%, transparent); }
+.ks-banner--suspended { background: color-mix(in srgb, #b91c1c 10%, var(--kcs-surface)); border-color: color-mix(in srgb, #b91c1c 35%, transparent); }
+.ks-badge { display: inline-block; padding: .15rem .6rem; border-radius: 999px; font-size: .75rem; font-weight: 800; background: var(--kcs-surface-2); }
+.ks-badge--active, .ks-badge--paid, .ks-badge--verified { background: color-mix(in srgb, #15803d 15%, transparent); color: #15803d; }
+.ks-badge--trialing { background: color-mix(in srgb, var(--kcs-primary) 14%, transparent); color: var(--kcs-primary); }
+.ks-badge--past_due, .ks-badge--pending { background: color-mix(in srgb, #b45309 16%, transparent); color: #b45309; }
+.ks-badge--suspended, .ks-badge--cancelled, .ks-badge--failed { background: color-mix(in srgb, #b91c1c 14%, transparent); color: #b91c1c; }
+.ks-meter { display: block; height: 6px; margin-top: .3rem; border-radius: 999px; background: var(--kcs-surface-2); overflow: hidden; }
+.ks-meter b { display: block; height: 100%; background: var(--kcs-primary); }
+.ks-url { font-size: 1rem !important; overflow-wrap: anywhere; }
+.ks-checkout, .kca-card + .kca-card, .kca-kpis + .kca-card { margin-top: 1rem; }
+.ks-toggles { display: flex; flex-wrap: wrap; gap: .6rem; }
+.ks-seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 14px; background: var(--kcs-surface-2); border: 1px solid var(--kcs-border); max-width: 100%; }
+.ks-seg label { position: relative; display: block !important; margin: 0 !important; cursor: pointer; }
+.ks-seg input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.ks-seg span { display: inline-flex; gap: .35rem; align-items: center; padding: .5rem .9rem; border-radius: 10px; font-weight: 700; font-size: .9rem; }
+.ks-seg b { font-size: .72rem; opacity: .8; }
+.ks-seg input:checked + span { background: var(--kcs-primary); color: var(--kcs-primary-contrast, #fff); }
+.ks-plans { display: grid; gap: .8rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); }
+.ks-plan { position: relative; display: block !important; margin: 0 !important; cursor: pointer; }
+.ks-plan > input { position: absolute; opacity: 0; }
+.ks-plan__body { display: grid; gap: .35rem; height: 100%; padding: 1.1rem; border-radius: 14px; border: 1px solid var(--kcs-border); background: var(--kcs-surface); font-weight: 400; }
+.ks-plan__body strong em { font-style: normal; font-size: .72rem; padding: .1rem .5rem; border-radius: 999px; background: var(--kcs-surface-2); margin-left: .3rem; }
+.ks-plan__body ul { margin: .3rem 0 0; padding-left: 1.1rem; color: var(--kcs-muted); font-size: .9rem; }
+.ks-plan.is-featured .ks-plan__body { border-color: color-mix(in srgb, var(--kcs-primary) 45%, var(--kcs-border)); }
+.ks-plan > input:checked + .ks-plan__body { border-color: var(--kcs-primary); box-shadow: 0 0 0 2px var(--kcs-primary) inset; }
+.ks-plan > input:focus-visible + .ks-plan__body { outline: 3px solid var(--kcs-primary); outline-offset: 2px; }
+.ks-p { display: none; align-items: baseline; gap: .15rem; font-size: 1.6rem; font-weight: 800; }
+.ks-p small { font-size: .85rem; color: var(--kcs-muted); font-weight: 600; }
+[data-r="international"][data-i="month"] .ks-p--international-month,
+[data-r="international"][data-i="year"] .ks-p--international-year,
+[data-r="local"][data-i="month"] .ks-p--local-month,
+[data-r="local"][data-i="year"] .ks-p--local-year { display: inline-flex; }
+.ks-gw { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: .4rem; }
+.ks-gw legend { font-weight: 700; margin-bottom: .4rem; }
+.ks-cancel { display: flex; flex-wrap: wrap; gap: .8rem; align-items: center; justify-content: space-between; }
+.ks-cancel p { margin: 0; }
+.ks-pre { white-space: pre-wrap; background: var(--kcs-surface-2); padding: .8rem 1rem; border-radius: 10px; font: inherit; }
+.ks-domain-head { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; }
+.ks-domain-head h3 { margin: 0; overflow-wrap: anywhere; }
+.ks-addr { font-size: 1.15rem; font-weight: 700; display: grid; gap: .2rem; margin: 0; overflow-wrap: anywhere; }
+.ks-copy { user-select: all; overflow-wrap: anywhere; }
+.ks-upsell { border-left: 4px solid var(--kcs-primary); }

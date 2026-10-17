@@ -158,6 +158,16 @@ class KCS_Partners {
 		if ( self::get_by_email( $email ) ) {
 			return new WP_Error( 'kcs_partner_exists', __( 'A partner with this email already exists. Please log in instead.', 'kingdom-church-suite' ) );
 		}
+		/**
+		 * Allow or block new partners (used by the SaaS plan limits).
+		 *
+		 * @param true|WP_Error $allowed True to allow.
+		 * @param array         $data    Partner data.
+		 */
+		$allowed = apply_filters( 'kcs_can_create_partner', true, $data );
+		if ( is_wp_error( $allowed ) ) {
+			return $allowed;
+		}
 
 		$plan      = ! empty( $data['plan_id'] ) ? KCS_Plans::get( (int) $data['plan_id'] ) : null;
 		$amount    = isset( $data['amount'] ) && '' !== $data['amount'] ? (float) $data['amount'] : ( $plan ? (float) $plan->amount : 0 );

@@ -1,0 +1,16 @@
+const { chromium } = require('playwright');
+(async () => { const b = await chromium.launch({ args: ['--no-proxy-server'] }); const errs = []; const out = process.argv[3];
+  const p = await b.newPage({ viewport: { width: 1366, height: 860 } }); p.on('pageerror', e => errs.push(e.message)); p.on('response', r => { if (r.status() >= 500) errs.push(r.status() + ' ' + r.url()); });
+  p.on('dialog', d => d.accept());
+  await p.goto(process.argv[2]); console.log('start:', p.url());
+  await Promise.all([p.waitForURL(/grace\.churchhub\.localhost/), p.click('button:has-text("Remove domain")')]);
+  await p.waitForLoadState(); console.log('after remove:', p.url(), '| address:', (await p.textContent('.ks-addr')).trim());
+  await p.fill('input[name=domain]', 'gracechapel.test'); await Promise.all([p.waitForNavigation(), p.click('form button.kcs-btn')]);
+  await p.screenshot({ path: out + '/domain-pending.png', fullPage: true });
+  await Promise.all([p.waitForURL(/gracechapel\.test.*ks_connected/, { timeout: 30000 }), p.click('button:has-text("Check now")')]);
+  console.log('after verify:', p.url(), '|', (await p.textContent('.kcs-alert--success')).trim());
+  await p.screenshot({ path: out + '/domain-connected.png', fullPage: true });
+  await p.goto('http://gracechapel.test/church-admin/?view=subscription'); console.log('still logged in on custom domain:', !!(await p.$('.ks-checkout')));
+  const f = await b.newPage(); await f.goto('http://grace.churchhub.localhost/about-us/'); console.log('old subdomain → ', f.url());
+  await f.goto('http://www.gracechapel.test/events/'); console.log('www → ', f.url());
+  console.log('issues:', errs.length ? errs : 'none'); await b.close(); })();

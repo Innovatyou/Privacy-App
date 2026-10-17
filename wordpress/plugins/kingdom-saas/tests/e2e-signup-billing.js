@@ -1,0 +1,50 @@
+// E2E 1: landing, pricing toggles, sign-up → new church site, auto-login, trial, test payment.
+const { chromium } = require('playwright');
+const B = 'http://churchhub.localhost', out = process.argv[2];
+(async () => {
+  const b = await chromium.launch({ args: ['--no-proxy-server'] }); const errs = []; const log = (...a) => console.log(...a);
+  const ctx = await b.newContext({ viewport: { width: 1366, height: 860 } });
+  const p = await ctx.newPage(); p.on('pageerror', e => errs.push('JS ' + e.message)); p.on('response', r => { if (r.status() >= 500) errs.push(r.status() + ' ' + r.url()); });
+  await p.goto(B + '/'); log('landing title:', await p.title());
+  const price = () => p.$$eval('.ks-price-grid .ks-p', e => e.filter(x => getComputedStyle(x).display !== 'none').map(x => x.innerText.replace(/\s+/g, '')).join(' | '));
+  log('pricing default:', await price());
+  await p.click('.ks-pricing .ks-seg label:has(input[value=local])'); log('pricing local:', await price());
+  await p.click('.ks-pricing .ks-seg label:has(input[value=year])'); log('pricing local yearly:', await price());
+  await p.screenshot({ path: out + '/landing.png', fullPage: true });
+  const href = await p.$eval('.ks-tier.is-featured [data-plan-link]', a => a.href); log('plan link:', href);
+  await p.goto(href);
+  log('signup region preselected:', await p.$eval('input[name=region]:checked', i => i.value), 'plan:', await p.$eval('input[name=plan]:checked', i => i.value));
+  await p.fill('[data-ks-church]', 'Grace Chapel International'); await p.waitForTimeout(700);
+  log('suggested subdomain:', await p.inputValue('[data-ks-subdomain]'), '|', await p.textContent('[data-ks-subdomain-msg]'));
+  await p.fill('[data-ks-subdomain]', 'grace'); await p.waitForTimeout(700); log('check:', await p.textContent('[data-ks-subdomain-msg]'));
+  await p.fill('input[name=name]', 'Pastor Ade Bello'); await p.fill('input[name=email]', 'ade@gracechapel.test'); await p.fill('input[name=password]', 'gracepass1');
+  await p.click('.ks-swatch:has(input[value=emerald])'); await p.check('input[name=terms]');
+  await p.screenshot({ path: out + '/signup.png', fullPage: true });
+  const t0 = Date.now();
+  await Promise.all([p.waitForURL(/grace\.churchhub\.localhost/, { timeout: 90000 }), p.click('[data-ks-signup] button')]);
+  await p.waitForLoadState('domcontentloaded');
+  log('after signup (' + ((Date.now() - t0) / 1000).toFixed(1) + 's):', p.url());
+  log('church admin heading:', await p.textContent('.kca__head h2').catch(() => 'n/a'), '| banner:', (await p.textContent('.ks-banner').catch(() => 'none')).trim());
+  log('nav has Subscription & Custom domain:', await p.$$eval('.kca__nav a', a => a.map(x => x.innerText.trim()).filter(t => /Subscription|Custom domain/.test(t)).join(',')));
+  await p.screenshot({ path: out + '/church-admin.png' });
+  // Front end of the new church site.
+  const site = new URL(p.url()).origin;
+  const f = await ctx.newPage(); await f.goto(site + '/');
+  log('site title:', await f.title(), '| footer credit:', (await f.$eval('.k-footer, footer', e => e.innerText).catch(() => '')).match(/Powered by \w+/)?.[0]);
+  log('palette:', await f.$eval('html', h => h.getAttribute('data-palette') || getComputedStyle(h).getPropertyValue('--k-primary')));
+  await f.screenshot({ path: out + '/church-home.png' }); await f.close();
+  // Subscription → test payment.
+  await p.goto(site + '/church-admin/?view=subscription');
+  log('kpis:', (await p.$$eval('.kca-kpi', e => e.map(x => x.innerText.replace(/\s+/g, ' ')))).join(' || '));
+  await p.click('.ks-checkout .ks-seg label:has(input[value=local])'); await p.click('.ks-checkout .ks-seg label:has(input[value=year])');
+  log('checkout prices local/year:', (await p.$$eval('.ks-plans .ks-p', e => e.filter(x => getComputedStyle(x).display !== 'none').map(x => x.innerText.replace(/\s+/g, '')))).join(' | '));
+  await p.screenshot({ path: out + '/subscription.png', fullPage: true });
+  await p.check('.ks-plan input[value=growth]'); await p.check('input[name=gateway][value=test]');
+  await Promise.all([p.waitForURL(/test-checkout/), p.click('.ks-checkout button.kcs-btn--lg')]);
+  log('test checkout:', (await p.textContent('.ks-testpay h1')).trim(), '|', (await p.textContent('.ks-testpay .ks-lead')).trim());
+  await Promise.all([p.waitForURL(/ks_paid=1/), p.click('button[value=success]')]);
+  log('after pay:', (await p.textContent('.kcs-alert--success')).trim());
+  log('kpis now:', (await p.$$eval('.kca-kpi', e => e.slice(0, 2).map(x => x.innerText.replace(/\s+/g, ' ')))).join(' || '));
+  log('invoice rows:', (await p.$$eval('.kca-table tbody tr', e => e.map(x => x.innerText.replace(/\s+/g, ' ')))).join(' || '));
+  log('issues:', errs.length ? errs : 'none'); await b.close();
+})();

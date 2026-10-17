@@ -74,7 +74,7 @@ $social   = kingdom_social_links();
 
 	<div class="k-footer__bottom">
 		<div class="k-container">
-			<p><?php echo esc_html( get_theme_mod( 'kingdom_copyright' ) ? get_theme_mod( 'kingdom_copyright' ) : '© ' . gmdate( 'Y' ) . ' ' . get_bloginfo( 'name' ) . '. ' . __( 'All rights reserved.', 'kingdom' ) ); ?></p>
+			<p><?php echo esc_html( get_theme_mod( 'kingdom_copyright' ) ? get_theme_mod( 'kingdom_copyright' ) : '© ' . gmdate( 'Y' ) . ' ' . get_bloginfo( 'name' ) . '. ' . __( 'All rights reserved.', 'kingdom' ) ); ?><?php echo wp_kses_post( apply_filters( 'kingdom_footer_credit', '' ) ); ?></p>
 			<?php if ( function_exists( 'the_privacy_policy_link' ) ) { the_privacy_policy_link(); } ?>
 		</div>
 	</div>

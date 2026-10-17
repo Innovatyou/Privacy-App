@@ -729,3 +729,9 @@ body:has(.k-wa) .k-to-top { right: auto; left: max(1.25rem, env(safe-area-inset-
 .k-faq summary { cursor: pointer; font-weight: 700; }
 .k-faq details[open] summary { margin-bottom: .5rem; color: var(--k-primary); }
 .k-faq p { margin: 0; color: var(--k-muted); }
+
+/* Long church names wrap instead of pushing the header off-screen. */
+.k-brand { flex: 0 1 auto; min-width: 0; max-width: 300px; }
+.k-brand__name { line-height: 1.15; overflow-wrap: anywhere; }
+.k-brand__mark { flex: none; }
+@media (max-width: 600px) { .k-brand__name { font-size: 1.1rem; } .k-brand { max-width: none; } }
