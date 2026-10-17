@@ -952,16 +952,24 @@ class KCS_Church_Admin {
 		}
 		$groups = array(
 			'banner'   => __( 'Homepage banner', 'kingdom-church-suite' ),
+			'media'    => __( 'Live stream, video & audio', 'kingdom-church-suite' ),
 			'sections' => __( 'Show or hide sections', 'kingdom-church-suite' ),
 		);
 		?>
 		<form method="post" class="kca-cols">
 			<?php echo self::fields( 'website_save', 'website' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<?php foreach ( $groups as $group => $title ) : ?>
+				<?php
+				if ( ! array_filter( $fields, function ( $f ) use ( $group ) { return $f[2] === $group; } ) ) {
+					continue;
+				}
+				?>
 				<section class="kca-card kcs-form">
 					<h3><?php echo esc_html( $title ); ?></h3>
 					<?php if ( 'banner' === $group ) : ?>
 						<p class="kcs-muted"><?php esc_html_e( 'Paste a YouTube, Vimeo or MP4 link to play it, muted and looping, behind the homepage banner. Leave it empty to use the banner image.', 'kingdom-church-suite' ); ?></p>
+					<?php elseif ( 'media' === $group ) : ?>
+						<p class="kcs-muted"><?php esc_html_e( 'YouTube live needs only the video link or ID (for example xzoaPmLegBE). Add your channel ID instead to always show whatever is live on your channel. Videos and audio left empty show your latest sermons.', 'kingdom-church-suite' ); ?></p>
 					<?php else : ?>
 						<p class="kcs-muted"><?php esc_html_e( 'Untick a section to remove it from every page of the website.', 'kingdom-church-suite' ); ?></p>
 						<div class="kca-switches">
@@ -978,7 +986,7 @@ class KCS_Church_Admin {
 						<?php elseif ( 'select' === $f[1] ) : ?>
 							<label><?php echo esc_html( $f[0] ); ?><select name="<?php echo esc_attr( $key ); ?>"><?php foreach ( (array) $f[4] as $k => $l ) : ?><option value="<?php echo esc_attr( $k ); ?>" <?php selected( $value, $k ); ?>><?php echo esc_html( $l ); ?></option><?php endforeach; ?></select></label>
 						<?php else : ?>
-							<label><?php echo esc_html( $f[0] ); ?><input type="<?php echo 'url' === $f[1] ? 'url' : ( 'number' === $f[1] ? 'number' : 'text' ); ?>" name="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( $value ); ?>"<?php echo 'number' === $f[1] ? ' min="0" max="90"' : ''; ?><?php echo 'url' === $f[1] ? ' placeholder="https://youtu.be/…"' : ''; ?>></label>
+							<label><?php echo esc_html( $f[0] ); ?><input type="<?php echo 'url' === $f[1] ? 'url' : ( 'number' === $f[1] ? 'number' : 'text' ); ?>" name="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( $value ); ?>"<?php echo 'number' === $f[1] ? ' min="0" max="90"' : ''; ?><?php echo 'url' === $f[1] ? ' placeholder="' . esc_attr( false !== strpos( $key, 'audio' ) ? 'https://…/message.mp3' : 'https://youtu.be/…' ) . '"' : ''; ?>></label>
 						<?php endif; ?>
 					<?php endforeach; ?>
 					<?php if ( 'sections' === $group ) : ?></div><?php endif; ?>

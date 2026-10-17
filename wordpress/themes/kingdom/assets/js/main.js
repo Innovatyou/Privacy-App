@@ -167,11 +167,12 @@
 		var body = modal.querySelector('.k-modal__body');
 		var closeModal = function () { modal.hidden = true; body.innerHTML = ''; };
 		document.addEventListener('click', function (e) {
-			var trigger = e.target.closest('[data-video]');
+			var trigger = e.target.closest('[data-video], [data-video-src]');
 			if (trigger) {
 				e.preventDefault();
 				var iframe = document.createElement('iframe');
-				iframe.src = 'https://www.youtube.com/embed/' + encodeURIComponent(trigger.dataset.video) + '?autoplay=1&rel=0';
+				// data-video = YouTube ID; data-video-src = any embed URL (e.g. Vimeo).
+				iframe.src = trigger.dataset.videoSrc || 'https://www.youtube.com/embed/' + encodeURIComponent(trigger.dataset.video) + '?autoplay=1&rel=0';
 				iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
 				iframe.allowFullscreen = true;
 				body.innerHTML = '';

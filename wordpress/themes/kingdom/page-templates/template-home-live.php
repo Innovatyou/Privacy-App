@@ -12,6 +12,8 @@ get_header();
 kingdom_section( 'hero', array( 'variant' => 'live', 'title' => get_theme_mod( 'kingdom_hero_title', __( 'Church online, every week', 'kingdom' ) ) ) );
 kingdom_section( 'service-times' );
 kingdom_section( 'sermons' );
+kingdom_section( 'videos' );
+kingdom_section( 'audio' );
 kingdom_section( 'prayer' );
 kingdom_section( 'give' );
 kingdom_section( 'events', array( 'layout' => 'list' ) );

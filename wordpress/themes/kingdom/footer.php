@@ -134,7 +134,9 @@ $social   = kingdom_social_links();
 	</div>
 <?php endif; ?>
 
-<button type="button" class="k-to-top" data-to-top aria-label="<?php esc_attr_e( 'Back to top', 'kingdom' ); ?>">↑</button>
+<?php if ( get_theme_mod( 'kingdom_to_top', true ) ) : ?>
+	<button type="button" class="k-to-top" data-to-top aria-label="<?php esc_attr_e( 'Back to top', 'kingdom' ); ?>">↑</button>
+<?php endif; ?>
 <div class="k-modal" data-video-modal hidden><button type="button" class="k-modal__close" data-modal-close aria-label="<?php esc_attr_e( 'Close', 'kingdom' ); ?>">×</button><div class="k-modal__body"></div></div>
 
 <?php wp_footer(); ?>

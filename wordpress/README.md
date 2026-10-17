@@ -61,6 +61,14 @@ There are also dedicated templates for single and archive views of sermons (vide
 
 **Show / hide sections**: every homepage section (announcement strip, welcome, stats, gallery, sermons, events, partnership, testimonies, visit us, social, newsletter, and so on), plus the top bar, footer newsletter and mobile tab bar, can be switched off under *Appearance → Customize → Show / Hide Sections* or in *Church Admin → Website*. No code needed.
 
+**YouTube live stream section**: needs only a YouTube video link or ID (default `xzoaPmLegBE`). Short (`youtu.be/…`), `watch?v=…` and `/live/…` links all work. Better still, enter your **channel ID** (`UC…`): the section then always shows whatever is live on your channel, so nothing needs changing each Sunday. Options: start playing muted, show YouTube live chat beside the video. Set it under *Customize → Live Stream, Video & Audio* or *Church Admin → Website*.
+
+**Videos section**: a large player with a side list. Add up to 4 YouTube or Vimeo links with titles, or leave them empty to show your latest sermon videos. Videos open in a pop-up player.
+
+**Audio section**: up to 4 MP3 messages with players and download buttons (or your latest sermon recordings), plus an optional Spotify, SoundCloud or Apple Podcasts player.
+
+**Every section has an on/off switch**: all homepage sections, plus site elements (top bar, header Give button, search, dark-mode button, live badge, colour picker, footer newsletter, back-to-top button, phone tab bar).
+
 **Video homepage banner**: under *Customize → Homepage Banner (image or video)* or *Church Admin → Website*, paste a YouTube, Vimeo or MP4/WebM link to use a video as the banner background. It plays muted and on a loop, and the banner image shows while it loads. Options:
 - **Hide all banner text**: show the video on its own. A hidden heading is kept for screen readers and SEO.
 - **"Watch with sound" button**: opens the YouTube video with sound in a pop-up.

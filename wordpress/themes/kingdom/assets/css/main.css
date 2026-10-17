@@ -176,6 +176,8 @@ p { margin: 0 0 1.1em; }
 .k-section--alt { background: var(--k-surface-2); }
 .k-section--dark { background: var(--k-dark); color: #fff; }
 .k-section--dark h2, .k-section--dark h3 { color: #fff; }
+.k-section--dark .k-eyebrow { color: var(--k-accent); }
+.k-section--dark .k-section__head p { color: rgba(255,255,255,.75); }
 .k-section__head { max-width: 720px; margin: 0 auto clamp(2rem, 4vw, 3.5rem); }
 .k-section__head--center { text-align: center; }
 .k-section__head--left { margin-inline: 0; }
@@ -735,3 +737,42 @@ body:has(.k-wa) .k-to-top { right: auto; left: max(1.25rem, env(safe-area-inset-
 .k-brand__name { line-height: 1.15; font-size: clamp(1.1rem, 1.25vw + .45rem, 1.45rem); }
 .k-brand__mark { flex: none; }
 @media (max-width: 600px) { .k-brand { max-width: none; } }
+
+/* YouTube live -------------------------------------------------------------- */
+.k-ytlive__grid { display: grid; gap: 1rem; max-width: 1000px; margin-inline: auto; }
+.k-ytlive__grid.has-chat { max-width: none; }
+@media (min-width: 1000px) { .k-ytlive__grid.has-chat { grid-template-columns: minmax(0, 1fr) 360px; } }
+.k-ytlive__player { position: relative; aspect-ratio: 16 / 9; border-radius: var(--k-radius); overflow: hidden; background: #000; box-shadow: 0 30px 60px -30px rgba(0,0,0,.6); }
+.k-ytlive__player iframe, .k-ytlive__chat iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.k-ytlive__chat { position: relative; min-height: 420px; border-radius: var(--k-radius); overflow: hidden; background: var(--k-surface); }
+.k-ytlive__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .75rem; margin: 1.5rem 0 0; }
+.k-ytlive__actions .k-icon { width: 20px; height: 20px; color: #ff0033; }
+.k-ytlive__dot { width: 10px; height: 10px; border-radius: 50%; background: #ff0033; box-shadow: 0 0 0 0 rgba(255,0,51,.6); animation: k-live-pulse 2s infinite; }
+@keyframes k-live-pulse { 70% { box-shadow: 0 0 0 10px rgba(255,0,51,0); } 100% { box-shadow: 0 0 0 0 rgba(255,0,51,0); } }
+@media (prefers-reduced-motion: reduce) { .k-ytlive__dot { animation: none; } }
+
+/* Videos -------------------------------------------------------------------- */
+.k-videos__grid { display: grid; gap: 1.25rem; }
+@media (min-width: 900px) { .k-videos__grid:not(.is-single) { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); align-items: start; } }
+.k-videos__grid.is-single { max-width: 960px; margin-inline: auto; width: 100%; }
+.k-videos__main { margin: 0; display: grid; gap: .6rem; }
+.k-videos__main figcaption { font-family: var(--k-font-heading); font-weight: 700; font-size: 1.2rem; }
+.k-videos__list { list-style: none; margin: 0; padding: 0; display: grid; gap: .9rem; }
+.k-videos__list li { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: .9rem; align-items: center; }
+.k-videos__list .k-video-thumb { border-radius: calc(var(--k-radius) * .7); }
+.k-videos__list .k-play { transform: scale(.7); }
+.k-videos__list span { font-weight: 600; line-height: 1.35; }
+@media (max-width: 480px) { .k-videos__list li { grid-template-columns: 120px minmax(0, 1fr); } }
+
+/* Audio --------------------------------------------------------------------- */
+.k-audio-section__grid { display: grid; gap: 1.25rem; max-width: 880px; margin-inline: auto; }
+.k-audio-section__grid.has-podcast { max-width: none; }
+@media (min-width: 1000px) { .k-audio-section__grid.has-podcast { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); align-items: start; } }
+.k-tracks { list-style: none; margin: 0; padding: 0; display: grid; gap: .75rem; }
+.k-track { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 1rem; align-items: center; padding: 1rem 1.1rem; border-radius: var(--k-radius); background: var(--k-surface); border: 1px solid var(--k-border); }
+.k-track__no { font: 800 1.4rem/1 var(--k-font-heading); color: var(--k-primary); opacity: .55; font-variant-numeric: tabular-nums; }
+.k-track__body { display: grid; gap: .25rem; min-width: 0; }
+.k-track__body strong a { color: inherit; text-decoration: none; }
+.k-track__body small { color: var(--k-muted); }
+.k-track__body audio { width: 100%; height: 40px; margin-top: .25rem; }
+.k-podcast iframe { width: 100%; border: 0; border-radius: var(--k-radius); display: block; }

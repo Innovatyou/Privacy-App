@@ -113,11 +113,13 @@ if ( ! $cta_url && kingdom_plugin_active() ) {
 			<?php if ( kingdom_plugin_active() && get_theme_mod( 'kingdom_live_badge', true ) ) : ?>
 				<?php echo do_shortcode( '[kcs_live_badge]' ); ?>
 			<?php endif; ?>
-			<button type="button" class="k-icon-btn" data-search-toggle aria-label="<?php esc_attr_e( 'Search', 'kingdom' ); ?>"><?php echo kingdom_icon( 'search' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
+			<?php if ( get_theme_mod( 'kingdom_header_search', true ) ) : ?>
+				<button type="button" class="k-icon-btn" data-search-toggle aria-label="<?php esc_attr_e( 'Search', 'kingdom' ); ?>"><?php echo kingdom_icon( 'search' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
+			<?php endif; ?>
 			<?php if ( get_theme_mod( 'kingdom_dark_toggle', true ) ) : ?>
 				<button type="button" class="k-icon-btn" data-theme-toggle aria-label="<?php esc_attr_e( 'Toggle dark mode', 'kingdom' ); ?>"><span class="k-when-light"><?php echo kingdom_icon( 'moon' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span><span class="k-when-dark"><?php echo kingdom_icon( 'sun' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span></button>
 			<?php endif; ?>
-			<?php if ( $cta_url ) : ?>
+			<?php if ( $cta_url && get_theme_mod( 'kingdom_header_cta', true ) ) : ?>
 				<a class="k-btn k-btn--accent k-btn--sm k-hide-sm" href="<?php echo esc_url( $cta_url ); ?>"><?php echo kingdom_icon( 'heart' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> <?php echo esc_html( $cta_text ); ?></a>
 			<?php endif; ?>
 			<button type="button" class="k-icon-btn k-nav-toggle" data-nav-toggle aria-controls="k-nav" aria-expanded="false" aria-label="<?php esc_attr_e( 'Menu', 'kingdom' ); ?>"><span class="k-when-closed"><?php echo kingdom_icon( 'menu' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span><span class="k-when-open"><?php echo kingdom_icon( 'close' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span></button>

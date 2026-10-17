@@ -18,7 +18,7 @@ if ( 'page' === get_option( 'show_on_front' ) ) {
 
 get_header();
 
-$kingdom_sections = array_filter( array_map( 'trim', explode( ',', get_theme_mod( 'kingdom_home_sections', 'hero, service-times, welcome, live, sermons, ministries, events, stats, partnership, gallery, testimonies, prayer, visit, give, social, newsletter' ) ) ) );
+$kingdom_sections = array_filter( array_map( 'trim', explode( ',', get_theme_mod( 'kingdom_home_sections', 'hero, service-times, welcome, youtube-live, sermons, videos, audio, ministries, events, stats, partnership, gallery, testimonies, prayer, visit, give, social, newsletter' ) ) ) );
 $kingdom_valid    = kingdom_available_sections();
 foreach ( $kingdom_sections as $kingdom_section ) {
 	if ( isset( $kingdom_valid[ $kingdom_section ] ) ) {

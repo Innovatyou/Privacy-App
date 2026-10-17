@@ -12,6 +12,7 @@ get_header();
 kingdom_section( 'hero', array( 'variant' => 'minimal' ) );
 kingdom_section( 'service-times' );
 kingdom_section( 'page-content' );
+kingdom_section( 'youtube-live' );
 kingdom_section( 'sermons' );
 kingdom_section( 'events', array( 'layout' => 'list' ) );
 kingdom_section( 'cta' );

@@ -11,8 +11,10 @@
 get_header();
 kingdom_section( 'hero', array( 'variant' => 'video' ) );
 kingdom_section( 'welcome' );
-kingdom_section( 'live' );
+kingdom_section( 'youtube-live' );
 kingdom_section( 'sermons', array( 'layout' => 'featured' ) );
+kingdom_section( 'videos' );
+kingdom_section( 'audio' );
 kingdom_section( 'events', array( 'layout' => 'list', 'count' => 4 ) );
 kingdom_section( 'verse' );
 kingdom_section( 'ministries' );

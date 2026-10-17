@@ -105,12 +105,15 @@ function kingdom_website_settings() {
 		'kingdom_hero_height'       => array( __( 'Banner height', 'kingdom' ), 'select', 'banner', 'full', array( 'full' => __( 'Full screen', 'kingdom' ), 'tall' => __( 'Tall (80%)', 'kingdom' ), 'medium' => __( 'Medium (60%)', 'kingdom' ), 'video' => __( 'Fit the video (16:9)', 'kingdom' ) ) ),
 		'kingdom_hero_overlay'      => array( __( 'Banner darkness over the video/image (0–90)', 'kingdom' ), 'number', 'banner', 55 ),
 	);
+	foreach ( kingdom_media_settings() as $key => $f ) {
+		$out[ $key ] = array( $f[0], $f[1], 'media', $f[2] );
+	}
 	foreach ( kingdom_available_sections() as $slug => $label ) {
 		$out[ 'kingdom_show_' . $slug ] = array( $label, 'checkbox', 'sections', true );
 	}
-	$out['kingdom_topbar']            = array( __( 'Top bar (service time, phone, partner login)', 'kingdom' ), 'checkbox', 'sections', true );
-	$out['kingdom_footer_newsletter'] = array( __( 'Footer newsletter band', 'kingdom' ), 'checkbox', 'sections', true );
-	$out['kingdom_mobile_nav']        = array( __( 'Bottom tab bar on phones', 'kingdom' ), 'checkbox', 'sections', true );
+	foreach ( kingdom_site_elements() as $key => $label ) {
+		$out[ $key ] = array( $label, 'checkbox', 'sections', true );
+	}
 	return $out;
 }
 add_filter(
@@ -130,7 +133,10 @@ function kingdom_available_sections() {
 		'hero'          => __( 'Hero', 'kingdom' ),
 		'service-times' => __( 'Service times bar', 'kingdom' ),
 		'welcome'       => __( 'Welcome / pastor message', 'kingdom' ),
-		'live'          => __( 'Live stream', 'kingdom' ),
+		'youtube-live'  => __( 'YouTube live stream', 'kingdom' ),
+		'live'          => __( 'Live stream (Church Suite schedule & chat)', 'kingdom' ),
+		'videos'        => __( 'Videos', 'kingdom' ),
+		'audio'         => __( 'Audio messages & podcast', 'kingdom' ),
 		'countdown'     => __( 'Next service countdown', 'kingdom' ),
 		'sermons'       => __( 'Latest sermons', 'kingdom' ),
 		'events'        => __( 'Upcoming events', 'kingdom' ),
@@ -150,6 +156,168 @@ function kingdom_available_sections() {
 		'contact'       => __( 'Contact & map', 'kingdom' ),
 		'cta'           => __( 'Call to action', 'kingdom' ),
 	);
+}
+
+/**
+ * Site-wide elements that can be switched on and off (theme mod => label).
+ *
+ * @return array
+ */
+function kingdom_site_elements() {
+	return array(
+		'kingdom_topbar'            => __( 'Top bar (service time, phone, partner login)', 'kingdom' ),
+		'kingdom_header_cta'        => __( 'Header “Give” button', 'kingdom' ),
+		'kingdom_header_search'     => __( 'Header search button', 'kingdom' ),
+		'kingdom_dark_toggle'       => __( 'Dark-mode button', 'kingdom' ),
+		'kingdom_live_badge'        => __( '“Live now” badge in the header', 'kingdom' ),
+		'kingdom_palette_switcher'  => __( 'Colour palette picker for visitors', 'kingdom' ),
+		'kingdom_footer_newsletter' => __( 'Footer newsletter band', 'kingdom' ),
+		'kingdom_to_top'            => __( 'Back-to-top button', 'kingdom' ),
+		'kingdom_mobile_nav'        => __( 'Bottom tab bar on phones', 'kingdom' ),
+	);
+}
+
+/**
+ * Settings for the YouTube live, Videos and Audio sections (key => array( label, type, default )).
+ *
+ * @return array
+ */
+function kingdom_media_settings() {
+	$out = array(
+		'kingdom_ytlive_url'      => array( __( 'YouTube live: video link or ID', 'kingdom' ), 'text', 'xzoaPmLegBE' ),
+		'kingdom_ytlive_channel'  => array( __( 'YouTube live: channel ID (UC…) — always shows whatever is live now', 'kingdom' ), 'text', '' ),
+		'kingdom_ytlive_title'    => array( __( 'YouTube live: heading', 'kingdom' ), 'text', __( 'Worship with us live', 'kingdom' ) ),
+		'kingdom_ytlive_autoplay' => array( __( 'YouTube live: start playing (muted) when the page opens', 'kingdom' ), 'checkbox', false ),
+		'kingdom_ytlive_chat'     => array( __( 'YouTube live: show the live chat next to the video', 'kingdom' ), 'checkbox', false ),
+		'kingdom_videos_title'    => array( __( 'Videos: heading', 'kingdom' ), 'text', __( 'Watch & be blessed', 'kingdom' ) ),
+		'kingdom_audio_title'     => array( __( 'Audio: heading', 'kingdom' ), 'text', __( 'Listen to the Word', 'kingdom' ) ),
+		'kingdom_audio_embed'     => array( __( 'Audio: podcast link (Spotify, SoundCloud or Apple Podcasts)', 'kingdom' ), 'url', '' ),
+	);
+	for ( $i = 1; $i <= 4; $i++ ) {
+		/* translators: %d: number */
+		$out[ 'kingdom_video_' . $i . '_url' ] = array( sprintf( __( 'Video %d: YouTube or Vimeo link', 'kingdom' ), $i ), 'url', '' );
+		/* translators: %d: number */
+		$out[ 'kingdom_video_' . $i . '_title' ] = array( sprintf( __( 'Video %d: title', 'kingdom' ), $i ), 'text', '' );
+	}
+	for ( $i = 1; $i <= 4; $i++ ) {
+		/* translators: %d: number */
+		$out[ 'kingdom_audio_' . $i . '_url' ] = array( sprintf( __( 'Audio %d: MP3 link', 'kingdom' ), $i ), 'url', '' );
+		/* translators: %d: number */
+		$out[ 'kingdom_audio_' . $i . '_title' ] = array( sprintf( __( 'Audio %d: title', 'kingdom' ), $i ), 'text', '' );
+	}
+	return $out;
+}
+
+/**
+ * Embed URL for the YouTube live section.
+ *
+ * A channel ID gives the "always live" embed (YouTube shows the current live stream, or the
+ * next scheduled one). Otherwise the video link or 11-character ID is embedded directly.
+ *
+ * @return array{src: string, id: string, watch: string}|null
+ */
+function kingdom_youtube_live() {
+	$channel  = trim( (string) get_theme_mod( 'kingdom_ytlive_channel', '' ) );
+	$raw      = trim( (string) get_theme_mod( 'kingdom_ytlive_url', 'xzoaPmLegBE' ) );
+	$id       = preg_match( '/^[A-Za-z0-9_-]{11}$/', $raw ) ? $raw : kingdom_youtube_id( $raw );
+	$autoplay = get_theme_mod( 'kingdom_ytlive_autoplay', false ) ? '&autoplay=1&mute=1' : '';
+	if ( preg_match( '/^UC[A-Za-z0-9_-]{22}$/', $channel ) ) {
+		return array(
+			'src'   => 'https://www.youtube.com/embed/live_stream?channel=' . rawurlencode( $channel ) . '&rel=0&playsinline=1' . $autoplay,
+			'id'    => $id,
+			'watch' => 'https://www.youtube.com/channel/' . rawurlencode( $channel ) . '/live',
+		);
+	}
+	if ( ! $id ) {
+		return null;
+	}
+	return array(
+		'src'   => 'https://www.youtube-nocookie.com/embed/' . rawurlencode( $id ) . '?rel=0&modestbranding=1&playsinline=1' . $autoplay,
+		'id'    => $id,
+		'watch' => 'https://www.youtube.com/watch?v=' . rawurlencode( $id ),
+	);
+}
+
+/**
+ * Videos for the Videos section: the church's own list, else the latest sermon videos.
+ *
+ * @param int $limit Max items.
+ * @return array Items of array( title, type, id, thumb, url ).
+ */
+function kingdom_videos( $limit = 4 ) {
+	$items = array();
+	for ( $i = 1; $i <= 4; $i++ ) {
+		$src = kingdom_video_source( get_theme_mod( 'kingdom_video_' . $i . '_url', '' ) );
+		if ( $src && 'file' !== $src['type'] ) {
+			$items[] = array(
+				'title' => get_theme_mod( 'kingdom_video_' . $i . '_title', '' ),
+				'type'  => $src['type'],
+				'id'    => $src['id'],
+				'thumb' => 'youtube' === $src['type'] ? 'https://i.ytimg.com/vi/' . $src['id'] . '/hqdefault.jpg' : kingdom_image( 'kingdom_gallery_1' ),
+				'url'   => 'youtube' === $src['type'] ? 'https://www.youtube.com/watch?v=' . $src['id'] : 'https://vimeo.com/' . $src['id'],
+			);
+		}
+	}
+	if ( ! $items && post_type_exists( 'kcs_sermon' ) ) {
+		$q = get_posts( array( 'post_type' => 'kcs_sermon', 'posts_per_page' => $limit * 3, 'meta_key' => '_kcs_video_url', 'meta_compare' => '!=', 'meta_value' => '' ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+		foreach ( $q as $p ) {
+			$src = kingdom_video_source( get_post_meta( $p->ID, '_kcs_video_url', true ) );
+			if ( $src && 'youtube' === $src['type'] ) {
+				$items[] = array( 'title' => get_the_title( $p ), 'type' => 'youtube', 'id' => $src['id'], 'thumb' => 'https://i.ytimg.com/vi/' . $src['id'] . '/hqdefault.jpg', 'url' => get_permalink( $p ) );
+			}
+		}
+	}
+	return array_slice( $items, 0, $limit );
+}
+
+/**
+ * Audio tracks for the Audio section: the church's own list, else the latest sermon recordings.
+ *
+ * @param int $limit Max items.
+ * @return array Items of array( title, src, meta, url ).
+ */
+function kingdom_audio_tracks( $limit = 4 ) {
+	$items = array();
+	for ( $i = 1; $i <= 4; $i++ ) {
+		$src = esc_url_raw( (string) get_theme_mod( 'kingdom_audio_' . $i . '_url', '' ) );
+		if ( $src ) {
+			$title   = get_theme_mod( 'kingdom_audio_' . $i . '_title', '' );
+			$items[] = array( 'title' => $title ? $title : wp_basename( wp_parse_url( $src, PHP_URL_PATH ) ), 'src' => $src, 'meta' => '', 'url' => '' );
+		}
+	}
+	if ( ! $items && post_type_exists( 'kcs_sermon' ) ) {
+		$q = get_posts( array( 'post_type' => 'kcs_sermon', 'posts_per_page' => $limit, 'meta_key' => '_kcs_audio_url', 'meta_compare' => '!=', 'meta_value' => '' ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+		foreach ( $q as $p ) {
+			$speakers = wp_get_post_terms( $p->ID, 'kcs_speaker', array( 'fields' => 'names' ) );
+			$items[]  = array(
+				'title' => get_the_title( $p ),
+				'src'   => get_post_meta( $p->ID, '_kcs_audio_url', true ),
+				'meta'  => trim( ( is_array( $speakers ) && $speakers ? $speakers[0] . ' · ' : '' ) . get_the_date( '', $p ) ),
+				'url'   => get_permalink( $p ),
+			);
+		}
+	}
+	return array_slice( $items, 0, $limit );
+}
+
+/**
+ * Embed URL for a podcast link (Spotify, SoundCloud or Apple Podcasts).
+ *
+ * @param string $url Link.
+ * @return array{src: string, height: int}|null
+ */
+function kingdom_podcast_embed( $url ) {
+	$url = trim( (string) $url );
+	if ( preg_match( '~open\.spotify\.com/(episode|show|playlist)/([A-Za-z0-9]+)~', $url, $m ) ) {
+		return array( 'src' => 'https://open.spotify.com/embed/' . $m[1] . '/' . $m[2], 'height' => 'episode' === $m[1] ? 152 : 352 );
+	}
+	if ( false !== strpos( $url, 'soundcloud.com/' ) ) {
+		return array( 'src' => 'https://w.soundcloud.com/player/?url=' . rawurlencode( $url ) . '&color=%23ff5500&visual=false', 'height' => 166 );
+	}
+	if ( false !== strpos( $url, 'podcasts.apple.com/' ) ) {
+		return array( 'src' => str_replace( 'podcasts.apple.com', 'embed.podcasts.apple.com', $url ), 'height' => 175 );
+	}
+	return null;
 }
 
 /**

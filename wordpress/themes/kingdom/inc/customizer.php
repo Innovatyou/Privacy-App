@@ -62,6 +62,7 @@ function kingdom_customize_register( $wp ) {
 		'kingdom_images'   => __( 'Church Images & Gallery', 'kingdom' ),
 		'kingdom_hero'     => __( 'Homepage Banner (image or video)', 'kingdom' ),
 		'kingdom_sections' => __( 'Show / Hide Sections', 'kingdom' ),
+		'kingdom_media'    => __( 'Live Stream, Video & Audio', 'kingdom' ),
 		'kingdom_home'     => __( 'Homepage Sections', 'kingdom' ),
 		'kingdom_welcome'  => __( 'Welcome / Pastor', 'kingdom' ),
 		'kingdom_services' => __( 'Service Times', 'kingdom' ),
@@ -146,8 +147,14 @@ function kingdom_customize_register( $wp ) {
 		$add( 'kingdom_sections', 'kingdom_show_' . $slug, $label, 'checkbox', true );
 	}
 
+	// Live stream, video & audio.
+	$wp->get_section( 'kingdom_media' )->description = __( 'YouTube live needs only your video link or ID. Add your channel ID instead to always show whatever is live on your channel, with no weekly changes.', 'kingdom' );
+	foreach ( kingdom_media_settings() as $key => $f ) {
+		$add( 'kingdom_media', $key, $f[0], $f[1], $f[2] );
+	}
+
 	// Homepage sections.
-	$add( 'kingdom_home', 'kingdom_home_sections', __( 'Section order', 'kingdom' ), 'textarea', 'hero, service-times, welcome, live, sermons, ministries, events, stats, partnership, gallery, testimonies, prayer, visit, give, social, newsletter', array(), __( 'Used when the front page is your latest posts or a page without a template. Available: ', 'kingdom' ) . implode( ', ', array_keys( kingdom_available_sections() ) ) );
+	$add( 'kingdom_home', 'kingdom_home_sections', __( 'Section order', 'kingdom' ), 'textarea', 'hero, service-times, welcome, youtube-live, sermons, videos, audio, ministries, events, stats, partnership, gallery, testimonies, prayer, visit, give, social, newsletter', array(), __( 'Used when the front page is your latest posts or a page without a template. Available: ', 'kingdom' ) . implode( ', ', array_keys( kingdom_available_sections() ) ) );
 	$add( 'kingdom_home', 'kingdom_sermons_title', __( 'Sermons title', 'kingdom' ), 'text', __( 'Latest messages', 'kingdom' ) );
 	$add( 'kingdom_home', 'kingdom_events_title', __( 'Events title', 'kingdom' ), 'text', __( 'Upcoming events', 'kingdom' ) );
 	$add( 'kingdom_home', 'kingdom_ministries_title', __( 'Ministries title', 'kingdom' ), 'text', __( 'Find your place', 'kingdom' ) );
@@ -195,6 +202,13 @@ function kingdom_customize_register( $wp ) {
 	$add( 'kingdom_footer', 'kingdom_footer_about', __( 'About text', 'kingdom' ), 'textarea', __( 'Raising a generation of believers who love God, love people and transform their world.', 'kingdom' ) );
 	$add( 'kingdom_footer', 'kingdom_footer_newsletter', __( 'Show newsletter in footer', 'kingdom' ), 'checkbox', true );
 	$add( 'kingdom_footer', 'kingdom_copyright', __( 'Copyright text', 'kingdom' ), 'text', '' );
+
+	// Site elements not already offered elsewhere (registered last so nothing is added twice).
+	foreach ( kingdom_site_elements() as $key => $label ) {
+		if ( ! $wp->get_setting( $key ) ) {
+			$add( 'kingdom_sections', $key, $label, 'checkbox', true );
+		}
+	}
 }
 add_action( 'customize_register', 'kingdom_customize_register' );
 
