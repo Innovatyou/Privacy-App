@@ -154,6 +154,21 @@ class KCS_Installer {
 			KEY gateway (gateway)
 		) $charset;";
 
+		$sql[] = 'CREATE TABLE ' . kcs_table( 'push' ) . " (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			endpoint_hash char(64) NOT NULL,
+			endpoint text NOT NULL,
+			p256dh varchar(120) NOT NULL,
+			auth varchar(40) NOT NULL,
+			user_id bigint(20) unsigned NOT NULL DEFAULT 0,
+			ua varchar(191) NOT NULL DEFAULT '',
+			created_at datetime NOT NULL,
+			updated_at datetime NOT NULL,
+			PRIMARY KEY  (id),
+			UNIQUE KEY endpoint_hash (endpoint_hash),
+			KEY user_id (user_id)
+		) $charset;";
+
 		$sql[] = 'CREATE TABLE ' . kcs_table( 'subscribers' ) . " (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			email varchar(191) NOT NULL,

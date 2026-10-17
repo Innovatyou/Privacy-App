@@ -31,13 +31,10 @@ class KCS_Features {
 	}
 
 	/**
-	 * Head links: podcast feed, manifest, theme colour.
+	 * Head links: podcast feed. (App manifest and colours: KCS_PWA.)
 	 */
 	public static function head_links() {
 		echo '<link rel="alternate" type="application/rss+xml" title="' . esc_attr( get_bloginfo( 'name' ) . ' — ' . __( 'Sermon Podcast', 'kingdom-church-suite' ) ) . '" href="' . esc_url( get_feed_link( 'sermon-podcast' ) ) . '">' . "\n";
-		echo '<link rel="manifest" href="' . esc_url( add_query_arg( 'kcs_manifest', 1, home_url( '/' ) ) ) . '">' . "\n";
-		echo '<meta name="theme-color" content="' . esc_attr( kcs_get_option( 'email_color', '#5b2a86' ) ) . '">' . "\n";
-		echo '<meta name="mobile-web-app-capable" content="yes">' . "\n";
 	}
 
 	/**
@@ -172,32 +169,14 @@ class KCS_Features {
 	}
 
 	/**
-	 * Web app manifest (Add to home screen).
+	 * Old manifest address: send it to the church app manifest.
 	 */
 	public static function manifest() {
 		if ( empty( $_GET['kcs_manifest'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
-		$icon_id = get_option( 'site_icon' );
-		$icons   = array();
-		foreach ( array( 192, 512 ) as $size ) {
-			$url = $icon_id ? wp_get_attachment_image_url( $icon_id, array( $size, $size ) ) : '';
-			if ( $url ) {
-				$icons[] = array( 'src' => $url, 'sizes' => $size . 'x' . $size, 'type' => 'image/png' );
-			}
-		}
-		$name = kcs_get_option( 'church_name', get_bloginfo( 'name' ) );
-		wp_send_json(
-			array(
-				'name'             => $name,
-				'short_name'       => mb_substr( $name, 0, 12 ),
-				'start_url'        => home_url( '/' ),
-				'display'          => 'standalone',
-				'background_color' => '#ffffff',
-				'theme_color'      => kcs_get_option( 'email_color', '#5b2a86' ),
-				'icons'            => $icons,
-			)
-		);
+		wp_safe_redirect( KCS_PWA::url( 'manifest' ), 301 );
+		exit;
 	}
 
 	/**

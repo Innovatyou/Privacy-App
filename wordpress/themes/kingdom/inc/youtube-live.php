@@ -203,6 +203,11 @@ function kingdom_youtube_live( $force = false ) {
 		if ( ! is_array( $status ) || ( $status['channel'] ?? '' ) !== $channel ) {
 			$status = array_merge( kingdom_ytlive_check( $channel ), array( 'channel' => $channel, 'checked_at' => time() ) );
 			set_transient( 'kingdom_ytlive_status', $status, kingdom_ytlive_cache_ttl( $status['state'] ) );
+			// First time this broadcast is seen live: tell the app (push notifications) once.
+			if ( 'live' === $status['state'] && $status['video_id'] && get_option( 'kingdom_ytlive_last_live' ) !== $status['video_id'] ) {
+				update_option( 'kingdom_ytlive_last_live', $status['video_id'], false );
+				do_action( 'kingdom_ytlive_went_live', $status );
+			}
 		}
 		$video = $status['video_id'] ? $status['video_id'] : $replay;
 		$out   = array(
@@ -339,3 +344,30 @@ function kingdom_ytlive_admin_status( $group ) {
 	echo '<p class="kcs-alert kcs-alert--' . esc_attr( $type ) . '">' . esc_html( $msg ) . ' <a href="' . esc_url( add_query_arg( 'ytlive_check', 1 ) ) . '">' . esc_html__( 'Check now', 'kingdom' ) . '</a></p>';
 }
 add_action( 'kcs_website_group_intro', 'kingdom_ytlive_admin_status' );
+
+/**
+ * Check the channel every few minutes in the background, so app users get the "we're live"
+ * notification even when nobody has the website open.
+ */
+function kingdom_ytlive_cron_schedules( $schedules ) {
+	$schedules['kingdom_five_minutes'] = array(
+		'interval' => 5 * MINUTE_IN_SECONDS,
+		'display'  => __( 'Every 5 minutes', 'kingdom' ),
+	);
+	return $schedules;
+}
+add_filter( 'cron_schedules', 'kingdom_ytlive_cron_schedules' );
+
+/**
+ * Keep the background check scheduled only while a channel is set.
+ */
+function kingdom_ytlive_schedule() {
+	$next = wp_next_scheduled( 'kingdom_ytlive_poll' );
+	if ( kingdom_ytlive_channel_id() && ! $next ) {
+		wp_schedule_event( time() + MINUTE_IN_SECONDS, 'kingdom_five_minutes', 'kingdom_ytlive_poll' );
+	} elseif ( ! kingdom_ytlive_channel_id() && $next ) {
+		wp_clear_scheduled_hook( 'kingdom_ytlive_poll' );
+	}
+}
+add_action( 'init', 'kingdom_ytlive_schedule' );
+add_action( 'kingdom_ytlive_poll', 'kingdom_youtube_live' );

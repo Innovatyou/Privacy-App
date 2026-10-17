@@ -785,3 +785,25 @@ body:has(.k-wa) .k-to-top { right: auto; left: max(1.25rem, env(safe-area-inset-
 .k-ytlive__countdown { padding: .4rem .9rem; border-radius: 999px; background: var(--k-accent); color: #1f1b24; font-weight: 800; font-variant-numeric: tabular-nums; }
 .k-ytlive__idle { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: .8rem; text-align: center; color: rgba(255,255,255,.8); padding: 1rem; }
 .k-ytlive__idle .k-icon { width: 48px; height: 48px; padding: 12px; border-radius: 50%; background: rgba(255,255,255,.12); }
+
+/* Custom colours in the visitor colour picker */
+.k-palette__custom { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .9rem; margin-top: .85rem; padding-top: .75rem; border-top: 1px solid var(--k-border); }
+.k-palette__custom > span { flex-basis: 100%; font-weight: 700; font-size: .85rem; }
+.k-palette__custom label { display: inline-flex; align-items: center; gap: .4rem; font-size: .85rem; cursor: pointer; }
+.k-palette__custom input[type="color"] { width: 34px; height: 34px; padding: 0; border: 2px solid var(--k-surface); border-radius: 50%; box-shadow: 0 0 0 1px var(--k-border); background: none; cursor: pointer; }
+.k-palette__custom input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+.k-palette__custom input[type="color"]::-webkit-color-swatch { border: 0; border-radius: 50%; }
+.k-palette__custom input[type="color"]::-moz-color-swatch { border: 0; border-radius: 50%; }
+
+/* ---------- Church app (opened from the home screen) ---------- */
+.k-nav__app { display: grid; gap: .6rem; margin-bottom: .75rem; }
+.k-nav__app .k-btn { gap: .5rem; }
+.k-nav__app .k-icon { width: 18px; height: 18px; }
+.k-nav__app [data-kcs-push].is-on { border-color: var(--k-primary); background: color-mix(in srgb, var(--k-primary) 10%, transparent); }
+html.is-app .k-topbar { display: none; }
+html.is-app .k-header { padding-top: env(safe-area-inset-top, 0px); }
+html.is-app.has-sticky-header .k-header,
+html.is-app .has-sticky-header .k-header { top: 0; }
+html.is-app .k-nav { padding-top: calc(5.5rem + env(safe-area-inset-top, 0px)); padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px)); }
+html.is-app .k-footer { padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)); }
+html.is-app .k-palette { display: none; }

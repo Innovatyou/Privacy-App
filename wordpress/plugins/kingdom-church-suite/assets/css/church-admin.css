@@ -90,3 +90,10 @@
 .kca-plan > summary .kcs-muted { flex: 1 1 200px; font-size: .9rem; }
 .kca-plan[open] > summary { margin-bottom: 1rem; padding-bottom: .8rem; border-bottom: 1px solid var(--kcs-border); }
 .kca-kpis + .kca-filters { margin-top: 1rem; }
+.kca-colour { display: flex !important; align-items: center; gap: .7rem; flex-direction: row !important; }
+.kca-colour input[type="color"] { width: 46px; height: 46px; padding: 0; border: 1px solid var(--kcs-border); border-radius: 12px; background: none; cursor: pointer; flex: none; }
+.kca-colour code { font-size: .8rem; color: var(--kcs-muted); }
+.kca-app-preview { display: grid; justify-items: center; gap: .45rem; width: 120px; padding: 1rem .5rem .8rem; margin: .25rem 0 .5rem; border-radius: 22px; background: linear-gradient(160deg, color-mix(in srgb, var(--app-bg) 30%, #1b1726), #0f0d15); color: #fff; font-size: .78rem; font-weight: 600; text-align: center; }
+.kca-app-preview img { width: 64px; height: 64px; border-radius: 15px; box-shadow: 0 6px 16px rgba(0,0,0,.4); }
+.kca-help { margin-top: .5rem; font-size: .9rem; }
+.kca-help summary { cursor: pointer; font-weight: 700; }

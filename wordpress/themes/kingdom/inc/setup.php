@@ -140,11 +140,11 @@ function kingdom_dynamic_css() {
 	$hfont   = 'System' === $heading ? $stack : '"' . $heading . '", ' . ( in_array( $heading, array( 'Playfair Display', 'Cormorant Garamond', 'Lora' ), true ) ? 'Georgia, serif' : $stack );
 	$bfont   = 'System' === $body ? $stack : '"' . $body . '", ' . $stack;
 
-	$css = ':root{--k-primary:' . $primary . ';--k-accent:' . $accent . ';--k-dark:' . $dark . ';--k-radius:' . $r . ';--k-container:' . $width . 'px;--k-font-heading:' . $hfont . ';--k-font-body:' . $bfont . ';}';
+	$css = ':root{--k-primary:' . $primary . ';--k-on-primary:' . kingdom_on_colour( $primary ) . ';--k-accent:' . $accent . ';--k-dark:' . $dark . ';--k-radius:' . $r . ';--k-container:' . $width . 'px;--k-font-heading:' . $hfont . ';--k-font-body:' . $bfont . ';}';
 	// Visitor colour switcher: each palette can be applied with <html data-palette="slug">.
 	if ( get_theme_mod( 'kingdom_palette_switcher', true ) ) {
 		foreach ( kingdom_palettes() as $slug => $p ) {
-			$css .= ':root[data-palette="' . esc_attr( $slug ) . '"]{--k-primary:' . $p[1] . ';--k-accent:' . $p[2] . ';--k-dark:' . $p[3] . ';}';
+			$css .= ':root[data-palette="' . esc_attr( $slug ) . '"]{--k-primary:' . $p[1] . ';--k-on-primary:' . kingdom_on_colour( $p[1] ) . ';--k-accent:' . $p[2] . ';--k-dark:' . $p[3] . ';}';
 		}
 	}
 	return $css;
@@ -200,7 +200,7 @@ function kingdom_has_transparent_header() {
 function kingdom_scheme_script() {
 	$default = get_theme_mod( 'kingdom_color_scheme', 'light' );
 	?>
-	<script>(function(){try{var s=localStorage.getItem('kingdom-scheme')||'<?php echo esc_js( $default ); ?>';if(s==='auto'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',s);<?php if ( get_theme_mod( 'kingdom_palette_switcher', true ) ) : ?>var p=localStorage.getItem('kingdom-palette');if(p){document.documentElement.setAttribute('data-palette',p);}<?php endif; ?>}catch(e){}})();</script>
+	<script>(function(){try{var s=localStorage.getItem('kingdom-scheme')||'<?php echo esc_js( $default ); ?>';if(s==='auto'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',s);<?php if ( get_theme_mod( 'kingdom_palette_switcher', true ) ) : ?>var p=localStorage.getItem('kingdom-palette');if(p){document.documentElement.setAttribute('data-palette',p);}if(p==='custom'){var c=JSON.parse(localStorage.getItem('kingdom-palette-custom')||'{}'),r=document.documentElement.style;if(c.primary){r.setProperty('--k-primary',c.primary);r.setProperty('--k-on-primary',c.on||'#fff');}if(c.accent){r.setProperty('--k-accent',c.accent);}}<?php endif; ?>}catch(e){}})();</script>
 	<?php
 }
 add_action( 'wp_head', 'kingdom_scheme_script', 0 );

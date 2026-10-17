@@ -18,7 +18,7 @@ if ( ! $cta_url && kingdom_plugin_active() ) {
 <html <?php language_attributes(); ?>>
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 	<?php wp_head(); ?>
 </head>
 <body <?php body_class(); ?>>
@@ -101,6 +101,13 @@ if ( ! $cta_url && kingdom_plugin_active() ) {
 								<button type="button" data-palette="<?php echo esc_attr( $kingdom_slug ); ?>" title="<?php echo esc_attr( $kingdom_p[0] ); ?>" style="--sw-a:<?php echo esc_attr( $kingdom_p[1] ); ?>;--sw-b:<?php echo esc_attr( $kingdom_p[2] ); ?>"><span class="screen-reader-text"><?php echo esc_html( $kingdom_p[0] ); ?></span></button>
 							<?php endforeach; ?>
 						</div>
+						<?php kingdom_custom_colour_fields( 'k-nav-pal' ); ?>
+					</div>
+				<?php endif; ?>
+				<?php if ( class_exists( 'KCS_PWA' ) && KCS_PWA::enabled() ) : ?>
+					<div class="k-nav__app">
+						<button type="button" class="k-btn k-btn--outline k-btn--block" data-kcs-install hidden><?php echo kingdom_icon( 'download' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> <?php esc_html_e( 'Install our app', 'kingdom' ); ?></button>
+						<button type="button" class="k-btn k-btn--outline k-btn--block" data-kcs-push hidden data-off-label="<?php esc_attr_e( 'Turn on notifications', 'kingdom' ); ?>" data-on-label="<?php esc_attr_e( 'Notifications on', 'kingdom' ); ?>"><?php echo kingdom_icon( 'bell' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> <span data-kcs-push-label><?php esc_html_e( 'Turn on notifications', 'kingdom' ); ?></span></button>
 					</div>
 				<?php endif; ?>
 				<?php if ( $cta_url ) : ?>

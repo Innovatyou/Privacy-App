@@ -18,7 +18,7 @@
 defined( 'ABSPATH' ) || exit;
 
 define( 'KCS_VERSION', '1.0.0' );
-define( 'KCS_DB_VERSION', '1.2.0' );
+define( 'KCS_DB_VERSION', '1.3.0' );
 define( 'KCS_FILE', __FILE__ );
 define( 'KCS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'KCS_URL', plugin_dir_url( __FILE__ ) );
@@ -30,6 +30,8 @@ require_once KCS_PATH . 'includes/class-kcs-post-types.php';
 require_once KCS_PATH . 'includes/class-kcs-email.php';
 require_once KCS_PATH . 'includes/class-kcs-partners.php';
 require_once KCS_PATH . 'includes/class-kcs-plans.php';
+require_once KCS_PATH . 'includes/class-kcs-push.php';
+require_once KCS_PATH . 'includes/class-kcs-pwa.php';
 require_once KCS_PATH . 'includes/gateways/abstract-kcs-gateway.php';
 require_once KCS_PATH . 'includes/gateways/class-kcs-gateway-flutterwave.php';
 require_once KCS_PATH . 'includes/gateways/class-kcs-gateway-paystack.php';

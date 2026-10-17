@@ -97,13 +97,41 @@
 			panel.hidden = !panel.hidden;
 			toggle.setAttribute('aria-expanded', panel.hidden ? 'false' : 'true');
 		});
+		var clearCustom = function () { ['--k-primary', '--k-accent', '--k-on-primary'].forEach(function (v) { root.style.removeProperty(v); }); };
 		document.addEventListener('click', function (e) {
 			var b = e.target.closest('.k-palette [data-palette], .k-nav__palette [data-palette]');
 			if (!b) { return; }
+			clearCustom();
 			if (b.dataset.palette) { root.setAttribute('data-palette', b.dataset.palette); } else { root.removeAttribute('data-palette'); }
 			try { b.dataset.palette ? localStorage.setItem('kingdom-palette', b.dataset.palette) : localStorage.removeItem('kingdom-palette'); } catch (err) { /* private mode */ }
 			mark();
 		});
+		/* Custom colours: any colour the visitor likes, with readable button text. */
+		var onColour = function (hex) {
+			var n = parseInt(hex.slice(1), 16), c = [n >> 16 & 255, n >> 8 & 255, n & 255].map(function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+			var l = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+			return 1.05 / (l + 0.05) >= (l + 0.05) / 0.05 * 0.6 ? '#ffffff' : '#16121c';
+		};
+		var applyCustom = function () {
+			var p = document.querySelector('[data-custom-colour="primary"]').value, a = document.querySelector('[data-custom-colour="accent"]').value;
+			root.setAttribute('data-palette', 'custom');
+			root.style.setProperty('--k-primary', p); root.style.setProperty('--k-on-primary', onColour(p)); root.style.setProperty('--k-accent', a);
+			try { localStorage.setItem('kingdom-palette', 'custom'); localStorage.setItem('kingdom-palette-custom', JSON.stringify({ primary: p, accent: a, on: onColour(p) })); } catch (err) { /* private mode */ }
+			mark();
+		};
+		document.querySelectorAll('[data-custom-colour]').forEach(function (input) {
+			input.addEventListener('input', function () {
+				document.querySelectorAll('[data-custom-colour="' + input.dataset.customColour + '"]').forEach(function (o) { if (o !== input) { o.value = input.value; } });
+				applyCustom();
+			});
+		});
+		try {
+			var saved = JSON.parse(localStorage.getItem('kingdom-palette-custom') || 'null');
+			if (saved && root.getAttribute('data-palette') === 'custom') {
+				document.querySelectorAll('[data-custom-colour="primary"]').forEach(function (i) { i.value = saved.primary; });
+				document.querySelectorAll('[data-custom-colour="accent"]').forEach(function (i) { i.value = saved.accent; });
+			}
+		} catch (err) { /* private mode */ }
 		document.addEventListener('click', function (e) { if (!panel.hidden && !e.target.closest('[data-palette-picker]')) { panel.hidden = true; toggle.setAttribute('aria-expanded', 'false'); } });
 		mark();
 	}

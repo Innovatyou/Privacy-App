@@ -129,6 +129,7 @@ $social   = kingdom_social_links();
 					<button type="button" data-palette="<?php echo esc_attr( $kingdom_slug ); ?>" title="<?php echo esc_attr( $kingdom_p[0] ); ?>" style="--sw-a:<?php echo esc_attr( $kingdom_p[1] ); ?>;--sw-b:<?php echo esc_attr( $kingdom_p[2] ); ?>"><span class="screen-reader-text"><?php echo esc_html( $kingdom_p[0] ); ?></span></button>
 				<?php endforeach; ?>
 			</div>
+			<?php kingdom_custom_colour_fields( 'k-pal' ); ?>
 			<button type="button" class="k-palette__reset" data-palette=""><?php esc_html_e( 'Reset to church colours', 'kingdom' ); ?></button>
 		</div>
 	</div>

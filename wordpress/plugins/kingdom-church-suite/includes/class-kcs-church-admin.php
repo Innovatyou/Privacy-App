@@ -57,6 +57,7 @@ class KCS_Church_Admin {
 			'notify'      => array( __( 'Notify partners', 'kingdom-church-suite' ), '✉' ),
 			'pastors'     => array( __( 'Pastors & WhatsApp', 'kingdom-church-suite' ), '☎' ),
 			'website'     => array( __( 'Website', 'kingdom-church-suite' ), '▣' ),
+			'app'         => array( __( 'Church app', 'kingdom-church-suite' ), '▤' ),
 		) );
 	}
 
@@ -265,8 +266,18 @@ class KCS_Church_Admin {
 						)
 					);
 				}
-				/* translators: %d: number of emails */
-				$msg = sprintf( __( 'Notification sent. %d email(s) queued.', 'kingdom-church-suite' ), $count );
+				$phones = 0;
+				if ( ! empty( $d['send_push'] ) ) {
+					$users = array();
+					foreach ( KCS_Partners::query( array( 'per_page' => 100000, 'status' => $status ) )['items'] as $p ) {
+						if ( $p->user_id && ( ! $plan_ids || in_array( (int) $p->plan_id, $plan_ids, true ) ) ) {
+							$users[] = (int) $p->user_id;
+						}
+					}
+					$phones = KCS_Push::send_all( $subject, wp_strip_all_tags( str_replace( '{first_name}', '', $message ) ), ! empty( $d['link'] ) ? $d['link'] : kcs_page_url( 'partner_dashboard' ), $users );
+				}
+				/* translators: 1: number of emails, 2: number of phones */
+				$msg = sprintf( __( 'Notification sent. %1$d email(s) queued, %2$d phone(s) notified.', 'kingdom-church-suite' ), $count, $phones );
 				break;
 
 			case 'announcement_delete':
@@ -342,6 +353,9 @@ class KCS_Church_Admin {
 						case 'number':
 							$value = min( 90, absint( $raw ) );
 							break;
+						case 'color':
+							$value = sanitize_hex_color( $raw ) ? sanitize_hex_color( $raw ) : $f[3];
+							break;
 						case 'select':
 							$value = array_key_exists( $raw, (array) ( $f[4] ?? array() ) ) ? $raw : $f[3];
 							break;
@@ -352,6 +366,34 @@ class KCS_Church_Admin {
 				}
 				$msg  = __( 'Website updated.', 'kingdom-church-suite' );
 				$view = 'website';
+				break;
+
+			case 'app_save':
+				kcs_update_option( 'pwa_enabled', empty( $d['pwa_enabled'] ) ? '0' : '1' );
+				kcs_update_option( 'pwa_banner', empty( $d['pwa_banner'] ) ? '0' : '1' );
+				kcs_update_option( 'pwa_live_push', empty( $d['pwa_live_push'] ) ? '0' : '1' );
+				kcs_update_option( 'pwa_name', sanitize_text_field( $d['pwa_name'] ?? '' ) );
+				kcs_update_option( 'pwa_short_name', mb_substr( sanitize_text_field( $d['pwa_short_name'] ?? '' ), 0, 14 ) );
+				kcs_update_option( 'pwa_icon', esc_url_raw( $d['pwa_icon'] ?? '' ) );
+				$msg = __( 'Church app saved. Phones pick up the changes next time the app opens.', 'kingdom-church-suite' );
+				break;
+
+			case 'push_send':
+				$title = sanitize_text_field( $d['push_title'] ?? '' );
+				$body  = sanitize_textarea_field( $d['push_body'] ?? '' );
+				$link  = esc_url_raw( $d['push_link'] ?? '' );
+				if ( ! $title || ! $body ) {
+					$msg  = __( 'Add a title and a message.', 'kingdom-church-suite' );
+					$type = 'error';
+					break;
+				}
+				if ( $link && wp_parse_url( $link, PHP_URL_HOST ) !== wp_parse_url( home_url(), PHP_URL_HOST ) ) {
+					$link = '';
+				}
+				$n = KCS_Push::send_all( $title, $body, $link );
+				/* translators: %d: number of phones */
+				$msg = $n ? sprintf( _n( 'Sending to %d phone…', 'Sending to %d phones…', $n, 'kingdom-church-suite' ), $n ) : __( 'No phones have turned on notifications yet.', 'kingdom-church-suite' );
+				$type = $n ? 'success' : 'error';
 				break;
 
 			case 'pastor_delete':
@@ -822,6 +864,7 @@ class KCS_Church_Admin {
 				</div>
 				<label class="kcs-check"><input type="checkbox" name="send_email" value="1" checked> <?php esc_html_e( 'Send by email', 'kingdom-church-suite' ); ?></label>
 				<label class="kcs-check"><input type="checkbox" name="post_dashboard" value="1" checked> <?php esc_html_e( 'Show on their partner dashboard', 'kingdom-church-suite' ); ?></label>
+				<label class="kcs-check"><input type="checkbox" name="send_push" value="1" checked> <?php esc_html_e( 'Send to their phones (partners who turned on app notifications)', 'kingdom-church-suite' ); ?></label>
 				<button class="kcs-btn"><?php esc_html_e( 'Send notification', 'kingdom-church-suite' ); ?></button>
 			</form>
 			<section class="kca-card">
@@ -951,6 +994,7 @@ class KCS_Church_Admin {
 			return;
 		}
 		$groups = array(
+			'brand'    => __( 'Church colours', 'kingdom-church-suite' ),
 			'banner'   => __( 'Homepage banner', 'kingdom-church-suite' ),
 			'media'    => __( 'Live stream, video & audio', 'kingdom-church-suite' ),
 			'sections' => __( 'Show or hide sections', 'kingdom-church-suite' ),
@@ -968,6 +1012,8 @@ class KCS_Church_Admin {
 					<h3><?php echo esc_html( $title ); ?></h3>
 					<?php if ( 'banner' === $group ) : ?>
 						<p class="kcs-muted"><?php esc_html_e( 'Paste a YouTube, Vimeo or MP4 link to play it, muted and looping, behind the homepage banner. Leave it empty to use the banner image.', 'kingdom-church-suite' ); ?></p>
+					<?php elseif ( 'brand' === $group ) : ?>
+						<p class="kcs-muted"><?php esc_html_e( 'Pick a ready-made palette, or choose Custom and set your own church colours. Button text switches between white and dark automatically so it stays readable.', 'kingdom-church-suite' ); ?></p>
 					<?php elseif ( 'media' === $group ) : ?>
 						<p class="kcs-muted"><?php esc_html_e( 'Paste your YouTube channel link or @handle once: the website shows your live stream the moment you go live, a countdown when a stream is scheduled, and your replay video the rest of the time. Videos and audio left empty show your latest sermons.', 'kingdom-church-suite' ); ?></p>
 					<?php else : ?>
@@ -984,6 +1030,8 @@ class KCS_Church_Admin {
 						if ( 'checkbox' === $f[1] ) :
 							?>
 							<label class="kcs-check kca-switch"><input type="checkbox" name="<?php echo esc_attr( $key ); ?>" value="1" <?php checked( (bool) $value ); ?>> <?php echo esc_html( $f[0] ); ?></label>
+						<?php elseif ( 'color' === $f[1] ) : ?>
+							<label class="kca-colour"><input type="color" name="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( $value ); ?>"> <span><?php echo esc_html( $f[0] ); ?> <code><?php echo esc_html( $value ); ?></code></span></label>
 						<?php elseif ( 'select' === $f[1] ) : ?>
 							<label><?php echo esc_html( $f[0] ); ?><select name="<?php echo esc_attr( $key ); ?>"><?php foreach ( (array) $f[4] as $k => $l ) : ?><option value="<?php echo esc_attr( $k ); ?>" <?php selected( $value, $k ); ?>><?php echo esc_html( $l ); ?></option><?php endforeach; ?></select></label>
 						<?php else : ?>
@@ -996,6 +1044,66 @@ class KCS_Church_Admin {
 			<?php endforeach; ?>
 		</form>
 		<p><a class="kcs-btn kcs-btn--ghost" href="<?php echo esc_url( home_url( '/' ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View website', 'kingdom-church-suite' ); ?></a></p>
+		<?php
+	}
+
+	/**
+	 * Church app: settings, notifications to every phone, history.
+	 */
+	private static function view_app() {
+		$on      = '1' === (string) kcs_get_option( 'pwa_enabled', '1' );
+		$devices = KCS_Push::count();
+		$log     = (array) get_option( 'kcs_push_log', array() );
+		$queue   = (array) get_option( 'kcs_push_queue', array() );
+		$v       = class_exists( 'KCS_PWA' ) ? KCS_PWA::version() : '';
+		?>
+		<div class="kca-kpis" style="margin-bottom:1rem">
+			<div class="kca-kpi"><span><?php esc_html_e( 'App', 'kingdom-church-suite' ); ?></span><strong><?php echo $on ? esc_html__( 'On', 'kingdom-church-suite' ) : esc_html__( 'Off', 'kingdom-church-suite' ); ?></strong></div>
+			<div class="kca-kpi"><span><?php esc_html_e( 'Phones with notifications', 'kingdom-church-suite' ); ?></span><strong><?php echo (int) $devices; ?></strong></div>
+			<div class="kca-kpi"><span><?php esc_html_e( 'Sending now', 'kingdom-church-suite' ); ?></span><strong><?php echo (int) array_sum( array_map( function ( $j ) { return count( $j['ids'] ); }, $queue ) ); ?></strong></div>
+		</div>
+		<div class="kca-cols">
+			<form method="post" class="kca-card kcs-form">
+				<?php echo self::fields( 'push_send', 'app' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<h3><?php esc_html_e( 'Send a notification to every phone', 'kingdom-church-suite' ); ?></h3>
+				<p class="kcs-muted"><?php esc_html_e( 'Appears on the lock screen of everyone who installed the app and turned on notifications — Android and iPhone.', 'kingdom-church-suite' ); ?></p>
+				<label><?php esc_html_e( 'Title', 'kingdom-church-suite' ); ?><input name="push_title" maxlength="60" required placeholder="<?php esc_attr_e( 'Sunday service at 9am', 'kingdom-church-suite' ); ?>"></label>
+				<label><?php esc_html_e( 'Message', 'kingdom-church-suite' ); ?><textarea name="push_body" rows="3" maxlength="180" required placeholder="<?php esc_attr_e( 'Come early and bring a friend!', 'kingdom-church-suite' ); ?>"></textarea></label>
+				<label><?php esc_html_e( 'Open this page when tapped (optional)', 'kingdom-church-suite' ); ?><input type="url" name="push_link" placeholder="<?php echo esc_attr( home_url( '/' ) ); ?>"></label>
+				<button class="kcs-btn" <?php disabled( ! $devices ); ?>><?php esc_html_e( 'Send now', 'kingdom-church-suite' ); ?></button>
+				<?php if ( ! $devices ) : ?><small class="kcs-muted"><?php esc_html_e( 'No phones yet. Members turn on notifications from the menu (“Turn on notifications”) or when the app asks them.', 'kingdom-church-suite' ); ?></small><?php endif; ?>
+				<?php if ( $log ) : ?>
+					<h4><?php esc_html_e( 'Recent notifications', 'kingdom-church-suite' ); ?></h4>
+					<ul class="kca-list">
+						<?php foreach ( $log as $l ) : ?>
+							<li><span><strong><?php echo esc_html( $l['title'] ); ?></strong><small><?php echo esc_html( $l['body'] ); ?></small></span><small><?php /* translators: 1: delivered, 2: failed */ echo esc_html( sprintf( __( '%1$d delivered · %2$d failed', 'kingdom-church-suite' ), $l['sent'], $l['failed'] ) . ' · ' . mysql2date( get_option( 'date_format' ), $l['date'] ) ); ?></small></li>
+						<?php endforeach; ?>
+					</ul>
+				<?php endif; ?>
+			</form>
+			<form method="post" class="kca-card kcs-form">
+				<?php echo self::fields( 'app_save', 'app' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<h3><?php esc_html_e( 'App settings', 'kingdom-church-suite' ); ?></h3>
+				<?php if ( $v ) : ?>
+					<div class="kca-app-preview" style="--app-bg:<?php echo esc_attr( KCS_PWA::colours()[0] ); ?>">
+						<img src="<?php echo esc_url( KCS_PWA::url( 'icon', array( 'size' => 192, 'v' => $v ) ) ); ?>" width="72" height="72" alt="">
+						<span><?php echo esc_html( KCS_PWA::name( true ) ); ?></span>
+					</div>
+					<p class="kcs-muted"><?php esc_html_e( 'The app uses your church logo and church colours automatically (change colours under Website → Church colours).', 'kingdom-church-suite' ); ?></p>
+				<?php endif; ?>
+				<label class="kcs-check"><input type="checkbox" name="pwa_enabled" value="1" <?php checked( $on ); ?>> <?php esc_html_e( 'Turn the church app on', 'kingdom-church-suite' ); ?></label>
+				<label class="kcs-check"><input type="checkbox" name="pwa_banner" value="1" <?php checked( '1', (string) kcs_get_option( 'pwa_banner', '1' ) ); ?>> <?php esc_html_e( 'Invite visitors to install the app (after a couple of visits)', 'kingdom-church-suite' ); ?></label>
+				<label class="kcs-check"><input type="checkbox" name="pwa_live_push" value="1" <?php checked( '1', (string) kcs_get_option( 'pwa_live_push', '1' ) ); ?>> <?php esc_html_e( 'Notify every phone automatically when the YouTube live stream starts', 'kingdom-church-suite' ); ?></label>
+				<label><?php esc_html_e( 'App name', 'kingdom-church-suite' ); ?><input name="pwa_name" value="<?php echo esc_attr( kcs_get_option( 'pwa_name', '' ) ); ?>" placeholder="<?php echo esc_attr( kcs_get_option( 'church_name', get_bloginfo( 'name' ) ) ); ?>"></label>
+				<label><?php esc_html_e( 'Name under the icon (max 14 letters)', 'kingdom-church-suite' ); ?><input name="pwa_short_name" maxlength="14" value="<?php echo esc_attr( kcs_get_option( 'pwa_short_name', '' ) ); ?>"></label>
+				<label><?php esc_html_e( 'App icon image URL (optional — square, at least 512×512)', 'kingdom-church-suite' ); ?><input type="url" name="pwa_icon" value="<?php echo esc_attr( kcs_get_option( 'pwa_icon', '' ) ); ?>" placeholder="<?php esc_attr_e( 'Leave empty to use your church logo', 'kingdom-church-suite' ); ?>"></label>
+				<button class="kcs-btn"><?php esc_html_e( 'Save app settings', 'kingdom-church-suite' ); ?></button>
+				<details class="kca-help"><summary><?php esc_html_e( 'How members install the app', 'kingdom-church-suite' ); ?></summary>
+					<p><strong>Android:</strong> <?php esc_html_e( 'open the website in Chrome and tap “Install app” (in the menu or the invitation at the bottom).', 'kingdom-church-suite' ); ?></p>
+					<p><strong>iPhone:</strong> <?php esc_html_e( 'open the website in Safari, tap Share, then “Add to Home Screen”. Open the app from the Home Screen to turn on notifications (iOS 16.4 or newer).', 'kingdom-church-suite' ); ?></p>
+				</details>
+			</form>
+		</div>
 		<?php
 	}
 

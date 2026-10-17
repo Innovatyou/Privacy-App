@@ -1,0 +1,272 @@
+/* Church app: install banner, iPhone guide, toasts and app-mode chrome. Uses the church colours. */
+.kcs-app-banner,
+.kcs-app-sheet,
+.kcs-app-toasts,
+.kcs-app-back,
+.kcs-app-ptr {
+	--kcs-app-main: var(--k-primary, #5b2a86);
+	--kcs-app-on: var(--k-on-primary, #fff);
+	--kcs-app-ink: var(--k-dark, #16121c);
+	font-family: inherit;
+	box-sizing: border-box;
+}
+.kcs-app-banner *,
+.kcs-app-sheet * { box-sizing: border-box; }
+
+.kcs-app-btn {
+	appearance: none;
+	border: 0;
+	border-radius: 999px;
+	padding: 0.7rem 1.2rem;
+	font: inherit;
+	font-weight: 700;
+	font-size: 0.95rem;
+	line-height: 1.1;
+	background: var(--kcs-app-main);
+	color: var(--kcs-app-on);
+	cursor: pointer;
+	min-height: 44px;
+}
+.kcs-app-btn--ghost { background: transparent; color: inherit; opacity: 0.75; }
+.kcs-app-btn:focus-visible { outline: 3px solid var(--kcs-app-main); outline-offset: 2px; }
+
+/* Install banner */
+.kcs-app-banner {
+	position: fixed;
+	z-index: 99990;
+	left: 12px;
+	right: 12px;
+	bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+	max-width: 520px;
+	margin: 0 auto;
+	display: grid;
+	grid-template-columns: 56px minmax(0, 1fr);
+	gap: 0.6rem 0.9rem;
+	align-items: center;
+	padding: 0.9rem;
+	border-radius: 20px;
+	background: #fff;
+	color: var(--kcs-app-ink);
+	box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+	transform: translateY(140%);
+	transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.kcs-app-banner.is-open { transform: none; }
+.kcs-app-banner__text { min-width: 0; display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.88rem; line-height: 1.35; }
+.kcs-app-banner__text strong { font-size: 1rem; }
+.kcs-app-banner__actions { grid-column: 1 / -1; display: flex; gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap; }
+
+.kcs-app-sheet__icon,
+.kcs-app-banner > img {
+	width: 56px;
+	height: 56px;
+	border-radius: 14px;
+	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+	flex: none;
+}
+
+/* Bottom sheet (iPhone guide, notifications) */
+.kcs-app-sheet { position: fixed; inset: 0; z-index: 99995; }
+.kcs-app-sheet__backdrop { position: absolute; inset: 0; background: rgba(10, 8, 14, 0.5); opacity: 0; transition: opacity 0.25s; }
+.kcs-app-sheet__panel {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	max-width: 560px;
+	margin: 0 auto;
+	padding: 1.4rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
+	border-radius: 24px 24px 0 0;
+	background: #fff;
+	color: var(--kcs-app-ink);
+	transform: translateY(100%);
+	transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.kcs-app-sheet.is-open .kcs-app-sheet__backdrop { opacity: 1; }
+.kcs-app-sheet.is-open .kcs-app-sheet__panel { transform: none; }
+.kcs-app-sheet__head { display: flex; gap: 0.9rem; align-items: center; margin-bottom: 1rem; }
+.kcs-app-sheet__head h2 { margin: 0 0 0.2rem; font-size: 1.15rem; line-height: 1.25; color: inherit; }
+.kcs-app-sheet__head p { margin: 0; font-size: 0.9rem; opacity: 0.75; line-height: 1.4; }
+.kcs-app-sheet__actions { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 1rem; }
+.kcs-app-sheet__actions .kcs-app-btn { width: 100%; }
+
+.kcs-app-steps { list-style: none; margin: 0; padding: 0; counter-reset: step; display: grid; gap: 0.6rem; }
+.kcs-app-steps li {
+	display: flex;
+	align-items: center;
+	gap: 0.8rem;
+	padding: 0.7rem 0.8rem;
+	border-radius: 14px;
+	background: rgba(0, 0, 0, 0.04);
+	font-weight: 600;
+	font-size: 0.95rem;
+}
+.kcs-app-steps__icon {
+	flex: none;
+	width: 38px;
+	height: 38px;
+	border-radius: 10px;
+	display: grid;
+	place-items: center;
+	background: #fff;
+	color: #0a7aff;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+.kcs-app-steps__icon--text { font-size: 0.8rem; font-weight: 800; }
+
+/* On iPad the Share button is at the top; on iPhone it is at the bottom. */
+.kcs-app-sheet__arrow { display: none; }
+
+/* Toasts */
+.kcs-app-toasts {
+	position: fixed;
+	z-index: 99998;
+	left: 50%;
+	bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+	transform: translateX(-50%);
+	width: min(92vw, 440px);
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	pointer-events: none;
+}
+.kcs-app-toast {
+	pointer-events: auto;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	padding: 0.75rem 0.9rem 0.75rem 1.1rem;
+	border-radius: 14px;
+	background: var(--kcs-app-ink);
+	color: #fff;
+	font-size: 0.9rem;
+	line-height: 1.35;
+	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+	animation: kcs-app-in 0.3s ease-out;
+	transition: opacity 0.3s, transform 0.3s;
+}
+.kcs-app-toast.is-out { opacity: 0; transform: translateY(10px); }
+.kcs-app-toast__btn {
+	flex: none;
+	border: 0;
+	border-radius: 999px;
+	padding: 0.45rem 0.9rem;
+	font: inherit;
+	font-weight: 700;
+	background: var(--kcs-app-main);
+	color: var(--kcs-app-on);
+	cursor: pointer;
+}
+@keyframes kcs-app-in { from { opacity: 0; transform: translateY(12px); } }
+
+/* Buttons the theme can place anywhere */
+[data-kcs-install][hidden],
+[data-kcs-push][hidden] { display: none !important; }
+
+/* App mode (opened from the home screen) */
+html.is-app { -webkit-tap-highlight-color: transparent; }
+html.is-app body { overscroll-behavior-y: contain; -webkit-user-select: none; user-select: none; }
+html.is-app body input,
+html.is-app body textarea,
+html.is-app body [contenteditable],
+html.is-app body p,
+html.is-app body li { -webkit-user-select: text; user-select: text; }
+
+.kcs-app-back {
+	position: fixed;
+	z-index: 99980;
+	left: calc(12px + env(safe-area-inset-left, 0px));
+	bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+	width: 46px;
+	height: 46px;
+	border: 0;
+	border-radius: 50%;
+	display: grid;
+	place-items: center;
+	background: var(--kcs-app-main);
+	color: var(--kcs-app-on);
+	box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+	cursor: pointer;
+}
+.kcs-app-back--inline {
+	position: static;
+	flex: none;
+	width: 40px;
+	height: 40px;
+	margin-right: -0.75rem;
+	box-shadow: none;
+	background: color-mix(in srgb, var(--kcs-app-main) 12%, transparent);
+	color: var(--kcs-app-main);
+}
+[data-theme="dark"] .kcs-app-back--inline { color: inherit; }
+
+.kcs-app-progress {
+	position: fixed;
+	z-index: 99999;
+	top: 0;
+	left: 0;
+	height: 3px;
+	width: 0;
+	background: var(--k-accent, #f4a62a);
+	opacity: 0;
+	pointer-events: none;
+}
+.kcs-app-progress.is-loading { opacity: 1; animation: kcs-app-progress 8s cubic-bezier(0.1, 0.7, 0.2, 1) forwards; }
+@keyframes kcs-app-progress { from { width: 0; } 10% { width: 45%; } to { width: 92%; } }
+
+.kcs-app-ptr {
+	position: fixed;
+	z-index: 99985;
+	top: calc(env(safe-area-inset-top, 0px) + 8px);
+	left: 50%;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	display: grid;
+	place-items: center;
+	background: #fff;
+	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+	transform: translate(-50%, -60px);
+	pointer-events: none;
+}
+.kcs-app-ptr__spin {
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	border: 3px solid var(--kcs-app-main);
+	border-right-color: transparent;
+	opacity: 0.5;
+}
+.kcs-app-ptr.is-ready .kcs-app-ptr__spin { opacity: 1; }
+.kcs-app-ptr.is-refreshing .kcs-app-ptr__spin { animation: kcs-app-spin 0.7s linear infinite; }
+@keyframes kcs-app-spin { to { transform: rotate(360deg); } }
+
+html.is-offline body::after {
+	content: "";
+	position: fixed;
+	z-index: 99999;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 3px;
+	background: repeating-linear-gradient(90deg, #d33 0 12px, transparent 12px 20px);
+	pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.kcs-app-banner,
+	.kcs-app-sheet__panel,
+	.kcs-app-sheet__backdrop,
+	.kcs-app-toast { transition: none; animation: none; }
+}
+
+/* Sit above the theme's bottom tab bar on phones. */
+.has-mobile-nav .kcs-app-back,
+.has-mobile-nav .kcs-app-toasts,
+.has-mobile-nav .kcs-app-banner { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+@media (min-width: 861px) {
+	.has-mobile-nav .kcs-app-back,
+	.has-mobile-nav .kcs-app-toasts,
+	.has-mobile-nav .kcs-app-banner { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+}

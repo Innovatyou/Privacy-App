@@ -51,7 +51,7 @@ There are also dedicated templates for single and archive views of sermons (vide
 **Sections** (`template-parts/sections/`) can be reordered on a plain front page via *Customize → Homepage Sections*:
 `hero` (6 variants), `service-times`, `welcome`, `live`, `countdown`, `sermons`, `events`, `ministries`, `stats`, `partnership`, `give`, `leadership`, `testimonies`, `verse`, `prayer`, `blog`, `newsletter`, `visit`, `contact`, `cta`.
 
-**Branding & colours**: 9 ready-made palettes (Royal Purple, Ocean Blue, Emerald Grace, Crimson Fire, Sunrise, Midnight, Rose of Sharon, River Jordan, Heritage Gold) or custom brand colours; an optional visitor colour picker; light logo for dark mode and transparent headers; tagline, motto, button style (pill, rounded, square) and fonts. Set these in *Customize → Church Branding & Colour Palettes*.
+**Branding & colours**: 9 ready-made palettes (Royal Purple, Ocean Blue, Emerald Grace, Crimson Fire, Sunrise, Midnight, Rose of Sharon, River Jordan, Heritage Gold) or **custom brand colours** (pick any main, highlight and dark colour — also in *Church Admin → Website → Church colours*, no code). The optional visitor colour picker offers the palettes plus **Custom**, a free colour picker for main and highlight colours (text on buttons switches between white and dark automatically so it stays readable); light logo for dark mode and transparent headers; tagline, motto, button style (pill, rounded, square) and fonts. Set these in *Customize → Church Branding & Colour Palettes*.
 
 **3D UI & mobile-first**: tilt-and-glare cards, layered 3D hero (floating cross, orbs, orbiting ring) with mouse and scroll parallax, pressable 3D buttons, glass panels, and an app-style bottom tab bar on phones (Home, Watch, Give, Prayer, Menu). Both can be toggled in *Customize → 3D Effects & Mobile*, and motion is reduced automatically for visitors who ask for it.
 
@@ -178,8 +178,17 @@ add_filter( 'kcs_payment_gateways', function ( $g ) { $g['mine'] = new My_Gatewa
 - `[kcs_livestream chat="yes"]` player plus YouTube live chat; Facebook Live or any custom embed (Vimeo, Boxcast…)
 - Countdown to the next service and a live badge that refreshes itself
 
+### Church app (PWA) — Android and iPhone
+Every church site is also an installable app, with **its own name, logo and church colours** (each SaaS church gets its own app on its own address or custom domain). No app store needed.
+- **Install**: Android/Chrome shows an *Install app* invitation and a button in the menu; iPhone/iPad Safari shows a step-by-step *Add to Home Screen* guide.
+- **Branding**: the icon, maskable Android icon, iPhone home-screen icon and 11 iPhone launch screens are drawn automatically from the church logo (App icon setting → site icon → theme logo → Church Suite logo) on the church's main colour, and are redrawn when the logo or colours change.
+- **Feels native**: full-screen with no browser bars, safe-area padding for notched phones, a back button in the header, pull to refresh, a page-loading bar, external links open outside the app, and shortcuts (long-press the icon) to Give, Watch live, Prayer and the partner dashboard.
+- **Works offline**: public pages people visit are saved; with no connection they open instantly, and anything else shows a branded offline page with service times. Admin, dashboards, checkout and logged-in pages are never saved.
+- **Push notifications** (Android and iPhone iOS 16.4+ from the Home Screen app): a *Turn on notifications* button in the menu, and a one-time offer inside the app. **Automatic "We're live" notification** when the YouTube stream starts (checked every 5 minutes in the background). Self-hosted Web Push (VAPID + RFC 8291 encryption), no Firebase account or fees; sent in parallel in the background; removed devices are cleaned up automatically.
+- **Church Admin → Church app**: turn the app on/off, app name and short name, optional icon, install invitation and live-notification switches, the number of phones with notifications, **send a notification to every phone**, and delivery history. *Notify partners* can also send to partners' phones.
+
 ### Other digital features
-Sermons (series, speakers, topics, video, audio, notes), **podcast RSS feed** for Apple Podcasts and Spotify (`/feed/sermon-podcast/`), events with `.ics` and Google Calendar links, ministries, leadership, testimonies, prayer requests and an "I prayed" prayer wall, a public testimony submission form (`[kcs_testimony_form]`, moderated), social connect buttons (`[kcs_social]`), verse of the day, an installable web-app manifest (add to home screen), and a signed outgoing webhook to CRMs or Zapier.
+Sermons (series, speakers, topics, video, audio, notes), **podcast RSS feed** for Apple Podcasts and Spotify (`/feed/sermon-podcast/`), events with `.ics` and Google Calendar links, ministries, leadership, testimonies, prayer requests and an "I prayed" prayer wall, a public testimony submission form (`[kcs_testimony_form]`, moderated), social connect buttons (`[kcs_social]`) and verse of the day, and a signed outgoing webhook to CRMs or Zapier.
 
 ### Advanced SEO
 - Per-post SEO title, meta description, focus keyword, canonical URL, social image, noindex/nofollow
@@ -214,6 +223,7 @@ Allowed CORS origins can be set in settings.
 | GET/PUT | `/me` · GET `/me/payments` | partner | Partner self-service |
 | PUT | `/me/plan` | partner | Upgrade, downgrade or switch: `{plan_id, amount?, frequency?}` |
 | POST | `/testimonies` | public | Submit a testimony (held as pending for review) |
+| POST | `/push/subscribe` · `/push/unsubscribe` | public | App notifications: browser `PushSubscription` JSON (Google, Mozilla, Apple, Microsoft push services only) |
 | GET | `/stats` | admin | Dashboard stats |
 | GET/POST | `/partners` | admin | List (search, status, plan_id, page, per_page, orderby, order) or create |
 | GET/PUT/DELETE | `/partners/{id}` · GET `/partners/{id}/payments` | admin | Manage a partner |
@@ -237,8 +247,8 @@ curl -X POST https://yoursite.com/wp-json/kcs/v1/notifications/email \
 **Outgoing webhooks**: set a URL in Settings → REST API to receive `partner.created`, `payment.completed`, `subscriber.created` and `prayer.created`. Each is signed with `X-KCS-Signature` (HMAC-SHA256 of the body using your API key).
 
 ### Developer hooks
-Actions: `kcs_partner_created`, `kcs_partner_updated`, `kcs_partner_deleted`, `kcs_payment_started`, `kcs_payment_completed`, `kcs_webhook_processed`, `kcs_subscriber_created`, `kcs_subscriber_unsubscribed`, `kcs_prayer_created`.
-Filters: `kcs_payment_gateways`, `kcs_currencies`, `kcs_giving_purposes`, `kcs_email_templates`, `kcs_campaign_recipients`, `kcs_live_status`, `kcs_schema_graph`, `kcs_seo_description`, `kcs_breadcrumb_items`, `kcs_seo_post_types`, `kcs_meta_fields`, `kcs_settings_schema`, `kcs_verses`.
+Actions: `kcs_partner_created`, `kcs_partner_updated`, `kcs_partner_deleted`, `kcs_payment_started`, `kcs_payment_completed`, `kcs_webhook_processed`, `kcs_subscriber_created`, `kcs_subscriber_unsubscribed`, `kcs_prayer_created`, `kingdom_ytlive_went_live` (theme, fired once per live broadcast).
+Filters: `kcs_payment_gateways`, `kcs_currencies`, `kcs_giving_purposes`, `kcs_email_templates`, `kcs_campaign_recipients`, `kcs_live_status`, `kcs_schema_graph`, `kcs_seo_description`, `kcs_breadcrumb_items`, `kcs_seo_post_types`, `kcs_meta_fields`, `kcs_settings_schema`, `kcs_verses`, `kcs_pwa_manifest`, `kcs_pwa_colours`.
 Templates: copy any file from `plugins/kingdom-church-suite/templates/` to `yourtheme/kingdom-church-suite/` to override it.
 
 ---

@@ -105,6 +105,15 @@ function kingdom_website_settings() {
 		'kingdom_hero_height'       => array( __( 'Banner height', 'kingdom' ), 'select', 'banner', 'full', array( 'full' => __( 'Full screen', 'kingdom' ), 'tall' => __( 'Tall (80%)', 'kingdom' ), 'medium' => __( 'Medium (60%)', 'kingdom' ), 'video' => __( 'Fit the video (16:9)', 'kingdom' ) ) ),
 		'kingdom_hero_overlay'      => array( __( 'Banner darkness over the video/image (0–90)', 'kingdom' ), 'number', 'banner', 55 ),
 	);
+	$palettes = array();
+	foreach ( kingdom_palettes() as $slug => $p ) {
+		$palettes[ $slug ] = $p[0];
+	}
+	$palettes['custom']           = __( 'Custom (use the colours below)', 'kingdom' );
+	$out['kingdom_palette']       = array( __( 'Colour palette', 'kingdom' ), 'select', 'brand', 'royal', $palettes );
+	$out['kingdom_color_primary'] = array( __( 'Custom main colour', 'kingdom' ), 'color', 'brand', '#5b2a86' );
+	$out['kingdom_color_accent']  = array( __( 'Custom highlight colour', 'kingdom' ), 'color', 'brand', '#f4a62a' );
+	$out['kingdom_color_dark']    = array( __( 'Custom dark colour (footer & dark sections)', 'kingdom' ), 'color', 'brand', '#16121c' );
 	foreach ( kingdom_media_settings() as $key => $f ) {
 		$out[ $key ] = array( $f[0], $f[1], 'media', $f[2] );
 	}
@@ -156,6 +165,46 @@ function kingdom_available_sections() {
 		'contact'       => __( 'Contact & map', 'kingdom' ),
 		'cta'           => __( 'Call to action', 'kingdom' ),
 	);
+}
+
+/**
+ * "Custom colours" fields for the visitor colour picker.
+ *
+ * @param string $id Unique id prefix.
+ */
+function kingdom_custom_colour_fields( $id ) {
+	list( $primary, $accent ) = kingdom_brand_colors();
+	?>
+	<div class="k-palette__custom">
+		<span><?php esc_html_e( 'Custom colours', 'kingdom' ); ?></span>
+		<label for="<?php echo esc_attr( $id ); ?>-primary"><input type="color" id="<?php echo esc_attr( $id ); ?>-primary" data-custom-colour="primary" value="<?php echo esc_attr( $primary ); ?>"> <?php esc_html_e( 'Main', 'kingdom' ); ?></label>
+		<label for="<?php echo esc_attr( $id ); ?>-accent"><input type="color" id="<?php echo esc_attr( $id ); ?>-accent" data-custom-colour="accent" value="<?php echo esc_attr( $accent ); ?>"> <?php esc_html_e( 'Highlight', 'kingdom' ); ?></label>
+	</div>
+	<?php
+}
+
+/**
+ * Readable text colour (white or near-black) on a background colour.
+ *
+ * @param string $hex Background colour.
+ * @return string
+ */
+function kingdom_on_colour( $hex ) {
+	$hex = ltrim( (string) $hex, '#' );
+	if ( 3 === strlen( $hex ) ) {
+		$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+	}
+	if ( 6 !== strlen( $hex ) ) {
+		return '#ffffff';
+	}
+	$lin = array();
+	foreach ( str_split( $hex, 2 ) as $c ) {
+		$v     = hexdec( $c ) / 255;
+		$lin[] = $v <= 0.03928 ? $v / 12.92 : pow( ( $v + 0.055 ) / 1.055, 2.4 );
+	}
+	$l = 0.2126 * $lin[0] + 0.7152 * $lin[1] + 0.0722 * $lin[2];
+	// Pick whichever gives more contrast.
+	return ( 1.05 / ( $l + 0.05 ) ) >= ( ( $l + 0.05 ) / 0.05 ) * 0.6 ? '#ffffff' : '#16121c';
 }
 
 /**
@@ -388,6 +437,7 @@ function kingdom_icon( $name ) {
 		'headphones' => '<path d="M3 18v-6a9 9 0 0 1 18 0v6"/><rect x="3" y="14" width="4" height="7" rx="1"/><rect x="17" y="14" width="4" height="7" rx="1"/>',
 		'book'      => '<path d="M4 4h6a3 3 0 0 1 3 3v14a2 2 0 0 0-2-2H4zM20 4h-6a3 3 0 0 0-3 3v14a2 2 0 0 1 2-2h7z"/>',
 		'download'  => '<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>',
+		'bell'      => '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
 		'users'     => '<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M16 3.5a4 4 0 0 1 0 9M22 21a7 7 0 0 0-4-6.3"/>',
 		'hands'     => '<path d="M12 21V11l-3-6a1.5 1.5 0 0 0-2.7 1.3L8 11l-3 4v6M12 21V11l3-6a1.5 1.5 0 0 1 2.7 1.3L16 11l3 4v6"/>',
 		'car'       => '<path d="M5 17H3v-5l2-5h14l2 5v5h-2M5 17a2 2 0 1 0 4 0 2 2 0 1 0-4 0M15 17a2 2 0 1 0 4 0 2 2 0 1 0-4 0M9 17h6M3 12h18"/>',
