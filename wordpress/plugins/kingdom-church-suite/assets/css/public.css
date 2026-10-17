@@ -261,3 +261,13 @@
 .kcs-tithe__calc[open] summary { margin-bottom: .75rem; }
 .kcs-tithe__ten { display: grid; gap: .25rem; align-content: end; margin: 0; }
 .kcs-tithe__ten strong { font-size: 1.4rem; }
+
+/* Featured payment method (Tithe & Offering) */
+.kcs-gateway__name small { display: block; font-weight: 400; font-size: .8rem; color: var(--kcs-muted); }
+.kcs-gateway__tag { display: inline-block; margin-left: .4rem; padding: .1rem .5rem; border-radius: 999px; font-style: normal; font-size: .7rem; font-weight: 700; letter-spacing: .02em; color: #fff; background: #0ba4db; vertical-align: middle; }
+.kcs-gateway--featured { grid-column: 1 / -1; padding: 1rem 1.1rem; border-color: #0ba4db; background: color-mix(in srgb, #0ba4db 6%, var(--kcs-surface, #fff)); }
+.kcs-gateway--featured:has(input:checked) { border-color: #0ba4db; box-shadow: 0 0 0 2px color-mix(in srgb, #0ba4db 30%, transparent); }
+@media (max-width: 480px) {
+	.kcs-region { display: grid; grid-template-columns: 1fr 1fr; width: 100%; border-radius: 16px; }
+	.kcs-region__opt span { justify-content: center; width: 100%; border-radius: 12px; padding: .55rem .5rem; font-size: .88rem; }
+}

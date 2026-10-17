@@ -330,6 +330,12 @@ button.chip { background: var(--surface); color: var(--fg); font: inherit; }
 .verse p { margin: 0 0 .4rem; font-style: italic; }
 .verse cite { font-style: normal; font-weight: 800; color: var(--brand); }
 td input[type=number] { max-width: 150px; }
+.gw-star { display: flex !important; gap: .7rem; align-items: flex-start; padding: .9rem 1rem; border-radius: 14px; border: 1.5px solid #0ba4db; background: color-mix(in srgb, #0ba4db 7%, var(--surface)); cursor: pointer; }
+.gw-star:has(input:checked) { box-shadow: 0 0 0 3px color-mix(in srgb, #0ba4db 25%, transparent); }
+.gw-star input { margin-top: .25rem; }
+.gw-star span { display: grid; gap: .15rem; }
+.gw-star em { margin-left: .35rem; padding: .1rem .5rem; border-radius: 999px; background: #0ba4db; color: #fff; font-style: normal; font-size: .7rem; font-weight: 800; vertical-align: middle; }
+.gw-star small { color: var(--muted); font-weight: 400; }
 </style>
 
 <div id="app"></div>
@@ -408,7 +414,7 @@ td input[type=number] { max-width: 150px; }
   // Gifts are totalled per currency: a partner who switches keeps their earlier total in the old currency.
   var ptotal = function (p) { var t = Object.assign({}, p.totals || {}); t[p.region] = p.total; var parts = Object.keys(t).filter(function (k) { return t[k]; }).map(function (k) { return money(t[k], k); }); return parts.join(' + ') || money(0, p.region); };
   var setRegion = function (p, r) { if (p.region === r) { return; } p.totals = p.totals || {}; p.totals[p.region] = p.total; p.total = p.totals[r] || 0; p.region = r; };
-  var GATEWAYS = { international: ['Stripe (card, Apple Pay)', 'PayPal', 'Flutterwave'], local: ['Paystack', 'Flutterwave (card, USSD)', 'Bank transfer'] };
+  var GATEWAYS = { international: ['Paystack', 'Stripe (card, Apple Pay)', 'PayPal', 'Flutterwave'], local: ['Paystack', 'Flutterwave (card, USSD)', 'Bank transfer'] };
   var AMOUNTS = { international: [10, 25, 50, 100, 250, 500], local: [5000, 10000, 20000, 50000, 100000, 250000] };
   function segRegion(cur) {
     return '<div class="seg region" role="group" aria-label="Where are you giving from?">' + ['international', 'local'].map(function (r) { return '<button type="button" data-act="region" data-r="' + r + '" aria-pressed="' + (cur === r) + '">' + (r === 'local' ? '📍 ' : '🌍 ') + esc(S.cur[r].label) + ' <small>' + S.cur[r].code + '</small></button>'; }).join('') + '</div>';
@@ -545,7 +551,7 @@ td input[type=number] { max-width: 150px; }
         '<fieldset class="tfs"><legend>2. How much?</legend>' + segRegion(r) + '<label for="ti-amt">Amount (' + S.cur[r].code + ')<input id="ti-amt" type="number" min="1" inputmode="decimal" placeholder="' + (r === 'local' ? 'e.g. 20000' : 'e.g. 50') + '"></label><div class="chips">' + AMOUNTS[r].map(function (v) { return '<button type="button" class="chip" data-act="preset" data-for="ti-amt" data-v="' + v + '">' + money(v, r) + '</button>'; }).join('') + '</div>' +
         '<details class="calc"><summary>Tithe calculator</summary><div class="grid g2"><label for="tc-income">My income / increase<input id="tc-income" type="number" min="0" inputmode="decimal"></label><div class="ten"><span class="muted small">Your tithe (10%)</span><strong id="tc-out">' + money(0, r) + '</strong><button type="button" class="btn ghost sm" data-act="tenth">Use this amount</button></div></div></details></fieldset>' +
         '<fieldset class="tfs"><legend>3. Your details</legend><div class="grid g2"><label for="ti-name">Full name<input id="ti-name" required value="Bola Ade" autocomplete="name"></label><label for="ti-email">Email<input id="ti-email" type="email" required value="bola@example.com" autocomplete="email"></label></div><label for="ti-note">Prayer or note (optional)<input id="ti-note" placeholder="e.g. Thanksgiving for my new job"></label></fieldset>' +
-        '<fieldset class="tfs"><legend>4. Payment method</legend><div class="chips">' + GATEWAYS[r].map(function (g, i) { return '<label class="chip"><input type="radio" name="tg" value="' + g + '"' + (i ? '' : ' checked') + '> ' + g + '</label>'; }).join('') + '</div></fieldset>' +
+        '<fieldset class="tfs"><legend>4. Payment method</legend><label class="gw-star"><input type="radio" name="tg" value="Paystack" checked><span><strong>Paystack <em>Recommended</em></strong><small>Card, bank transfer, USSD, QR or mobile money · ' + S.cur[r].code + '</small></span></label><div class="chips">' + GATEWAYS[r].filter(function (g) { return g !== 'Paystack'; }).map(function (g) { return '<label class="chip"><input type="radio" name="tg" value="' + g + '"> ' + g + '</label>'; }).join('') + '</div></fieldset>' +
         '<button class="btn accent block">Give now</button><p class="muted small" style="margin:0">🔒 Secure payment. A receipt is emailed to you straight away.</p><div data-msg aria-live="polite"></div></form></div></section>' +
         '<section class="band alt"><div class="wrap"><div class="head center"><span class="eyebrow">Ways to give</span><h2>What each gift means</h2></div><div class="grid g4">' + [['Tithe', 'The first tenth of your income, returned to God in obedience and trust.'], ['Offering', 'A freewill gift above the tithe, given cheerfully as the Spirit leads.'], ['Thanksgiving', 'Celebrate a testimony — a birthday, new job, healing or answered prayer.'], ['First fruit & seed', 'Honour God with the first of a new season, or sow towards a harvest.']].map(function (x) { return '<div class="card tilt"><h3 style="margin-top:0">' + x[0] + '</h3><p class="muted" style="margin:0">' + x[1] + '</p></div>'; }).join('') + '</div></div></section>';
     }

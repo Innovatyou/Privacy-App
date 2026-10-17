@@ -294,6 +294,8 @@ class KCS_Church_Admin {
 				$settings['local_label']           = sanitize_text_field( $d['local_label'] ?? '' );
 				$settings['amounts_international'] = preg_replace( '/[^0-9.,]/', '', (string) ( $d['amounts_international'] ?? '' ) );
 				$settings['amounts_local']         = preg_replace( '/[^0-9.,]/', '', (string) ( $d['amounts_local'] ?? '' ) );
+				$gw                                = sanitize_key( $d['tithe_gateway'] ?? '' );
+				$settings['tithe_gateway']         = KCS_Payments::gateway( $gw ) ? $gw : 'none';
 				update_option( 'kcs_settings', $settings );
 				$msg  = __( 'Currency settings saved.', 'kingdom-church-suite' );
 				$view = 'plans';
@@ -674,6 +676,14 @@ class KCS_Church_Admin {
 				<label><?php esc_html_e( 'Local label', 'kingdom-church-suite' ); ?><input name="local_label" value="<?php echo esc_attr( kcs_get_option( 'local_label', 'Local' ) ); ?>" placeholder="<?php esc_attr_e( 'e.g. Nigeria', 'kingdom-church-suite' ); ?>"></label>
 				<label><?php esc_html_e( 'Quick amounts (international)', 'kingdom-church-suite' ); ?><input name="amounts_international" value="<?php echo esc_attr( implode( ',', kcs_region_amounts( 'international' ) ) ); ?>"></label>
 				<label><?php esc_html_e( 'Quick amounts (local)', 'kingdom-church-suite' ); ?><input name="amounts_local" value="<?php echo esc_attr( implode( ',', kcs_region_amounts( 'local' ) ) ); ?>"></label>
+				<label><?php esc_html_e( 'Featured payment method on Tithe & Offering', 'kingdom-church-suite' ); ?>
+					<select name="tithe_gateway">
+						<option value="none"><?php esc_html_e( '— None —', 'kingdom-church-suite' ); ?></option>
+						<?php foreach ( KCS_Payments::gateways() as $g ) : ?>
+							<option value="<?php echo esc_attr( $g->id ); ?>" <?php selected( kcs_get_option( 'tithe_gateway', 'paystack' ), $g->id ); ?>><?php echo esc_html( $g->title . ( $g->is_enabled() ? '' : ' ' . __( '(not switched on)', 'kingdom-church-suite' ) ) ); ?></option>
+						<?php endforeach; ?>
+					</select>
+				</label>
 			</div>
 			<button class="kcs-btn"><?php esc_html_e( 'Save currency settings', 'kingdom-church-suite' ); ?></button>
 		</form>

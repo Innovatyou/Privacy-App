@@ -91,6 +91,7 @@ Other theme features: three header styles (classic, centered, transparent over h
 - `[kcs_tithe]` (page created automatically; the theme's **Tithe & Offering** page template adds the scripture, giving explanations and an FAQ around it)
 - Giving types as cards: Tithe, Offering, Thanksgiving, First Fruit and Seed (editable under *Settings → Giving & partnership → Tithe & Offering page options*). Link to a type with `?type=offering` or `[kcs_tithe type="offering"]`
 - International (USD) / Local switch with quick amounts for each currency, a 10% **tithe calculator**, an optional prayer note, and an emailed receipt
+- **Paystack is the featured payment method**: shown first, marked "Recommended" and preselected for both USD and local givers (card, bank transfer, USSD, QR or mobile money). Change or turn off the featured method under *Church Admin → Plans & currency* or *Settings → Giving & partnership*. Add your Paystack keys under *Church Suite → Settings → Payments*; to take USD through Paystack, USD must also be enabled on your Paystack account
 - *Church Admin → Payments* shows this month's totals per purpose (tithe, offering, partnership…) and filters payments by purpose
 
 ### Church Admin dashboard (front end, no wp-admin)

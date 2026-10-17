@@ -17,6 +17,23 @@
 defined( 'ABSPATH' ) || exit;
 
 $gateways = KCS_Payments::enabled_gateways();
+// The featured method (Paystack by default) is listed first and preselected.
+$featured = (string) kcs_get_option( 'tithe_gateway', 'paystack' );
+$star     = null;
+foreach ( $gateways as $i => $g ) {
+	if ( $g->id === $featured ) {
+		$star = $g;
+		unset( $gateways[ $i ] );
+		array_unshift( $gateways, $star );
+		break;
+	}
+}
+$channels = array(
+	'paystack'    => __( 'Card, bank transfer, USSD, QR or mobile money', 'kingdom-church-suite' ),
+	'flutterwave' => __( 'Card, bank transfer, USSD or mobile money', 'kingdom-church-suite' ),
+	'stripe'      => __( 'Card, Apple Pay or Google Pay', 'kingdom-church-suite' ),
+	'paypal'      => __( 'PayPal balance or card', 'kingdom-church-suite' ),
+);
 $regions  = kcs_regions();
 $region   = kcs_sanitize_region( $region );
 $type     = isset( $types[ $type ] ) ? $type : (string) key( $types );
@@ -101,10 +118,19 @@ if ( ! $gateways ) {
 
 	<fieldset class="kcs-gateways">
 		<legend><?php esc_html_e( '4. Payment method', 'kingdom-church-suite' ); ?></legend>
+		<?php if ( 'none' !== $featured && ! $star && current_user_can( 'manage_kcs' ) ) : ?>
+			<?php $want = KCS_Payments::gateway( $featured ); ?>
+			<?php /* translators: %s: gateway name */ ?>
+			<p class="kcs-alert kcs-alert--info"><?php printf( esc_html__( 'Admin: %s is not switched on yet, so givers cannot choose it.', 'kingdom-church-suite' ), esc_html( $want ? $want->title : $featured ) ); ?> <a href="<?php echo esc_url( admin_url( 'admin.php?page=kcs-settings&tab=payments' ) ); ?>"><?php esc_html_e( 'Add your keys →', 'kingdom-church-suite' ); ?></a></p>
+		<?php endif; ?>
 		<?php $first = true; foreach ( $gateways as $g ) : ?>
-			<label class="kcs-gateway" data-currencies="<?php echo esc_attr( implode( ',', $g->currency_list() ) ); ?>">
+			<label class="kcs-gateway<?php echo $g === $star ? ' kcs-gateway--featured' : ''; ?>" data-currencies="<?php echo esc_attr( implode( ',', $g->currency_list() ) ); ?>">
 				<input type="radio" name="gateway" value="<?php echo esc_attr( $g->id ); ?>" <?php checked( $first ); ?>>
-				<span class="kcs-gateway__name kcs-gw-<?php echo esc_attr( $g->id ); ?>"><?php echo esc_html( $g->display_title() ); ?></span>
+				<span class="kcs-gateway__name kcs-gw-<?php echo esc_attr( $g->id ); ?>">
+					<?php echo esc_html( $g->display_title() ); ?>
+					<?php if ( $g === $star ) : ?><em class="kcs-gateway__tag"><?php esc_html_e( 'Recommended', 'kingdom-church-suite' ); ?></em><?php endif; ?>
+					<?php if ( isset( $channels[ $g->id ] ) ) : ?><small><?php echo esc_html( $channels[ $g->id ] ); ?></small><?php endif; ?>
+				</span>
 			</label>
 			<?php $first = false; endforeach; ?>
 	</fieldset>
