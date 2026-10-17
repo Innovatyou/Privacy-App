@@ -93,7 +93,7 @@ body.ks { margin: 0; font: 16px/1.6 "Plus Jakarta Sans", system-ui, -apple-syste
 .ks-device--back { position: absolute; inset: 30px auto auto 0; width: 60%; opacity: .55; transform: rotateY(18deg) translateZ(-80px); }
 .ks-float { position: absolute; padding: .7rem 1rem; border-radius: 14px; background: var(--ks-surface); border: 1px solid var(--ks-border); box-shadow: var(--ks-shadow); font-weight: 800; display: grid; animation: ks-bob 5s ease-in-out infinite; }
 .ks-float small { font-weight: 500; color: var(--ks-muted); font-size: .75rem; }
-.ks-float--a { left: -1%; bottom: -10%; }
+.ks-float--a { left: -3%; top: 38%; }
 .ks-float--b { right: 2%; top: -4%; animation-delay: -2.5s; }
 @keyframes ks-bob { 50% { transform: translateY(-8px); } }
 @media (prefers-reduced-motion: reduce) { .ks-float { animation: none; } .ks-device { transition: none; } }
