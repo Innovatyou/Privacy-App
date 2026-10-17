@@ -205,3 +205,21 @@ Templates: copy any file from `plugins/kingdom-church-suite/templates/` to `your
 - [ ] YouTube channel ID (and optionally an API key) added
 - [ ] Church address, geo coordinates and social links filled in (SEO tab)
 - [ ] Search Console verification and sitemap submitted (`/wp-sitemap.xml`)
+
+---
+
+## Replacing the church images with real or AI-generated photos
+
+The default images are illustrations bundled in `themes/kingdom/assets/img/`. To use photos, go to **Appearance → Customize → Kingdom Church Theme → Church Images & Gallery**, click a slot and upload. Remove a photo to bring the illustration back. No code is needed.
+
+If you want AI-generated photos first, these prompts work well in Midjourney, DALL·E, Ideogram or Adobe Firefly (landscape 16:10, 1920 px or wider):
+
+| Slot | Prompt |
+|---|---|
+| Homepage hero | *Wide photo of a joyful Nigerian church congregation worshipping with raised hands in a modern auditorium, warm golden stage lights, a glowing cross on the stage, women in colourful gele headwraps, shallow depth of field, documentary style* |
+| Pastor / welcome | *Portrait of a smiling West African pastor couple in their 50s in elegant traditional attire, standing in a bright church foyer, soft natural light, 4:5* |
+| Church building | *Modern African church building at golden hour, cream walls, red roof, a bell tower with a cross, palm trees, families walking in on a Sunday morning, Lagos* |
+| Stats background | *Church choir in matching kente-pattern robes singing on stage, motion, vibrant colours, wide angle* |
+| Gallery | *Youth outreach serving food in a Lagos community* · *Kids church class with happy children and balloons* · *Pastor preaching passionately from a wooden pulpit with an open Bible* · *Small group Bible study in a living room, Ghana* |
+
+Use photos of your own members only with their permission.
