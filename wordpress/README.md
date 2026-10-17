@@ -1,0 +1,180 @@
+# Kingdom Church — WordPress Theme + Church Suite Plugin
+
+A complete church website kit:
+
+| Package | Path | What it does |
+|---|---|---|
+| **Kingdom Church** theme | `themes/kingdom/` | Modern, responsive design with **25 page templates**, 20 reusable sections, dark mode, Customizer options and a one-click starter site |
+| **Kingdom Church Suite** plugin | `plugins/kingdom-church-suite/` | Partnerships, partner login and dashboard, admin partner/payment management, payment gateways, REST API, email notifications, newsletter, YouTube live, sermons, events, prayer and advanced SEO |
+
+The theme works on its own. The plugin holds all data and business logic, so your content and partners survive a theme change.
+
+---
+
+## Installation
+
+1. Zip each folder and upload it in WordPress:
+   ```bash
+   cd wordpress/themes  && zip -r kingdom.zip kingdom
+   cd ../plugins        && zip -r kingdom-church-suite.zip kingdom-church-suite
+   ```
+   - **Plugins → Add New → Upload** → `kingdom-church-suite.zip` → Activate
+   - **Appearance → Themes → Add New → Upload** → `kingdom.zip` → Activate
+2. Go to **Appearance → Kingdom Setup**, pick a homepage layout and click **Create starter site**. This creates every page with its template, the main and footer menus, the homepage and the blog page. It never deletes content.
+3. Go to **Church Suite → Settings** and fill in church details, service schedule, payment gateways, email, YouTube and SEO.
+4. Go to **Appearance → Customize → Kingdom Church Theme** to set colours, fonts, header style, hero, sections, contact and social links.
+5. Install an SMTP plugin (WP Mail SMTP, FluentSMTP…) with Mailgun, SendGrid, SES, Brevo or Postmark for reliable email.
+6. Use a real server cron for timely emails and reminders: `*/5 * * * * curl -s https://yoursite.com/wp-cron.php >/dev/null`
+
+Requirements: WordPress 6.0+, PHP 7.4+, HTTPS (required by the payment providers).
+
+---
+
+## Theme: page templates
+
+Choose a template under **Page → Template**:
+
+| Homepages (6) | Church pages | Partnership & giving | Layouts |
+|---|---|---|---|
+| Home — Classic | About Us | Give Online | Full Width |
+| Home — Modern Video | Leadership | Partnership | Sidebar Left |
+| Home — Minimal | What We Believe | Partner Portal | Sidebar Right |
+| Home — Mega Church | Ministries | Prayer Request | Landing Page (no header/footer) |
+| Home — Live Stream First | Sermons | Watch Live | |
+| Home — Split Hero | Events · Testimonies · Contact · Plan Your Visit · I'm New | | |
+
+There are also dedicated templates for single and archive views of sermons (video, audio with speed control, notes, scripture link, series list, filters), events (countdown, map, register, Google/Apple/Outlook calendar), ministries, leaders and testimonies.
+
+**Sections** (`template-parts/sections/`) can be reordered on a plain front page via *Customize → Homepage Sections*:
+`hero` (6 variants), `service-times`, `welcome`, `live`, `countdown`, `sermons`, `events`, `ministries`, `stats`, `partnership`, `give`, `leadership`, `testimonies`, `verse`, `prayer`, `blog`, `newsletter`, `visit`, `contact`, `cta`.
+
+Other theme features: three header styles (classic, centered, transparent over hero), sticky header, top bar, live "LIVE NOW" badge, dark mode toggle (remembers the visitor's choice), video-modal hero, animated counters, scroll reveal, floating WhatsApp button, back-to-top, breadcrumbs and accessible markup (skip link, focus styles, ARIA, reduced-motion support).
+
+---
+
+## Plugin: features
+
+### Partnership & partner portal
+- Plans (fixed or custom amount; weekly, monthly, quarterly, yearly, one-time; featured "Most popular"), managed under **Church Suite → Plans**
+- `[kcs_partner_register]` creates a WordPress account (role *Church Partner*) and a partner record, logs the partner in, and takes them to make their first gift
+- `[kcs_partner_login]` and `[kcs_partner_dashboard]`: overview (plan, commitment, next due date, total given), give, giving history, edit profile and plan, pause or resume, change password
+- Partners are kept out of wp-admin and the toolbar is hidden for them
+- Daily cron emails reminders N days before the due date and flags partners **overdue** after 7 days' grace
+
+### Admin dashboard (Church Suite menu)
+- **Dashboard**: KPIs, 12-month giving chart, partners by status, recent payments, shortcode reference
+- **Partners**: search, filter by status, sort, add/edit, bulk activate, deactivate, email or delete, CSV export
+- **Payments**: filter by status, gateway, purpose and date; re-verify with the gateway; mark offline payments paid (sends receipt); mark refunded or cancelled; CSV export
+- **Email Partners**: compose to all, active or overdue partners, subscribers, or selected partners; queue status
+- **Newsletter**: campaigns (draft, test send, schedule, send), subscribers (import, export, bulk actions)
+- **Prayer Requests**: moderate and approve for the public prayer wall, mark answered
+- **Settings**: General · Payment Gateways · Email & Notifications · Email Templates (editable) · Live Streaming · SEO · REST API
+
+### Payment gateways
+| Gateway | Integration | Webhook verification |
+|---|---|---|
+| **Flutterwave** | Standard checkout (v3) | `verif-hash` secret hash |
+| **Paystack** | Hosted checkout | HMAC-SHA512 (`x-paystack-signature`) |
+| **PayPal** | Orders v2, capture on return | PayPal verify-webhook-signature API |
+| **Stripe** | Checkout Sessions (cards, Apple Pay, Google Pay) | `Stripe-Signature` HMAC-SHA256 with timestamp tolerance |
+| **Razorpay** | Payment Links | HMAC-SHA256 (`x-razorpay-signature`) |
+| **Bank transfer / offline** | Instructions plus manual confirmation | — |
+| **Custom API gateway** | Any provider with a hosted checkout (Monnify, Interswitch, Remita, Squad, Chapa, PesaPal…), configured entirely in settings: endpoints, headers, JSON body templates with placeholders, response paths, success values, minor units | HMAC SHA-256/512/1 or shared secret |
+
+Security model:
+- Every payment is **verified server to server** with the provider before it is marked paid. The redirect alone is never trusted.
+- Amount and currency must match what was expected; a mismatch is flagged *Needs review*.
+- Completion is an atomic, idempotent status change, so a callback and a webhook racing each other only credit once.
+
+Webhook URL for each gateway: `https://yoursite.com/wp-json/kcs/v1/webhooks/{gateway}` (also shown in settings).
+
+**Add your own gateway** in code:
+```php
+class My_Gateway extends KCS_Gateway { /* fields(), initialize(), verify(), parse_webhook() */ }
+add_filter( 'kcs_payment_gateways', function ( $g ) { $g['mine'] = new My_Gateway(); return $g; } );
+```
+
+> **Recurring partnerships** are handled with due dates plus reminder emails and a one-click "Give now" link. This works the same across every gateway. Card auto-debit (gateway-native subscriptions) is not included.
+
+### Email notifications & newsletter
+- Branded HTML emails: partner welcome, receipt, due-date reminder, admin new-partner and new-payment alerts, newsletter confirm and welcome, prayer received. All are editable with placeholders.
+- Newsletter with double opt-in, one-click unsubscribe (with `List-Unsubscribe` header), audiences (subscribers, all/active/overdue partners, everyone), scheduling, test sends, and optional auto-email when a sermon is published
+- Batch queue (default 50 per 5 minutes) with retries, to protect sender reputation
+
+### Live streaming
+- YouTube Data API live detection (title, upcoming streams), cached and quota-friendly: by default it only queries around your service times
+- Works without an API key using the channel's live embed; a manual video override and an offline fallback video are also available
+- `[kcs_livestream chat="yes"]` player plus YouTube live chat; Facebook Live or any custom embed (Vimeo, Boxcast…)
+- Countdown to the next service and a live badge that refreshes itself
+
+### Other digital features
+Sermons (series, speakers, topics, video, audio, notes), **podcast RSS feed** for Apple Podcasts and Spotify (`/feed/sermon-podcast/`), events with `.ics` and Google Calendar links, ministries, leadership, testimonies, prayer requests and an "I prayed" prayer wall, verse of the day, an installable web-app manifest (add to home screen), and a signed outgoing webhook to CRMs or Zapier.
+
+### Advanced SEO
+- Per-post SEO title, meta description, focus keyword, canonical URL, social image, noindex/nofollow
+- Live Google preview and on-page analysis (length, keyword placement, density, headings, alt text, internal links)
+- Open Graph and Twitter cards; Google and Bing verification; geo meta
+- JSON-LD graph: **Church** (address, geo, service times, social profiles), WebSite with SearchAction, WebPage, BreadcrumbList, **Event**, **VideoObject** and **PodcastEpisode** for sermons, BlogPosting, Person for leaders
+- Breadcrumbs; noindex for search/date/author archives; sitemap cleanup (noindex posts and the users sitemap removed); robots.txt sitemap line; **301 redirect manager**
+- Switches itself off automatically when Yoast, Rank Math, SEOPress or AIOSEO is active, so tags are never duplicated
+
+---
+
+## REST API — `/wp-json/kcs/v1`
+
+**Authentication for admin endpoints** (any one of):
+- the `X-KCS-API-Key: <key>` header (Settings → REST API)
+- a logged-in user with the `manage_kcs` capability (cookie + `X-WP-Nonce`)
+- WordPress Application Passwords (HTTP Basic)
+
+Allowed CORS origins can be set in settings.
+
+| Method | Endpoint | Auth | Purpose |
+|---|---|---|---|
+| GET | `/plans` | public | Active partnership plans |
+| GET | `/gateways?currency=NGN` | public | Enabled gateways for a currency |
+| POST | `/payments/initialize` | public (partner if logged in) | `{gateway, amount, currency, purpose, name, email, phone}` → `{reference, redirect_url}` |
+| GET | `/payments/status?reference=` | public | Payment status (re-verifies pending payments) |
+| GET | `/payments/callback/{gateway}` | public | Return URL from the provider (verifies, then redirects) |
+| POST | `/webhooks/{gateway}` | signature | Provider webhooks |
+| POST | `/subscribe` · `/unsubscribe` | public | Newsletter |
+| GET | `/live` · `/services/next` · `/verse` · `/prayer-wall` | public | Live status, schedule, verse, prayer wall |
+| POST | `/prayer-requests` · `/prayer-requests/{id}/pray` | public | Prayer |
+| GET/PUT | `/me` · GET `/me/payments` | partner | Partner self-service |
+| GET | `/stats` | admin | Dashboard stats |
+| GET/POST | `/partners` | admin | List (search, status, plan_id, page, per_page, orderby, order) or create |
+| GET/PUT/DELETE | `/partners/{id}` · GET `/partners/{id}/payments` | admin | Manage a partner |
+| GET | `/payments` · `/payments/{id}` | admin | List (search, status, gateway, purpose, date_from, date_to) or view |
+| POST | `/payments/{id}/complete` · `/payments/{id}/verify` | admin | Manual confirm or re-verify |
+| POST/PUT/DELETE | `/plans` · `/plans/{id}` | admin | Manage plans |
+| POST | `/notifications/email` | admin | Email partners: `{subject, message, audience \| partner_ids[] \| emails[], send_now}` |
+| GET/POST/DELETE | `/subscribers` · `/subscribers/{id}` | admin | Subscribers |
+| GET/POST | `/campaigns` · `/campaigns/{id}` · POST `/campaigns/{id}/send` | admin | Newsletter campaigns |
+| GET/PUT | `/prayer-requests` · `/prayer-requests/{id}` | admin | Moderate prayer requests |
+
+List endpoints return `X-WP-Total` and `X-WP-TotalPages` headers.
+
+```bash
+# Email all active partners
+curl -X POST https://yoursite.com/wp-json/kcs/v1/notifications/email \
+  -H "X-KCS-API-Key: $KEY" -H "Content-Type: application/json" \
+  -d '{"audience":"partners_active","subject":"Partners meeting","message":"<p>Dear {first_name}, see you Friday!</p>"}'
+```
+
+**Outgoing webhooks**: set a URL in Settings → REST API to receive `partner.created`, `payment.completed`, `subscriber.created` and `prayer.created`. Each is signed with `X-KCS-Signature` (HMAC-SHA256 of the body using your API key).
+
+### Developer hooks
+Actions: `kcs_partner_created`, `kcs_partner_updated`, `kcs_partner_deleted`, `kcs_payment_started`, `kcs_payment_completed`, `kcs_webhook_processed`, `kcs_subscriber_created`, `kcs_subscriber_unsubscribed`, `kcs_prayer_created`.
+Filters: `kcs_payment_gateways`, `kcs_currencies`, `kcs_giving_purposes`, `kcs_email_templates`, `kcs_campaign_recipients`, `kcs_live_status`, `kcs_schema_graph`, `kcs_seo_description`, `kcs_breadcrumb_items`, `kcs_seo_post_types`, `kcs_meta_fields`, `kcs_settings_schema`, `kcs_verses`.
+Templates: copy any file from `plugins/kingdom-church-suite/templates/` to `yourtheme/kingdom-church-suite/` to override it.
+
+---
+
+## Going live checklist
+- [ ] HTTPS enabled
+- [ ] Gateway **live** keys entered and webhook URLs registered in each provider's dashboard
+- [ ] SMTP configured and a test email sent (Settings → Email)
+- [ ] Real server cron set up
+- [ ] YouTube channel ID (and optionally an API key) added
+- [ ] Church address, geo coordinates and social links filled in (SEO tab)
+- [ ] Search Console verification and sitemap submitted (`/wp-sitemap.xml`)

@@ -1,0 +1,5 @@
+/* Editor styles: keep the block editor close to the front end. */
+body { font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 1.0625rem; line-height: 1.7; color: #1f1b24; }
+h1, h2, h3, h4, h5, h6 { font-family: "Playfair Display", Georgia, serif; line-height: 1.2; }
+a { color: #5b2a86; }
+blockquote { border-left: 4px solid #f4a62a; padding: 1rem 1.5rem; background: #f6f3fa; }

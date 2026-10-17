@@ -1,0 +1,16 @@
+/*
+Theme Name: Kingdom Church
+Theme URI: https://example.com/kingdom-church
+Author: Kingdom Church Suite
+Description: A modern, fast and fully customisable church theme with 25+ page templates (six homepage layouts, live stream, giving, partnership, sermons, events, ministries, leadership, prayer, plan-your-visit and more), dark mode, YouTube live integration and deep integration with the Kingdom Church Suite plugin for partnerships, payments, newsletters and SEO.
+Version: 1.0.0
+Requires at least: 6.0
+Tested up to: 6.7
+Requires PHP: 7.4
+License: GNU General Public License v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: kingdom
+Tags: church, nonprofit, events, custom-colors, custom-logo, custom-menu, featured-images, full-width-template, theme-options, translation-ready, block-styles, wide-blocks
+*/
+
+/* All styles live in assets/css/main.css (enqueued by functions.php). */
