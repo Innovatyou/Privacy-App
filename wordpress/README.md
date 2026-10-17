@@ -78,6 +78,7 @@ A full church-management dashboard on the **Church Admin** page (`[kcs_church_ad
 - **Payments**: mark bank transfers received (unlocks the partner and sends the receipt), re-check gateway payments
 - **Prayer requests**, **Visits** ("Plan your visit" bookings with WhatsApp follow-up) and **Testimonies** (publish or remove)
 - **Notify partners**: by plan and status, by email and/or as an update on their dashboard (announcement, event or resource with a link)
+- **Website WhatsApp chat**: turn the floating "Chat with us" button on or off, and set the greeting, office hours and contacts (e.g. General enquiries, Prayer line, First-time visitors), each with its own number and pre-filled message (`{church}` and `{page}` are filled in automatically)
 - **Pastors & WhatsApp**: add pastors with WhatsApp numbers and choose which plans can reach them; the highest plan always reaches every pastor
 
 ### Partner access by plan & payment lockout

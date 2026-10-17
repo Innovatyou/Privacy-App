@@ -268,6 +268,12 @@ class KCS_Church_Admin {
 				$msg = __( 'Pastor saved.', 'kingdom-church-suite' );
 				break;
 
+			case 'wa_chat_save':
+				KCS_WhatsApp_Chat::save( $d );
+				$msg  = __( 'Website WhatsApp chat saved.', 'kingdom-church-suite' );
+				$view = 'pastors';
+				break;
+
 			case 'pastor_delete':
 				KCS_Pastors::delete( sanitize_key( $d['pastor_id'] ?? '' ) );
 				$msg = __( 'Pastor removed.', 'kingdom-church-suite' );
@@ -671,6 +677,42 @@ class KCS_Church_Admin {
 			}
 		}
 		?>
+		<?php $chat = KCS_WhatsApp_Chat::get(); ?>
+		<form method="post" class="kca-card kcs-form">
+			<?php echo self::fields( 'wa_chat_save', 'pastors' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			<h3><?php esc_html_e( 'Website “Chat with us” on WhatsApp', 'kingdom-church-suite' ); ?></h3>
+			<p class="kcs-muted"><?php esc_html_e( 'A floating WhatsApp button on every page of the public website. Visitors pick a contact and WhatsApp opens with a ready-made message.', 'kingdom-church-suite' ); ?></p>
+			<label class="kcs-check"><input type="checkbox" name="wa_enabled" value="1" <?php checked( ! empty( $chat['enabled'] ) ); ?>> <?php esc_html_e( 'Show the WhatsApp chat button on the website', 'kingdom-church-suite' ); ?></label>
+			<div class="kcs-grid-2">
+				<label><?php esc_html_e( 'Chat title', 'kingdom-church-suite' ); ?><input name="wa_title" value="<?php echo esc_attr( $chat['title'] ); ?>"></label>
+				<label><?php esc_html_e( 'Reply time / office hours', 'kingdom-church-suite' ); ?><input name="wa_hours" value="<?php echo esc_attr( $chat['hours'] ); ?>"></label>
+			</div>
+			<label><?php esc_html_e( 'Greeting', 'kingdom-church-suite' ); ?><textarea name="wa_greeting" rows="2"><?php echo esc_textarea( $chat['greeting'] ); ?></textarea></label>
+			<fieldset><legend><?php esc_html_e( 'Contacts (leave the number empty to remove a row)', 'kingdom-church-suite' ); ?></legend>
+				<?php
+				$rows = $chat['contacts'];
+				if ( ! $rows ) {
+					$rows = array(
+						array( 'label' => __( 'General enquiries', 'kingdom-church-suite' ), 'phone' => '', 'message' => '' ),
+						array( 'label' => __( 'Prayer line', 'kingdom-church-suite' ), 'phone' => '', 'message' => __( 'Hello, I would like someone to pray with me.', 'kingdom-church-suite' ) ),
+						array( 'label' => __( 'First-time visitors', 'kingdom-church-suite' ), 'phone' => '', 'message' => __( 'Hello, I am planning to visit {church} this Sunday.', 'kingdom-church-suite' ) ),
+					);
+				}
+				$rows[] = array( 'label' => '', 'phone' => '', 'message' => '' );
+				foreach ( $rows as $i => $row ) :
+					?>
+					<div class="kca-wa-row">
+						<input name="wa_label[]" value="<?php echo esc_attr( $row['label'] ); ?>" placeholder="<?php esc_attr_e( 'Label, e.g. Church office', 'kingdom-church-suite' ); ?>" aria-label="<?php esc_attr_e( 'Label', 'kingdom-church-suite' ); ?>">
+						<input name="wa_phone[]" value="<?php echo esc_attr( $row['phone'] ); ?>" inputmode="tel" placeholder="2348012345678" aria-label="<?php esc_attr_e( 'WhatsApp number with country code', 'kingdom-church-suite' ); ?>">
+						<input name="wa_message[]" value="<?php echo esc_attr( $row['message'] ); ?>" placeholder="<?php esc_attr_e( 'Pre-filled message (optional)', 'kingdom-church-suite' ); ?>" aria-label="<?php esc_attr_e( 'Pre-filled message', 'kingdom-church-suite' ); ?>">
+					</div>
+				<?php endforeach; ?>
+				<small class="kcs-muted"><?php esc_html_e( 'Use {church} or {page} in a message to insert the church name or the page the visitor is on.', 'kingdom-church-suite' ); ?></small>
+			</fieldset>
+			<button class="kcs-btn"><?php esc_html_e( 'Save website chat', 'kingdom-church-suite' ); ?></button>
+		</form>
+
+		<h3><?php esc_html_e( 'Pastors for partners', 'kingdom-church-suite' ); ?></h3>
 		<p class="kcs-muted"><?php esc_html_e( 'Partners see a “Chat on WhatsApp” button for each pastor assigned to their plan (and to lower plans). Partners on the highest plan can chat with every pastor.', 'kingdom-church-suite' ); ?></p>
 		<div class="kca-cols">
 			<div class="kca-stack">

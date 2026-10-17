@@ -398,3 +398,74 @@ class KCS_Announcements {
 		return $out;
 	}
 }
+
+/**
+ * Website-wide "Chat with us on WhatsApp" widget settings.
+ */
+class KCS_WhatsApp_Chat {
+
+	/**
+	 * Current settings merged with defaults.
+	 *
+	 * @return array enabled, title, greeting, hours, contacts[] (label, phone, message).
+	 */
+	public static function get() {
+		$saved = get_option( 'kcs_wa_chat', array() );
+		return wp_parse_args(
+			is_array( $saved ) ? $saved : array(),
+			array(
+				'enabled'  => 1,
+				'title'    => kcs_get_option( 'church_name', get_bloginfo( 'name' ) ),
+				'greeting' => __( 'Hello! 👋 How can we help you today? Chat with our church team on WhatsApp.', 'kingdom-church-suite' ),
+				'hours'    => __( 'We usually reply within a few hours (Mon–Sat, 9am–6pm).', 'kingdom-church-suite' ),
+				'contacts' => array(),
+			)
+		);
+	}
+
+	/**
+	 * Save settings from the church admin form.
+	 *
+	 * @param array $data Raw data.
+	 */
+	public static function save( $data ) {
+		$contacts = array();
+		$labels   = (array) ( $data['wa_label'] ?? array() );
+		foreach ( $labels as $i => $label ) {
+			$phone = KCS_Pastors::normalise_phone( $data['wa_phone'][ $i ] ?? '' );
+			if ( $phone ) {
+				$contacts[] = array(
+					'label'   => sanitize_text_field( $label ? $label : __( 'Church office', 'kingdom-church-suite' ) ),
+					'phone'   => $phone,
+					'message' => sanitize_text_field( $data['wa_message'][ $i ] ?? '' ),
+				);
+			}
+		}
+		update_option(
+			'kcs_wa_chat',
+			array(
+				'enabled'  => empty( $data['wa_enabled'] ) ? 0 : 1,
+				'title'    => sanitize_text_field( $data['wa_title'] ?? '' ),
+				'greeting' => sanitize_textarea_field( $data['wa_greeting'] ?? '' ),
+				'hours'    => sanitize_text_field( $data['wa_hours'] ?? '' ),
+				'contacts' => array_slice( $contacts, 0, 6 ),
+			),
+			false
+		);
+	}
+
+	/**
+	 * Click-to-chat link for a contact. {page} in the message becomes the current page title.
+	 *
+	 * @param array  $contact Contact.
+	 * @param string $page    Page title.
+	 * @return string
+	 */
+	public static function link( $contact, $page = '' ) {
+		$church = kcs_get_option( 'church_name', get_bloginfo( 'name' ) );
+		/* translators: %s: church name */
+		$text = $contact['message'] ? $contact['message'] : sprintf( __( 'Hello %s, I found you on your website and I would like to ask about…', 'kingdom-church-suite' ), $church );
+		$text = str_replace( array( '{page}', '{church}' ), array( $page, $church ), $text );
+		return 'https://wa.me/' . rawurlencode( $contact['phone'] ) . '?text=' . rawurlencode( $text );
+	}
+}

@@ -80,8 +80,27 @@ $social   = kingdom_social_links();
 	</div>
 </footer>
 
-<?php if ( get_theme_mod( 'kingdom_whatsapp_float' ) && get_theme_mod( 'kingdom_social_whatsapp' ) ) : ?>
-	<a class="k-whatsapp" href="<?php echo esc_url( get_theme_mod( 'kingdom_social_whatsapp' ) ); ?>" target="_blank" rel="noopener" aria-label="WhatsApp"><?php echo kingdom_icon( 'whatsapp' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
+<?php $kingdom_wa = kingdom_whatsapp_chat(); ?>
+<?php if ( $kingdom_wa ) : ?>
+	<div class="k-wa" data-wa>
+		<div class="k-wa__panel" id="k-wa-panel" role="dialog" aria-label="<?php esc_attr_e( 'Chat with us on WhatsApp', 'kingdom' ); ?>" hidden>
+			<div class="k-wa__head">
+				<span class="k-wa__avatar" aria-hidden="true"><?php echo kingdom_icon( 'whatsapp' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+				<span><strong><?php echo esc_html( $kingdom_wa['title'] ); ?></strong><small><?php esc_html_e( 'Typically replies within a few hours', 'kingdom' ); ?></small></span>
+				<button type="button" class="k-wa__close" data-wa-toggle aria-label="<?php esc_attr_e( 'Close chat', 'kingdom' ); ?>">×</button>
+			</div>
+			<div class="k-wa__body">
+				<p class="k-wa__bubble"><?php echo esc_html( $kingdom_wa['greeting'] ); ?></p>
+				<?php foreach ( $kingdom_wa['contacts'] as $kingdom_c ) : ?>
+					<a class="k-wa__contact" href="<?php echo esc_url( $kingdom_c['url'] ); ?>" target="_blank" rel="noopener"><span><?php echo esc_html( $kingdom_c['label'] ); ?></span><b><?php esc_html_e( 'Start chat', 'kingdom' ); ?> →</b></a>
+				<?php endforeach; ?>
+				<?php if ( ! empty( $kingdom_wa['hours'] ) ) : ?><p class="k-wa__hours"><?php echo esc_html( $kingdom_wa['hours'] ); ?></p><?php endif; ?>
+			</div>
+		</div>
+		<button type="button" class="k-wa__btn" data-wa-toggle aria-expanded="false" aria-controls="k-wa-panel">
+			<?php echo kingdom_icon( 'whatsapp' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?><span class="k-wa__label"><?php esc_html_e( 'Chat with us', 'kingdom' ); ?></span>
+		</button>
+	</div>
 <?php endif; ?>
 <?php if ( get_theme_mod( 'kingdom_mobile_nav', true ) ) : ?>
 	<?php

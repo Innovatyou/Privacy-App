@@ -270,6 +270,30 @@ td select, .inline-select { min-height: 40px; padding: .35rem .6rem; border-radi
 .item { display: flex; flex-wrap: wrap; gap: .8rem; justify-content: space-between; align-items: flex-start; }
 .item > div:first-child { flex: 1 1 260px; min-width: 0; }
 .actions { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+/* WhatsApp chat widget */
+.wa { position: fixed; z-index: 57; right: var(--gr); bottom: calc(78px + env(safe-area-inset-bottom, 0px)); display: grid; justify-items: end; gap: .7rem; }
+@media (min-width: 1040px) { .wa { bottom: calc(20px + env(safe-area-inset-bottom, 0px)); } }
+.wa__btn { display: inline-flex; align-items: center; gap: .5rem; min-height: 56px; min-width: 56px; justify-content: center; padding: 0 1.1rem 0 .9rem; border: 0; border-radius: 999px; background: #25d366; color: #fff; font-weight: 700; cursor: pointer; box-shadow: 0 12px 28px -6px rgba(37,211,102,.55), 0 4px 0 #1a9e4c; }
+.wa__btn svg { width: 28px; height: 28px; }
+@media (max-width: 560px) { .wa__btn span { display: none; } .wa__btn { padding: 0; } }
+.wa__panel { width: min(340px, calc(100vw - 32px)); border-radius: 20px; overflow: hidden; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 24px 60px rgba(0,0,0,.3); }
+.wa__head { display: flex; align-items: center; gap: .7rem; padding: .9rem 1rem; background: #075e54; color: #fff; }
+.wa__head > span:nth-child(2) { display: grid; flex: 1; line-height: 1.3; }
+.wa__head small { opacity: .8; font-size: .76rem; }
+.wa__av { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: #25d366; }
+.wa__av svg { width: 22px; height: 22px; }
+.wa__x { background: none; border: 0; color: #fff; font-size: 1.6rem; cursor: pointer; line-height: 1; }
+.wa__body { display: grid; gap: .5rem; padding: 1rem; background: #ece5dd; }
+:root[data-theme="dark"] .wa__body { background: #0b141a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .wa__body { background: #0b141a; } }
+.wa__bubble { margin: 0 0 .3rem; padding: .7rem .9rem; border-radius: 0 12px 12px 12px; background: var(--surface); color: var(--fg); font-size: .94rem; }
+.wa__c { display: flex; justify-content: space-between; align-items: center; gap: .6rem; min-height: 48px; padding: .55rem .9rem; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); text-decoration: none; font-weight: 600; }
+.wa__c:hover { border-color: #25d366; }
+.wa__c b { color: #128c4b; font-size: .84rem; white-space: nowrap; }
+:root[data-theme="dark"] .wa__c b { color: #3ddc84; }
+.wa__hours { margin: .2rem 0 0; font-size: .78rem; color: var(--muted); }
+.warow { display: grid; gap: .5rem; padding: .5rem 0; border-bottom: 1px dashed var(--line); }
+@media (min-width: 720px) { .warow { grid-template-columns: 1fr 1fr 2fr; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .tilt { transform: none !important; } }
 </style>
 
@@ -333,6 +357,11 @@ td select, .inline-select { min-height: 40px; padding: .35rem .6rem; border-radi
       { id: 3, title: 'Our marriage restored', text: 'The marriage retreat changed everything. We renewed our vows at our tenth anniversary in front of church family.', name: 'Kemi & Dayo', place: 'Port Harcourt', status: 'published' },
       { id: 4, title: 'Visa approved', text: 'After two refusals my study visa was approved the week after the partners prayed with me.', name: 'Chioma N.', place: 'Enugu', status: 'pending' }
     ],
+    waChat: { enabled: true, greeting: 'Hello! 👋 How can we help you today? Chat with our church team on WhatsApp.', hours: 'We reply Mon–Sat, 9am–6pm.', open: false, contacts: [
+      { label: 'General enquiries', phone: '2348000000000', msg: 'Hello Grace Chapel, I found you on your website and I would like to ask about…' },
+      { label: 'Prayer line', phone: '2348000000011', msg: 'Hello, I would like someone to pray with me.' },
+      { label: 'First-time visitors', phone: '2348000000022', msg: 'Hello, I am planning to visit Grace Chapel this Sunday.' }
+    ] },
     me: null, role: null, ptab: 'overview', atab: 'overview'
   };
   var plan = function (id) { return S.plans.find(function (p) { return p.id === id; }); };
@@ -371,7 +400,14 @@ td select, .inline-select { min-height: 40px; padding: .35rem .6rem; border-radi
       '<div><h4>Services</h4><p>Sunday · 9:00 AM &amp; 11:30 AM<br>Wednesday · 6:00 PM<br>Friday · 9:00 PM</p></div>' +
       '<div><h4>Quick links</h4><p><a href="#partnership">Become a partner</a><br><a href="#visit">Plan your visit</a><br><a href="#login">Partner login</a><br><a href="#login" data-staff="1">Church admin</a></p></div></div>' +
       '<div class="wrap small" style="margin-top:1.5rem">Preview of the Kingdom Church WordPress theme. Sample data, nothing is sent.</div></footer>' +
-      '<nav class="tabbar" aria-label="Quick navigation">' + [['home', '⌂', 'Home'], ['watch', '▶', 'Watch'], ['give', '♥', 'Give'], ['prayer', '✦', 'Prayer'], ['login', '☺', 'Partner']].map(function (t) { return '<a href="#' + t[0] + '" class="' + (t[0] === cur ? 'on ' : '') + (t[0] === 'give' ? 'give' : '') + '"><span>' + t[1] + '</span>' + t[2] + '</a>'; }).join('') + '</nav>';
+      '<nav class="tabbar" aria-label="Quick navigation">' + [['home', '⌂', 'Home'], ['watch', '▶', 'Watch'], ['give', '♥', 'Give'], ['prayer', '✦', 'Prayer'], ['login', '☺', 'Partner']].map(function (t) { return '<a href="#' + t[0] + '" class="' + (t[0] === cur ? 'on ' : '') + (t[0] === 'give' ? 'give' : '') + '"><span>' + t[1] + '</span>' + t[2] + '</a>'; }).join('') + '</nav>' + waWidget();
+  }
+  var waIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l1.6-4.6A8.5 8.5 0 1 1 8 19.6z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1.2-1.2-1.7-1-1 .7a4 4 0 0 1-2-2l.7-1-1-1.7z"/></svg>';
+  function waWidget() {
+    var w = S.waChat; if (!w.enabled || !w.contacts.length) { return ''; }
+    return '<div class="wa"><div class="wa__panel" role="dialog" aria-label="Chat with us on WhatsApp"' + (w.open ? '' : ' hidden') + '><div class="wa__head"><span class="wa__av">' + waIcon + '</span><span><strong>' + esc(S.church) + '</strong><small>Typically replies within a few hours</small></span><button class="wa__x" data-act="wa" aria-label="Close chat">×</button></div>' +
+      '<div class="wa__body"><p class="wa__bubble">' + esc(w.greeting) + '</p>' + w.contacts.map(function (c) { return '<a class="wa__c" href="https://wa.me/' + c.phone + '?text=' + encodeURIComponent(c.msg) + '" target="_blank" rel="noopener"><span>' + esc(c.label) + '</span><b>Start chat →</b></a>'; }).join('') + (w.hours ? '<p class="wa__hours">' + esc(w.hours) + '</p>' : '') + '</div></div>' +
+      '<button class="wa__btn" data-act="wa" aria-expanded="' + w.open + '">' + waIcon + '<span>Chat with us</span></button></div>';
   }
   function pageHead(title, sub, img) {
     return '<section class="pagehead" style="background-image:url(' + img + ')"><div class="wrap"><div class="crumb"><a href="#home">Home</a> / ' + esc(title) + '</div><h1>' + esc(title) + '</h1><p>' + esc(sub) + '</p></div></section>';
@@ -520,7 +556,10 @@ td select, .inline-select { min-height: 40px; padding: .35rem .6rem; border-radi
       body = '<div class="cols"><form class="card form" data-form="notify"><fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:700;margin-bottom:.4rem">Who should receive it?</legend><div class="chips">' + S.plans.map(function (pl) { return '<label class="chip"><input type="checkbox" name="np" value="' + pl.id + '"> ' + pl.name + '</label>'; }).join('') + '</div><p class="muted small" style="margin:.4rem 0 0">Leave all unticked to reach every partner.</p></fieldset><label for="n-title">Title<input id="n-title" required value="Partners prayer retreat"></label><label for="n-body">Message<textarea id="n-body" required>Dear {first_name}, join us on the 30th for a day of prayer at the retreat centre.</textarea></label><label for="n-kind">Type<select id="n-kind"><option value="event">Event</option><option value="news">Announcement</option><option value="resource">Resource</option></select></label><label class="check" for="n-email"><input id="n-email" type="checkbox" checked> Send by email</label><label class="check" for="n-dash"><input id="n-dash" type="checkbox" checked> Show on partner dashboards</label><button class="btn">Send notification</button></form>' +
         '<div class="card"><h3>On partner dashboards</h3><ul class="list">' + S.news.slice().reverse().map(function (n) { return '<li><span><strong>' + esc(n.title) + '</strong><span class="muted small">' + (n.plans.length ? n.plans.map(function (id) { return plan(id).name; }).join(', ') : 'All partners') + '</span></span><button class="btn ghost sm" data-act="n-del" data-id="' + n.id + '" aria-label="Remove">✕</button></li>'; }).join('') + '</ul></div></div>';
     } else if (v === 'pastors') {
-      body = '<p class="muted">Partners see a WhatsApp chat button for each pastor assigned to their plan or a lower plan. The highest plan (★) always reaches every pastor.</p><div class="cols"><div class="grid">' + S.pastors.map(function (x) { return '<div class="card item"><div class="pastor"><span class="av">' + x.name.replace(/^(Pastor|Rev\. Dr\.)\s/, '')[0] + '</span><span><strong>' + esc(x.name) + '</strong><span class="muted small">' + esc(x.role) + ' · +' + x.phone + '</span><span class="chips" style="margin-top:.4rem">' + S.plans.filter(function (pl) { return x.plans.indexOf(pl.id) >= 0 || pl.level === topLevel(); }).map(function (pl) { return '<span class="chip on">' + pl.name + (pl.level === topLevel() ? ' ★' : '') + '</span>'; }).join('') + '</span></span></div><button class="btn ghost sm" data-act="pa-del" data-id="' + x.id + '">Remove</button></div>'; }).join('') + '</div>' +
+      var w = S.waChat;
+      body = '<form class="card form" data-form="wachat"><h3>Website “Chat with us” on WhatsApp</h3><p class="muted" style="margin:0">A floating WhatsApp button on every page of the public website. Visitors pick a contact and WhatsApp opens with a ready-made message.</p><label class="check" for="wa-on"><input id="wa-on" type="checkbox"' + (w.enabled ? ' checked' : '') + '> Show the WhatsApp chat button on the website</label><label for="wa-greet">Greeting<input id="wa-greet" value="' + esc(w.greeting) + '"></label><label for="wa-hours">Reply time / office hours<input id="wa-hours" value="' + esc(w.hours) + '"></label><fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:700">Contacts (leave the number empty to remove)</legend>' +
+        w.contacts.concat([{ label: '', phone: '', msg: '' }]).map(function (c, i) { return '<div class="warow"><input aria-label="Label" name="wl" value="' + esc(c.label) + '" placeholder="Label, e.g. Youth desk"><input aria-label="WhatsApp number" name="wp" inputmode="tel" value="' + esc(c.phone) + '" placeholder="2348012345678"><input aria-label="Pre-filled message" name="wm" value="' + esc(c.msg) + '" placeholder="Pre-filled message"></div>'; }).join('') + '</fieldset><button class="btn">Save website chat</button></form><h3 style="margin:.5rem 0 0">Pastors for partners</h3>' +
+        '<p class="muted">Partners see a WhatsApp chat button for each pastor assigned to their plan or a lower plan. The highest plan (★) always reaches every pastor.</p><div class="cols"><div class="grid">' + S.pastors.map(function (x) { return '<div class="card item"><div class="pastor"><span class="av">' + x.name.replace(/^(Pastor|Rev\. Dr\.)\s/, '')[0] + '</span><span><strong>' + esc(x.name) + '</strong><span class="muted small">' + esc(x.role) + ' · +' + x.phone + '</span><span class="chips" style="margin-top:.4rem">' + S.plans.filter(function (pl) { return x.plans.indexOf(pl.id) >= 0 || pl.level === topLevel(); }).map(function (pl) { return '<span class="chip on">' + pl.name + (pl.level === topLevel() ? ' ★' : '') + '</span>'; }).join('') + '</span></span></div><button class="btn ghost sm" data-act="pa-del" data-id="' + x.id + '">Remove</button></div>'; }).join('') + '</div>' +
         '<form class="card form" data-form="pastor"><h3>Add a pastor</h3><label for="pa-name">Name<input id="pa-name" required value="Pastor Joy Eze"></label><label for="pa-role">Role<input id="pa-role" value="Youth & young adults"></label><label for="pa-phone">WhatsApp number with country code<input id="pa-phone" required inputmode="tel" value="2348020000009"></label><fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:700;margin-bottom:.4rem">Available to plans</legend><div class="chips">' + S.plans.map(function (pl) { var t = pl.level === topLevel(); return '<label class="chip"><input type="checkbox" name="pp" value="' + pl.id + '"' + (t ? ' checked disabled' : (pl.level === 1 ? ' checked' : '')) + '> ' + pl.name + (t ? ' ★' : '') + '</label>'; }).join('') + '</div></fieldset><button class="btn">Save pastor</button></form></div>';
     }
     return '<header class="dtop"><div class="wrap"><a class="brand" href="#home"><span class="mark"></span><b>' + esc(S.church) + ' · Admin</b></a><button class="icon" data-act="theme" aria-label="Toggle dark mode">' + themeIcon + '</button><button class="btn ghost sm" data-act="logout">Log out</button></div></header>' +
@@ -549,6 +588,7 @@ td select, .inline-select { min-height: 40px; padding: .35rem .6rem; border-radi
     if (!el) { return; }
     if (el.dataset.staff) { setTimeout(function () { var b = document.querySelector('[data-act="login-staff"]'); if (b) { b.focus(); } }, 50); return; }
     var a = el.dataset.act, id = Number(el.dataset.id);
+    if (a === 'wa') { S.waChat.open = !S.waChat.open; var y0 = window.scrollY; route(); window.scrollTo(0, y0); return; }
     if (a === 'theme') { var dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; root.dataset.theme = dark ? 'light' : 'dark'; }
     else if (a === 'menu') { document.getElementById('drawer').hidden = false; document.querySelector('.scrim').hidden = false; }
     else if (a === 'menu-close') { document.getElementById('drawer').hidden = true; el.hidden = true; }
@@ -592,6 +632,7 @@ td select, .inline-select { min-height: 40px; padding: .35rem .6rem; border-radi
       else { S.payments.push({ id: Date.now(), pid: me.id, amt: pl.amt, method: m === 'card' ? 'Paystack' : 'Flutterwave', status: 'completed', date: new Date(), ref: 'PTN-' + Math.random().toString(36).slice(2, 8).toUpperCase() }); me.status = 'active'; me.total += pl.amt; me.due = addDays(30); toast('Payment confirmed. Welcome back!'); S.ptab = 'overview'; rerender(); }
     }
     else if (k === 'notify') { var ids = Array.prototype.map.call(f.querySelectorAll('input[name="np"]:checked'), function (x) { return +x.value; }); if (document.getElementById('n-dash').checked) { S.news.push({ id: Date.now(), title: val('n-title'), body: val('n-body'), kind: val('n-kind'), plans: ids, date: new Date() }); } var n = S.partners.filter(function (p) { return !ids.length || ids.indexOf(p.plan) >= 0; }).length; toast('Sent to ' + n + ' partner(s)' + (document.getElementById('n-email').checked ? ' by email' : '') + '.'); rerender(); }
+    else if (k === 'wachat') { var L = f.querySelectorAll('[name=wl]'), P = f.querySelectorAll('[name=wp]'), M = f.querySelectorAll('[name=wm]'), list = []; for (var i = 0; i < P.length; i++) { var ph = P[i].value.replace(/\D/g, ''); if (ph) { list.push({ label: L[i].value || 'Church office', phone: ph, msg: M[i].value || 'Hello ' + S.church + ', I found you on your website.' }); } } S.waChat.enabled = document.getElementById('wa-on').checked; S.waChat.greeting = val('wa-greet'); S.waChat.hours = val('wa-hours'); S.waChat.contacts = list; toast('Website chat saved. Open any website page to see it.'); rerender(); }
     else if (k === 'pastor') { var pids = Array.prototype.map.call(f.querySelectorAll('input[name="pp"]:checked:not([disabled])'), function (x) { return +x.value; }); S.pastors.push({ id: Date.now(), name: val('pa-name'), role: val('pa-role'), phone: val('pa-phone').replace(/\D/g, ''), plans: pids }); toast('Pastor added. Partners on those plans can now chat with them.'); rerender(); }
   });
 

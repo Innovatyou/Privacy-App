@@ -478,3 +478,50 @@ function kingdom_dashboard_type() {
 	}
 	return '';
 }
+
+/**
+ * Website WhatsApp chat widget settings, or null when it should not show.
+ *
+ * Managed in Church Admin → Pastors & WhatsApp (plugin). Without the plugin, the
+ * WhatsApp link from Customize → Social Profiles is used as a single contact.
+ *
+ * @return array|null title, greeting, hours, contacts[] (label, url).
+ */
+function kingdom_whatsapp_chat() {
+	if ( kingdom_dashboard_type() ) {
+		return null;
+	}
+	$page   = wp_strip_all_tags( wp_get_document_title() );
+	$theme  = get_theme_mod( 'kingdom_social_whatsapp' );
+	$digits = $theme ? preg_replace( '/\D+/', '', $theme ) : '';
+	if ( class_exists( 'KCS_WhatsApp_Chat' ) ) {
+		$cfg = KCS_WhatsApp_Chat::get();
+		if ( empty( $cfg['enabled'] ) ) {
+			return null;
+		}
+		$contacts = $cfg['contacts'];
+		if ( ! $contacts && $digits ) {
+			$contacts = array( array( 'label' => __( 'Church office', 'kingdom' ), 'phone' => $digits, 'message' => '' ) );
+		}
+		if ( ! $contacts ) {
+			return null;
+		}
+		$cfg['contacts'] = array_map(
+			function ( $c ) use ( $page ) {
+				return array( 'label' => $c['label'], 'url' => KCS_WhatsApp_Chat::link( $c, $page ) );
+			},
+			$contacts
+		);
+		return $cfg;
+	}
+	if ( ! $digits || ! get_theme_mod( 'kingdom_whatsapp_float', true ) ) {
+		return null;
+	}
+	return array(
+		'title'    => get_bloginfo( 'name' ),
+		'greeting' => __( 'Hello! 👋 How can we help you today?', 'kingdom' ),
+		'hours'    => '',
+		/* translators: %s: site name */
+		'contacts' => array( array( 'label' => __( 'Church office', 'kingdom' ), 'url' => 'https://wa.me/' . $digits . '?text=' . rawurlencode( sprintf( __( 'Hello %s, I found you on your website.', 'kingdom' ), get_bloginfo( 'name' ) ) ) ) ),
+	);
+}

@@ -72,6 +72,18 @@
 		window.addEventListener('scroll', function () { scene.style.transform = 'translateY(' + (window.scrollY * 0.25).toFixed(1) + 'px)'; }, { passive: true });
 	}
 
+	/* WhatsApp chat widget */
+	var wa = document.querySelector('[data-wa]');
+	if (wa) {
+		var waPanel = wa.querySelector('.k-wa__panel'), waBtn = wa.querySelector('.k-wa__btn');
+		var setWa = function (open) { waPanel.hidden = !open; waBtn.setAttribute('aria-expanded', open ? 'true' : 'false'); wa.classList.toggle('is-open', open); };
+		wa.addEventListener('click', function (e) { if (e.target.closest('[data-wa-toggle]')) { setWa(waPanel.hidden); } });
+		document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !waPanel.hidden) { setWa(false); waBtn.focus(); } });
+		document.addEventListener('click', function (e) { if (!waPanel.hidden && !e.target.closest('[data-wa]')) { setWa(false); } });
+		// Shrink the label to an icon after the visitor starts scrolling.
+		window.addEventListener('scroll', function () { wa.classList.toggle('is-compact', window.scrollY > 400); }, { passive: true });
+	}
+
 	/* Visitor colour palette */
 	var picker = document.querySelector('[data-palette-picker]');
 	if (picker) {

@@ -176,7 +176,7 @@ function kingdom_customize_register( $wp ) {
 		$add( 'kingdom_social', 'kingdom_social_' . $k, $l, 'url', '' );
 	}
 	$add( 'kingdom_social', 'kingdom_social_telegram', 'Telegram', 'url', '' );
-	$add( 'kingdom_social', 'kingdom_whatsapp_float', __( 'Show floating WhatsApp button', 'kingdom' ), 'checkbox', false );
+	$add( 'kingdom_social', 'kingdom_whatsapp_float', __( 'Show the "Chat with us on WhatsApp" button', 'kingdom' ), 'checkbox', true, array(), __( 'With the Kingdom Church Suite plugin, manage contacts, greeting and hours in Church Admin → Pastors & WhatsApp.', 'kingdom' ) );
 	$add( 'kingdom_social', 'kingdom_social_title', __( 'Social section title', 'kingdom' ), 'text', __( 'Connect with us online', 'kingdom' ) );
 	$add( 'kingdom_social', 'kingdom_social_hashtag', __( 'Church hashtag', 'kingdom' ), 'text', '' );
 
