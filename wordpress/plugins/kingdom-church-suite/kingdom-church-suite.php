@@ -3,7 +3,7 @@
  * Plugin Name:       Kingdom Church Suite
  * Plugin URI:        https://example.com/kingdom-church-suite
  * Description:       Church partnerships, partner portal, multi-gateway payments (Flutterwave, Paystack, PayPal, Stripe, Razorpay, bank transfer, custom API), REST API, email notifications, newsletter, YouTube live streaming, sermons, events, prayer requests and advanced SEO.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Kingdom Church Suite
@@ -17,7 +17,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'KCS_VERSION', '1.0.0' );
+define( 'KCS_VERSION', '1.1.0' );
 define( 'KCS_DB_VERSION', '1.3.0' );
 define( 'KCS_FILE', __FILE__ );
 define( 'KCS_PATH', plugin_dir_path( __FILE__ ) );
