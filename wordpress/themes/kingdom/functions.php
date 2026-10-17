@@ -13,5 +13,6 @@ define( 'KINGDOM_URI', get_template_directory_uri() );
 
 require KINGDOM_DIR . '/inc/setup.php';
 require KINGDOM_DIR . '/inc/template-tags.php';
+require KINGDOM_DIR . '/inc/youtube-live.php';
 require KINGDOM_DIR . '/inc/customizer.php';
 require KINGDOM_DIR . '/inc/setup-wizard.php';

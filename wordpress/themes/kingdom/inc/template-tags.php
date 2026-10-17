@@ -184,8 +184,9 @@ function kingdom_site_elements() {
  */
 function kingdom_media_settings() {
 	$out = array(
-		'kingdom_ytlive_url'      => array( __( 'YouTube live: video link or ID', 'kingdom' ), 'text', 'xzoaPmLegBE' ),
-		'kingdom_ytlive_channel'  => array( __( 'YouTube live: channel ID (UC…) — always shows whatever is live now', 'kingdom' ), 'text', '' ),
+		'kingdom_ytlive_channel'  => array( __( 'YouTube live: your channel (link, @handle or channel ID) — switches to your stream automatically', 'kingdom' ), 'text', '' ),
+		'kingdom_ytlive_url'      => array( __( 'YouTube live: video to show when you are not live (link or ID)', 'kingdom' ), 'text', 'xzoaPmLegBE' ),
+		'kingdom_ytlive_api_key'  => array( __( 'YouTube live: YouTube API key (optional, most reliable detection)', 'kingdom' ), 'text', '' ),
 		'kingdom_ytlive_title'    => array( __( 'YouTube live: heading', 'kingdom' ), 'text', __( 'Worship with us live', 'kingdom' ) ),
 		'kingdom_ytlive_autoplay' => array( __( 'YouTube live: start playing (muted) when the page opens', 'kingdom' ), 'checkbox', false ),
 		'kingdom_ytlive_chat'     => array( __( 'YouTube live: show the live chat next to the video', 'kingdom' ), 'checkbox', false ),
@@ -206,36 +207,6 @@ function kingdom_media_settings() {
 		$out[ 'kingdom_audio_' . $i . '_title' ] = array( sprintf( __( 'Audio %d: title', 'kingdom' ), $i ), 'text', '' );
 	}
 	return $out;
-}
-
-/**
- * Embed URL for the YouTube live section.
- *
- * A channel ID gives the "always live" embed (YouTube shows the current live stream, or the
- * next scheduled one). Otherwise the video link or 11-character ID is embedded directly.
- *
- * @return array{src: string, id: string, watch: string}|null
- */
-function kingdom_youtube_live() {
-	$channel  = trim( (string) get_theme_mod( 'kingdom_ytlive_channel', '' ) );
-	$raw      = trim( (string) get_theme_mod( 'kingdom_ytlive_url', 'xzoaPmLegBE' ) );
-	$id       = preg_match( '/^[A-Za-z0-9_-]{11}$/', $raw ) ? $raw : kingdom_youtube_id( $raw );
-	$autoplay = get_theme_mod( 'kingdom_ytlive_autoplay', false ) ? '&autoplay=1&mute=1' : '';
-	if ( preg_match( '/^UC[A-Za-z0-9_-]{22}$/', $channel ) ) {
-		return array(
-			'src'   => 'https://www.youtube.com/embed/live_stream?channel=' . rawurlencode( $channel ) . '&rel=0&playsinline=1' . $autoplay,
-			'id'    => $id,
-			'watch' => 'https://www.youtube.com/channel/' . rawurlencode( $channel ) . '/live',
-		);
-	}
-	if ( ! $id ) {
-		return null;
-	}
-	return array(
-		'src'   => 'https://www.youtube-nocookie.com/embed/' . rawurlencode( $id ) . '?rel=0&modestbranding=1&playsinline=1' . $autoplay,
-		'id'    => $id,
-		'watch' => 'https://www.youtube.com/watch?v=' . rawurlencode( $id ),
-	);
 }
 
 /**

@@ -969,11 +969,12 @@ class KCS_Church_Admin {
 					<?php if ( 'banner' === $group ) : ?>
 						<p class="kcs-muted"><?php esc_html_e( 'Paste a YouTube, Vimeo or MP4 link to play it, muted and looping, behind the homepage banner. Leave it empty to use the banner image.', 'kingdom-church-suite' ); ?></p>
 					<?php elseif ( 'media' === $group ) : ?>
-						<p class="kcs-muted"><?php esc_html_e( 'YouTube live needs only the video link or ID (for example xzoaPmLegBE). Add your channel ID instead to always show whatever is live on your channel. Videos and audio left empty show your latest sermons.', 'kingdom-church-suite' ); ?></p>
+						<p class="kcs-muted"><?php esc_html_e( 'Paste your YouTube channel link or @handle once: the website shows your live stream the moment you go live, a countdown when a stream is scheduled, and your replay video the rest of the time. Videos and audio left empty show your latest sermons.', 'kingdom-church-suite' ); ?></p>
 					<?php else : ?>
 						<p class="kcs-muted"><?php esc_html_e( 'Untick a section to remove it from every page of the website.', 'kingdom-church-suite' ); ?></p>
 						<div class="kca-switches">
 					<?php endif; ?>
+					<?php do_action( 'kcs_website_group_intro', $group ); ?>
 					<?php
 					foreach ( $fields as $key => $f ) :
 						if ( $f[2] !== $group ) {

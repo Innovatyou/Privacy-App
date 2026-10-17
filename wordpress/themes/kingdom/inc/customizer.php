@@ -148,7 +148,7 @@ function kingdom_customize_register( $wp ) {
 	}
 
 	// Live stream, video & audio.
-	$wp->get_section( 'kingdom_media' )->description = __( 'YouTube live needs only your video link or ID. Add your channel ID instead to always show whatever is live on your channel, with no weekly changes.', 'kingdom' );
+	$wp->get_section( 'kingdom_media' )->description = __( 'Paste your YouTube channel link or @handle once. The website then shows your live stream the moment you go live, a countdown when a stream is scheduled, and your replay video the rest of the time — no weekly changes.', 'kingdom' );
 	foreach ( kingdom_media_settings() as $key => $f ) {
 		$add( 'kingdom_media', $key, $f[0], $f[1], $f[2] );
 	}

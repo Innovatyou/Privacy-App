@@ -184,6 +184,62 @@
 		document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !modal.hidden) { closeModal(); } });
 	}
 
+	/* YouTube live: switch to the stream the moment it starts (no page refresh) */
+	document.querySelectorAll('[data-ytlive]').forEach(function (sec) {
+		var label = sec.querySelector('[data-ytlive-label]');
+		var count = sec.querySelector('[data-ytlive-countdown]');
+		var player = sec.querySelector('[data-ytlive-player]');
+		var chat = sec.querySelector('[data-ytlive-chat]');
+		var watch = sec.querySelector('[data-ytlive-watch]');
+		var grid = sec.querySelector('.k-ytlive__grid');
+		function frame(src, title) {
+			var f = document.createElement('iframe');
+			f.src = src; f.title = title || 'YouTube'; f.allowFullscreen = true;
+			f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+			f.referrerPolicy = 'strict-origin-when-cross-origin';
+			return f;
+		}
+		function tick() {
+			var starts = parseInt(sec.dataset.starts, 10) * 1000;
+			if (!count) { return; }
+			if (sec.dataset.state !== 'upcoming' || !starts || starts < Date.now()) { count.hidden = true; return; }
+			var s = Math.floor((starts - Date.now()) / 1000), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
+			count.textContent = (d ? d + 'd ' : '') + (d || h ? h + 'h ' : '') + m + 'm ' + (d ? '' : (s % 60) + 's');
+			count.hidden = false;
+		}
+		function apply(s) {
+			if (!s || !s.state || s.state === 'none') { return; }
+			var changed = s.state !== sec.dataset.state || (s.video_id || '') !== sec.dataset.video;
+			sec.dataset.state = s.state; sec.dataset.starts = s.starts_at || 0;
+			sec.className = sec.className.replace(/\bis-(live|upcoming|offline)\b/g, '') + ' is-' + s.state;
+			if (label) { label.textContent = s.label; }
+			if (watch && s.watch) { watch.href = s.watch; }
+			if (changed) {
+				player.innerHTML = '';
+				if (s.embed) { player.appendChild(frame(s.embed, s.title)); }
+				if (chat) {
+					chat.innerHTML = '';
+					chat.hidden = !s.chat;
+					if (s.chat) { chat.appendChild(frame(s.chat, 'Live chat')); }
+					grid.classList.toggle('has-chat', !!s.chat);
+				}
+				sec.dataset.video = s.video_id || '';
+			}
+			tick();
+		}
+		function poll() {
+			if (document.hidden) { return; }
+			fetch(sec.dataset.ytlive, { headers: { Accept: 'application/json' } })
+				.then(function (r) { return r.ok ? r.json() : null; })
+				.then(apply)
+				.catch(function () {});
+		}
+		tick();
+		setInterval(tick, 1000);
+		setInterval(poll, 60000);
+		document.addEventListener('visibilitychange', function () { if (!document.hidden) { poll(); } });
+	});
+
 	/* Filter selects navigate to the chosen archive */
 	document.querySelectorAll('[data-filter-select]').forEach(function (sel) {
 		sel.addEventListener('change', function () { if (sel.value) { window.location.href = sel.value; } });

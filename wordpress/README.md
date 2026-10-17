@@ -61,7 +61,15 @@ There are also dedicated templates for single and archive views of sermons (vide
 
 **Show / hide sections**: every homepage section (announcement strip, welcome, stats, gallery, sermons, events, partnership, testimonies, visit us, social, newsletter, and so on), plus the top bar, footer newsletter and mobile tab bar, can be switched off under *Appearance → Customize → Show / Hide Sections* or in *Church Admin → Website*. No code needed.
 
-**YouTube live stream section**: needs only a YouTube video link or ID (default `xzoaPmLegBE`). Short (`youtu.be/…`), `watch?v=…` and `/live/…` links all work. Better still, enter your **channel ID** (`UC…`): the section then always shows whatever is live on your channel, so nothing needs changing each Sunday. Options: start playing muted, show YouTube live chat beside the video. Set it under *Customize → Live Stream, Video & Audio* or *Church Admin → Website*.
+**YouTube live stream section (always live)**: paste your YouTube **channel link or @handle** once (for example `https://www.youtube.com/@yourchurch`). The website then:
+- finds your channel ID by itself (no need to look up `UC…`);
+- checks about once a minute whether you are live, scheduled or offline. All visitors share one cached check, so traffic never multiplies requests to YouTube;
+- **when you go live**: shows your live stream with a red "Live now" badge, plus YouTube live chat if switched on;
+- **when a stream is scheduled**: shows YouTube's waiting room with "Starts today at 9:00 am" and a ticking countdown;
+- **the rest of the time**: shows your replay video (default `xzoaPmLegBE`) with "Not live right now · Next: Sunday 9:00 am" taken from your service times;
+- **switches open pages automatically** when the stream starts or ends, with no refresh needed (`GET /wp-json/kingdom/v1/live`).
+
+No API key is needed: the theme reads your channel's public live page. For the most reliable detection, add a free YouTube Data API key (or reuse the one in Church Suite settings). Church Admin → Website shows whether the channel is connected and its current status, with a "Check now" link. Without a channel, the section simply shows the one video you enter.
 
 **Videos section**: a large player with a side list. Add up to 4 YouTube or Vimeo links with titles, or leave them empty to show your latest sermon videos. Videos open in a pop-up player.
 
