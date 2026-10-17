@@ -547,7 +547,7 @@ class KCS_Church_Admin {
 				</form>
 				<section class="kca-card">
 					<h3><?php esc_html_e( 'Giving', 'kingdom-church-suite' ); ?></h3>
-					<p><?php esc_html_e( 'Total given', 'kingdom-church-suite' ); ?>: <strong><?php echo esc_html( kcs_format_money( $p->total_given, $p->currency ) ); ?></strong></p>
+					<p><?php esc_html_e( 'Total given', 'kingdom-church-suite' ); ?>: <strong><?php echo esc_html( KCS_Partners::total_given_label( $p ) ); ?></strong></p>
 					<ul class="kca-list">
 						<?php foreach ( $pays as $pay ) : ?>
 							<li><span><strong><?php echo esc_html( kcs_format_money( $pay->amount, $pay->currency ) ); ?></strong><small><?php echo esc_html( mysql2date( get_option( 'date_format' ), $pay->created_at ) . ' · ' . $pay->gateway ); ?></small></span><?php echo kcs_status_badge( $pay->status ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></li>
@@ -582,7 +582,7 @@ class KCS_Church_Admin {
 						<td data-label="<?php esc_attr_e( 'Partner', 'kingdom-church-suite' ); ?>"><a href="<?php echo esc_url( self::url( 'partners', array( 'id' => $p->id ) ) ); ?>"><strong><?php echo esc_html( trim( $p->first_name . ' ' . $p->last_name ) ); ?></strong></a><small><?php echo esc_html( $p->email . ' · ' . $p->phone ); ?></small></td>
 						<td data-label="<?php esc_attr_e( 'Plan', 'kingdom-church-suite' ); ?>"><?php echo esc_html( $names[ $p->plan_id ] ?? '—' ); ?><small><?php echo esc_html( kcs_format_money( $p->amount, $p->currency ) ); ?></small></td>
 						<td data-label="<?php esc_attr_e( 'Next due', 'kingdom-church-suite' ); ?>"><?php echo $p->next_due_date ? esc_html( mysql2date( get_option( 'date_format' ), $p->next_due_date ) ) : '—'; ?></td>
-						<td data-label="<?php esc_attr_e( 'Total given', 'kingdom-church-suite' ); ?>"><?php echo esc_html( kcs_format_money( $p->total_given, $p->currency ) ); ?></td>
+						<td data-label="<?php esc_attr_e( 'Total given', 'kingdom-church-suite' ); ?>"><?php echo esc_html( KCS_Partners::total_given_label( $p ) ); ?></td>
 						<td data-label="<?php esc_attr_e( 'Status', 'kingdom-church-suite' ); ?>"><?php echo self::status_form( 'partner_status', 'partners', $p->id, KCS_Partners::statuses(), $p->status ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
 					</tr>
 				<?php endforeach; ?>

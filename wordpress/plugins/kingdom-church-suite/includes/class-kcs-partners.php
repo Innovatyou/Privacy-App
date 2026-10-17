@@ -415,6 +415,32 @@ class KCS_Partners {
 	}
 
 	/**
+	 * Total given, per currency, e.g. "$720.00 + ₦25,000.00".
+	 *
+	 * Partners can switch between international and local currency, so their completed
+	 * payments are summed per currency instead of adding dollars to naira.
+	 *
+	 * @param object $partner Partner.
+	 * @return string
+	 */
+	public static function total_given_label( $partner ) {
+		global $wpdb;
+		$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT currency, SUM(amount) total FROM ' . kcs_table( 'payments' ) . " WHERE partner_id = %d AND status = 'completed' GROUP BY currency ORDER BY total DESC", $partner->id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		if ( ! $rows ) {
+			return kcs_format_money( $partner->total_given, $partner->currency );
+		}
+		return implode(
+			' + ',
+			array_map(
+				function ( $r ) {
+					return kcs_format_money( $r->total, $r->currency );
+				},
+				$rows
+			)
+		);
+	}
+
+	/**
 	 * Delete a partner (keeps the WP user and payment history).
 	 *
 	 * @param int $id Partner ID.

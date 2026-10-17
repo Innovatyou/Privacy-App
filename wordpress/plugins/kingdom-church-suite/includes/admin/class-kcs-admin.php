@@ -327,7 +327,7 @@ class KCS_Admin {
 						case 'amount':
 							return esc_html( kcs_format_money( $p->amount, $p->currency ) ) . '<br><small>' . esc_html( $freqs[ $p->frequency ] ?? '' ) . '</small>';
 						case 'total_given':
-							return esc_html( kcs_format_money( $p->total_given, $p->currency ) );
+							return esc_html( KCS_Partners::total_given_label( $p ) );
 						case 'next_due_date':
 							return $p->next_due_date ? esc_html( mysql2date( get_option( 'date_format' ), $p->next_due_date ) ) : '—';
 						case 'status':
@@ -402,7 +402,7 @@ class KCS_Admin {
 			<div class="kcs-panel">
 				<h2><?php esc_html_e( 'Summary', 'kingdom-church-suite' ); ?></h2>
 				<p><?php esc_html_e( 'Partner ID', 'kingdom-church-suite' ); ?>: <code><?php echo esc_html( $p->partner_code ); ?></code></p>
-				<p><?php esc_html_e( 'Total given', 'kingdom-church-suite' ); ?>: <strong><?php echo esc_html( kcs_format_money( $p->total_given, $p->currency ) ); ?></strong></p>
+				<p><?php esc_html_e( 'Total given', 'kingdom-church-suite' ); ?>: <strong><?php echo esc_html( KCS_Partners::total_given_label( $p ) ); ?></strong></p>
 				<p><?php esc_html_e( 'Last payment', 'kingdom-church-suite' ); ?>: <?php echo $p->last_payment_at ? esc_html( mysql2date( get_option( 'date_format' ), $p->last_payment_at ) ) : '—'; ?></p>
 				<p><?php esc_html_e( 'Joined', 'kingdom-church-suite' ); ?>: <?php echo esc_html( mysql2date( get_option( 'date_format' ), $p->created_at ) ); ?></p>
 				<?php if ( $p->user_id ) : ?><p><a href="<?php echo esc_url( get_edit_user_link( $p->user_id ) ); ?>"><?php esc_html_e( 'WordPress user', 'kingdom-church-suite' ); ?> →</a></p><?php endif; ?>

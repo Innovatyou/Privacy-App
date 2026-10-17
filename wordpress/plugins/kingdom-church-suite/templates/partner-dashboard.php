@@ -78,7 +78,7 @@ $completed = array_filter(
 			<div class="kcs-stat"><span><?php esc_html_e( 'Partnership', 'kingdom-church-suite' ); ?></span><strong><?php echo esc_html( $plan ? $plan->name : __( 'Custom', 'kingdom-church-suite' ) ); ?></strong></div>
 			<div class="kcs-stat"><span><?php esc_html_e( 'Commitment', 'kingdom-church-suite' ); ?></span><strong><?php echo esc_html( kcs_format_money( $partner->amount, $partner->currency ) ); ?></strong><small><?php echo esc_html( $freqs[ $partner->frequency ] ?? '' ); ?></small></div>
 			<div class="kcs-stat"><span><?php esc_html_e( 'Next due', 'kingdom-church-suite' ); ?></span><strong><?php echo $partner->next_due_date && 'one_time' !== $partner->frequency ? esc_html( date_i18n( get_option( 'date_format' ), strtotime( $partner->next_due_date ) ) ) : '—'; ?></strong></div>
-			<div class="kcs-stat"><span><?php esc_html_e( 'Total given', 'kingdom-church-suite' ); ?></span><strong><?php echo esc_html( kcs_format_money( $partner->total_given, $partner->currency ) ); ?></strong><small><?php /* translators: %d: number of gifts */ printf( esc_html( _n( '%d gift', '%d gifts', count( $completed ), 'kingdom-church-suite' ) ), count( $completed ) ); ?></small></div>
+			<div class="kcs-stat"><span><?php esc_html_e( 'Total given', 'kingdom-church-suite' ); ?></span><strong><?php echo esc_html( KCS_Partners::total_given_label( $partner ) ); ?></strong><small><?php /* translators: %d: number of gifts */ printf( esc_html( _n( '%d gift', '%d gifts', count( $completed ), 'kingdom-church-suite' ) ), count( $completed ) ); ?></small></div>
 		</div>
 		<?php $benefits = $plan ? array_filter( array_map( 'trim', explode( "\n", (string) $plan->benefits ) ) ) : array(); ?>
 		<?php if ( $benefits ) : ?>
